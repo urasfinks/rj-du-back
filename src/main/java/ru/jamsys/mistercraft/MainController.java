@@ -41,7 +41,7 @@ public class MainController {
         }
     }
 
-    public ResponseEntity auth() {
+    public ResponseEntity<?> auth() {
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
                 .header("WWW-Authenticate", "Basic realm=\"JamSys\"")
