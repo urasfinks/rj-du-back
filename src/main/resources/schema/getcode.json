@@ -1,0 +1,17 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "mail": {
+      "type": "string",
+      "description": "Email",
+      "pattern": "^\\S+@\\S+\\.\\S+$",
+      "format": "email",
+      "minLength": 6,
+      "maxLength": 127
+    }
+  },
+  "required": [
+    "mail"
+  ]
+}

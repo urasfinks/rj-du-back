@@ -1,0 +1,28 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "mail": {
+      "type": "string",
+      "description": "Email",
+      "pattern": "^\\S+@\\S+\\.\\S+$",
+      "format": "email",
+      "minLength": 6,
+      "maxLength": 127
+    },
+    "code": {
+      "type": "integer",
+      "minimum": 10000,
+      "maximum": 99999
+    },
+    "uuid_device": {
+      "type": "string",
+      "pattern": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+    }
+  },
+  "required": [
+    "mail",
+    "code",
+    "uuid_device"
+  ]
+}

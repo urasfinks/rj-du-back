@@ -12,7 +12,9 @@ public enum Device implements TemplateEnum {
 
     UPDATE_ID_USER("UPDATE device SET id_user = ${IN.id_user::NUMBER} WHERE uuid_device = ${IN.uuid_device::VARCHAR}", StatementType.SELECT),
 
-    INSERT("INSERT INTO device (uuid_device) values (${IN.uuid_device::VARCHAR})", StatementType.SELECT);
+    UPDATE("UPDATE device SET id_user = ${IN.id_user::NUMBER} WHERE uuid_device = ${IN.uuid_device::VARCHAR}", StatementType.SELECT),
+
+    INSERT("INSERT INTO device (uuid_device, id_user) values (${IN.uuid_device::VARCHAR}, ${IN.id_user::NUMBER})", StatementType.SELECT);
 
     private Template template;
 
