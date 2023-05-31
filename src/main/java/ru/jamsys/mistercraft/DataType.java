@@ -5,6 +5,7 @@ public enum DataType {
     template,
     systemData,
     userDataRSync,
+    socket,
     //NOT JSON data
     js,
     any;

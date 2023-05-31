@@ -29,6 +29,7 @@ public class MainController {
 
     @RequestMapping(value = "/getcode", method = RequestMethod.POST)
     public ResponseEntity<?> getCode(@RequestBody String postBody) {
+        System.out.println(postBody);
         //{"login":"urasfinks@yandex.ru"}
         JsonHttpResponse jRet = new JsonHttpResponse();
         if (jRet.isStatus()) {
@@ -74,8 +75,13 @@ public class MainController {
     }
 
     @RequestMapping(value = "/signin", method = RequestMethod.POST)
-    public ResponseEntity<?> signIn(@RequestBody String postBody) {
-        //{"login":"urasfinks@yandex.ru", "code":12345, "uuid":"a1b2c3"}
+    public ResponseEntity<?> signIn(@RequestBody String postBody, @RequestHeader("Authorization") String authorization) {
+        System.out.println(postBody);
+        UserSessionInfo userSessionInfo = Auth.getDeviceUuid(authorization);
+        if (!userSessionInfo.isValidRequest()) {
+            return auth();
+        }
+        //{"login":"urasfinks@yandex.ru", "code":12345}
         JsonHttpResponse jRet = new JsonHttpResponse();
         if (jRet.isStatus()) {
             validate("schema/signin.json", postBody, jRet);
@@ -112,6 +118,7 @@ public class MainController {
         List device = null;
         if (jRet.isStatus()) { //Получим запись устройства
             try {
+                req.put("uuid_device", userSessionInfo.getDeviceUuid());
                 device = App.jdbcTemplate.exec(App.postgreSQLPoolName, Device.SELECT_BY_UUID, req);
             } catch (Exception e) {
                 jRet.setException(e.toString());
@@ -129,6 +136,7 @@ public class MainController {
                 jRet.setException(e.toString());
             }
         }
+        req.remove("uuid_device"); //Персональная информация, если не удалить - то доступ к ней может получить JS, а это уже не секьюрно
         return ResponseEntity
                 .status(jRet.isStatus() ? HttpStatus.OK : HttpStatus.EXPECTATION_FAILED)
                 .body(jRet.toString());
@@ -174,7 +182,7 @@ public class MainController {
         }
         WrapJsonToObject<Map> mapWrapJsonToObject = Util.jsonToObject(postBody, Map.class);
         if (mapWrapJsonToObject.getException() == null) {
-            System.out.println("[" + new Date().toString() + "] Request(/sync); UserSessionInfo => isRegister: " + userSessionInfo.isRegister() + "; postBody: " + postBody);
+            System.out.println("[" + new Date() + "] Request(/sync); UserSessionInfo => isRegister: " + userSessionInfo.isRegister() + "; postBody: " + postBody);
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body(Sync.handler(userSessionInfo, mapWrapJsonToObject.getObject()));

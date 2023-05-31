@@ -11,7 +11,7 @@ import java.util.Map;
 public class UserSessionInfo {
 
     int version;
-    long idUser;
+    private Long idUser;
     private String deviceUuid;
     private boolean checked = false;
 
@@ -21,6 +21,11 @@ public class UserSessionInfo {
 
     boolean isValidRequest() {
         return version > 0 && deviceUuid != null;
+    }
+
+    void appendAuthJdbcTemplateArguments(Map<String, Object> arguments) {
+        arguments.put("id_user", idUser);
+        arguments.put("uuid_device", deviceUuid);
     }
 
     void check() {
