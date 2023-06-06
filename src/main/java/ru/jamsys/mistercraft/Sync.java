@@ -4,83 +4,13 @@ import ru.jamsys.App;
 import ru.jamsys.Util;
 import ru.jamsys.mistercraft.jt.Data;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Sync {
 
     public static String handler(UserSessionInfo userSessionInfo, Map<String, Object> parsedJson) {
         Map<String, List<Map<String, Object>>> result = new HashMap<>();
-        /*Правила:
-         * 1) Обновляем содержимое (к нам приходят пользовательские данные с обнулёнными revision)
-         * 2) Селектим по ревизиям (так как на обновлении установятся новые revision, то мы как зеркалом будем возвращать новые номера ревизий для данных)
-         *
-         * Пока пусть будет режим бумеранга, если дальше будет медленно работать - будем думать и оптимизировать, пока так.
-         * */
-        //Блок обновления
-        try {
-            //System.out.println(parsedJson);
-            /*
-           {
-            "maxRevisionByType": {
-              "js": 0,
-              "socket": 0,
-              "systemData": 0,
-              "template": 0,
-              "userDataRSync": 0,
-              "any": 0
-            },
-            "userData": [
-              {
-                "id_data": 26,
-                "uuid_data": "500efb3e-8dfe-4b77-a536-9ea866a1ffe4",
-                "value_data": "{\"label\":\"Хьюмидор\"}",
-                "type_data": "userDataRSync",
-                "parent_uuid_data": null,
-                "key_data": "humidor",
-                "date_add_data": 1685559500427,
-                "date_update_data": null,
-                "revision_data": 0,
-                "is_remove_data": 0
-              }
-            ],
-            "socketData": [
-              {
-                "id_data": 27,
-                "uuid_data": "test",
-                "value_data": "{}",
-                "type_data": "socket",
-                "parent_uuid_data": null,
-                "key_data": null,
-                "date_add_data": 1685559656447,
-                "date_update_data": null,
-                "revision_data": 0,
-                "is_remove_data": 0
-              },
-              {
-                "id_data": 28,
-                "uuid_data": "test2",
-                "value_data": "{}",
-                "type_data": "socket",
-                "parent_uuid_data": "test",
-                "key_data": null,
-                "date_add_data": 1685559656448,
-                "date_update_data": null,
-                "revision_data": 0,
-                "is_remove_data": 0
-              }
-            ]
-          }
-             * */
-            List<Map> userDatas = (List<Map>) parsedJson.get("userData");
-            for(Map userData : userDatas){
-                System.out.println(userData);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
         //Блок выгрузки
         try {
             @SuppressWarnings("unchecked")
@@ -95,30 +25,59 @@ public class Sync {
                     arguments.put("type_data", dataType.toString());
                     arguments.put("revision_data", rqRevision);
                     userSessionInfo.appendAuthJdbcTemplateArguments(arguments);
-                    List<Map<String, Object>> exec = new ArrayList<>();
-                    switch (dataType) {
-                        case js:
-                        case any:
-                        case systemData:
-                        case template:
-                            exec = App.jdbcTemplate.exec(App.postgreSQLPoolName, Data.SELECT_SYSTEM_DATA_RANGE, arguments);
-                            break;
-                        case userDataRSync:
-                            exec = App.jdbcTemplate.exec(App.postgreSQLPoolName, Data.SELECT_USER_DATA_RANGE, arguments);
-                            break;
-                        case socket:
-                            exec = App.jdbcTemplate.exec(App.postgreSQLPoolName, Data.SELECT_SOCKET_DATA_RANGE, arguments);
-                            break;
-                    }
+                    List<Map<String, Object>> exec = switch (dataType) {
+                        case js, any, systemData, template ->
+                                App.jdbcTemplate.exec(App.postgreSQLPoolName, Data.SELECT_SYSTEM_DATA_RANGE, arguments);
+                        case userDataRSync ->
+                                App.jdbcTemplate.exec(App.postgreSQLPoolName, Data.SELECT_USER_DATA_RANGE, arguments);
+                        case socket ->
+                                App.jdbcTemplate.exec(App.postgreSQLPoolName, Data.SELECT_SOCKET_DATA_RANGE, arguments);
+                    };
                     result.put(dataType.toString(), exec);
+                } else if (dbRevision < rqRevision) { //Рассинхрон версий
+                    List<Map<String, Object>> needUpgradeServerType = new ArrayList<>();
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("needUpgrade", dbRevision);
+                    needUpgradeServerType.add(map);
+
+                    result.put(dataType.toString(), needUpgradeServerType);
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        //Блок обновления
+        insertData(userSessionInfo, parsedJson, "userDataRSync", result); //Он может прийти пустым, так как просто человечек не залогинен
+        insertData(userSessionInfo, parsedJson, "socket", result);
+
         String json = Util.jsonObjectToStringPretty(result);
         System.out.println("Sync.sync() => " + json);
         return json;
+    }
+
+    private static void insertData(UserSessionInfo userSessionInfo, Map<String, Object> parsedJson, String key, Map<String, List<Map<String, Object>>> result) {
+        List<Map<String, Object>> dataList = (List<Map<String, Object>>) parsedJson.get(key);
+        for (Map<String, Object> dataItem : dataList) {
+            try {
+                Map<String, Object> arguments = App.jdbcTemplate.createArguments();
+                arguments.putAll(dataItem);
+                userSessionInfo.appendAuthJdbcTemplateArguments(arguments);
+                List<Map<String, Object>> exec = App.jdbcTemplate.exec(App.postgreSQLPoolName, Data.INSERT, arguments);
+                if (exec.size() > 0 && exec.get(0).containsKey("new_id_revision")) {
+                    String newIdRevisionString = (String) exec.get(0).get("new_id_revision");
+                    if (newIdRevisionString != null && Util.isNumeric(newIdRevisionString)) {
+                        dataItem.put("revision_data", Long.parseLong(newIdRevisionString));
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        if (!result.containsKey(key)) {
+            result.put(key, new ArrayList<>());
+        }
+        mergeRevision(dataList, result.get(key));
     }
 
     private static Map<String, Long> getMaxRevisionByType(UserSessionInfo userSessionInfo) throws Exception {
@@ -130,5 +89,35 @@ public class Sync {
             dbMapRevision.put((String) row.get("key"), (Long) row.get("max"));
         }
         return dbMapRevision;
+    }
+
+    public static void mergeRevision(List<Map<String, Object>> listInsertItem, List<Map<String, Object>> listResultItem) {
+        for (Map<String, Object> insertItem : listInsertItem) {
+            boolean find = false;
+            for (Map<String, Object> item : listResultItem) {
+                if (item.get("uuid").equals(insertItem.get("uuid_data"))) {
+                    item.clear(); //Что бы не передавать туже самую информацию
+                    item.put("uuid", insertItem.get("uuid_data"));
+                    item.put("revision", insertItem.get("revision_data"));
+                    find = true;
+                    break;
+                }
+            }
+            if (!find) {
+                Map<String, Object> appendMap = new HashMap<>();
+                appendMap.put("uuid", insertItem.get("uuid_data")); //Только номер ревизии заполняем, что бы не передавать повторно информацию
+                appendMap.put("revision", insertItem.get("revision_data")); //Только номер ревизии заполняем, что бы не передавать повторно информацию
+                /*for (Object key : insertItem.keySet()) {
+                    String newKey = key.toString().replace("_data", "");
+                    appendMap.put(newKey, insertItem.get(key));
+                }*/
+                listResultItem.add(appendMap);
+            }
+        }
+        listResultItem.sort((lhs, rhs) -> {
+            long l = Long.parseLong(lhs.get("revision").toString());
+            long r = Long.parseLong(rhs.get("revision").toString());
+            return Long.compare(l, r);
+        });
     }
 }

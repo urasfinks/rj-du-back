@@ -14,21 +14,22 @@ public class Parse {
         HttpClient httpClient = new HttpClient();
         httpClient.setUrl("https://api.cigar-register.com/api/v1/catalog/lines?filters[brand_id][]=" + brandId);
 
-        WrapJsonToObject<Map> mapWrapJsonToObject = Util.jsonToObject("{\n" +
-                "    \"accept\": \"application/json, text/plain, */*\",\n" +
-                "    \"accept-language\": \"ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7\",\n" +
-                "    \"authorization\": \"Bearer 15770|dMvHbAeUsUCWm1Ktzku7hDItuUa4FzyEb55Lh3I7\",\n" +
-                "    \"cache-control\": \"no-cache\",\n" +
-                "    \"pragma\": \"no-cache\",\n" +
-                "    \"sec-ch-ua\": \"\\\"Not_A Brand\\\";v=\\\"99\\\", \\\"Google Chrome\\\";v=\\\"109\\\", \\\"Chromium\\\";v=\\\"109\\\"\",\n" +
-                "    \"sec-ch-ua-mobile\": \"?0\",\n" +
-                "    \"sec-ch-ua-platform\": \"\\\"macOS\\\"\",\n" +
-                "    \"sec-fetch-dest\": \"empty\",\n" +
-                "    \"sec-fetch-mode\": \"cors\",\n" +
-                "    \"sec-fetch-site\": \"same-site\",\n" +
-                "    \"Referer\": \"https://www.cigar-register.com/\",\n" +
-                "    \"Referrer-Policy\": \"strict-origin-when-cross-origin\"\n" +
-                "  }", Map.class);
+        WrapJsonToObject<Map> mapWrapJsonToObject = Util.jsonToObject("""
+                {
+                    "accept": "application/json, text/plain, */*",
+                    "accept-language": "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7",
+                    "authorization": "Bearer 15770|dMvHbAeUsUCWm1Ktzku7hDItuUa4FzyEb55Lh3I7",
+                    "cache-control": "no-cache",
+                    "pragma": "no-cache",
+                    "sec-ch-ua": "\\"Not_A Brand\\";v=\\"99\\", \\"Google Chrome\\";v=\\"109\\", \\"Chromium\\";v=\\"109\\"",
+                    "sec-ch-ua-mobile": "?0",
+                    "sec-ch-ua-platform": "\\"macOS\\"",
+                    "sec-fetch-dest": "empty",
+                    "sec-fetch-mode": "cors",
+                    "sec-fetch-site": "same-site",
+                    "Referer": "https://www.cigar-register.com/",
+                    "Referrer-Policy": "strict-origin-when-cross-origin"
+                  }""", Map.class);
         for (Object key : mapWrapJsonToObject.getObject().keySet()) {
             httpClient.setRequestHeader(key.toString(), mapWrapJsonToObject.getObject().get(key).toString());
         }
@@ -41,21 +42,22 @@ public class Parse {
         HttpClient httpClient = new HttpClient();
         httpClient.setUrl("https://api.cigar-register.com/api/v1/catalog/cards?filters[brand_id][]=" + brandId + "&filters[line_id][]=" + lineId);
 
-        WrapJsonToObject<Map> mapWrapJsonToObject = Util.jsonToObject("{\n" +
-                "    \"accept\": \"application/json, text/plain, */*\",\n" +
-                "    \"accept-language\": \"ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7\",\n" +
-                "    \"authorization\": \"Bearer 15770|dMvHbAeUsUCWm1Ktzku7hDItuUa4FzyEb55Lh3I7\",\n" +
-                "    \"cache-control\": \"no-cache\",\n" +
-                "    \"pragma\": \"no-cache\",\n" +
-                "    \"sec-ch-ua\": \"\\\"Not_A Brand\\\";v=\\\"99\\\", \\\"Google Chrome\\\";v=\\\"109\\\", \\\"Chromium\\\";v=\\\"109\\\"\",\n" +
-                "    \"sec-ch-ua-mobile\": \"?0\",\n" +
-                "    \"sec-ch-ua-platform\": \"\\\"macOS\\\"\",\n" +
-                "    \"sec-fetch-dest\": \"empty\",\n" +
-                "    \"sec-fetch-mode\": \"cors\",\n" +
-                "    \"sec-fetch-site\": \"same-site\",\n" +
-                "    \"Referer\": \"https://www.cigar-register.com/\",\n" +
-                "    \"Referrer-Policy\": \"strict-origin-when-cross-origin\"\n" +
-                "  }", Map.class);
+        WrapJsonToObject<Map> mapWrapJsonToObject = Util.jsonToObject("""
+                {
+                    "accept": "application/json, text/plain, */*",
+                    "accept-language": "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7",
+                    "authorization": "Bearer 15770|dMvHbAeUsUCWm1Ktzku7hDItuUa4FzyEb55Lh3I7",
+                    "cache-control": "no-cache",
+                    "pragma": "no-cache",
+                    "sec-ch-ua": "\\"Not_A Brand\\";v=\\"99\\", \\"Google Chrome\\";v=\\"109\\", \\"Chromium\\";v=\\"109\\"",
+                    "sec-ch-ua-mobile": "?0",
+                    "sec-ch-ua-platform": "\\"macOS\\"",
+                    "sec-fetch-dest": "empty",
+                    "sec-fetch-mode": "cors",
+                    "sec-fetch-site": "same-site",
+                    "Referer": "https://www.cigar-register.com/",
+                    "Referrer-Policy": "strict-origin-when-cross-origin"
+                  }""", Map.class);
         for (Object key : mapWrapJsonToObject.getObject().keySet()) {
             httpClient.setRequestHeader(key.toString(), mapWrapJsonToObject.getObject().get(key).toString());
         }
@@ -68,21 +70,22 @@ public class Parse {
         HttpClient httpClient = new HttpClient();
         httpClient.setUrl("https://api.cigar-register.com/api/v1/catalog/card/" + cardId);
 
-        WrapJsonToObject<Map> mapWrapJsonToObject = Util.jsonToObject("{\n" +
-                "    \"accept\": \"application/json, text/plain, */*\",\n" +
-                "    \"accept-language\": \"ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7\",\n" +
-                "    \"authorization\": \"Bearer 15770|dMvHbAeUsUCWm1Ktzku7hDItuUa4FzyEb55Lh3I7\",\n" +
-                "    \"cache-control\": \"no-cache\",\n" +
-                "    \"pragma\": \"no-cache\",\n" +
-                "    \"sec-ch-ua\": \"\\\"Not_A Brand\\\";v=\\\"99\\\", \\\"Google Chrome\\\";v=\\\"109\\\", \\\"Chromium\\\";v=\\\"109\\\"\",\n" +
-                "    \"sec-ch-ua-mobile\": \"?0\",\n" +
-                "    \"sec-ch-ua-platform\": \"\\\"macOS\\\"\",\n" +
-                "    \"sec-fetch-dest\": \"empty\",\n" +
-                "    \"sec-fetch-mode\": \"cors\",\n" +
-                "    \"sec-fetch-site\": \"same-site\",\n" +
-                "    \"Referer\": \"https://www.cigar-register.com/\",\n" +
-                "    \"Referrer-Policy\": \"strict-origin-when-cross-origin\"\n" +
-                "  }", Map.class);
+        WrapJsonToObject<Map> mapWrapJsonToObject = Util.jsonToObject("""
+                {
+                    "accept": "application/json, text/plain, */*",
+                    "accept-language": "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7",
+                    "authorization": "Bearer 15770|dMvHbAeUsUCWm1Ktzku7hDItuUa4FzyEb55Lh3I7",
+                    "cache-control": "no-cache",
+                    "pragma": "no-cache",
+                    "sec-ch-ua": "\\"Not_A Brand\\";v=\\"99\\", \\"Google Chrome\\";v=\\"109\\", \\"Chromium\\";v=\\"109\\"",
+                    "sec-ch-ua-mobile": "?0",
+                    "sec-ch-ua-platform": "\\"macOS\\"",
+                    "sec-fetch-dest": "empty",
+                    "sec-fetch-mode": "cors",
+                    "sec-fetch-site": "same-site",
+                    "Referer": "https://www.cigar-register.com/",
+                    "Referrer-Policy": "strict-origin-when-cross-origin"
+                  }""", Map.class);
         for (Object key : mapWrapJsonToObject.getObject().keySet()) {
             httpClient.setRequestHeader(key.toString(), mapWrapJsonToObject.getObject().get(key).toString());
         }
@@ -133,7 +136,7 @@ public class Parse {
                 arguments.put("id_user", 1);
                 arguments.put("key_data", "cigar");
 
-                App.jdbcTemplate.exec(App.postgreSQLPoolName, Data.INSERT, arguments);
+                App.jdbcTemplate.exec(App.postgreSQLPoolName, Data.TEST_INSERT, arguments);
             }
         }
         System.out.println("Finish");
