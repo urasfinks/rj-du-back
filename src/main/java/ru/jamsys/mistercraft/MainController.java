@@ -1,6 +1,8 @@
 package ru.jamsys.mistercraft;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -38,10 +40,10 @@ public class MainController {
         if (jRet.isStatus()) {
             parseBody(postBody, jRet);
         }
-        Map req = new HashMap();
+        Map<String, Object> req = new HashMap<>();
         if (jRet.isStatus()) {
             try {
-                req = (Map) jRet.getData().get("request");
+                req = (Map<String, Object>) jRet.getData().get("request");
             } catch (Exception e) {
                 jRet.setException(e.toString());
             }
@@ -62,7 +64,7 @@ public class MainController {
                 jRet.setException(e.toString());
             }
         }
-        if (jRet.isStatus()) {
+        if (jRet.isStatus() && arguments != null) {
             try {
                 eMail.sendCode((String) arguments.get("mail"), arguments.get("code").toString());
             } catch (Exception e) {
@@ -89,10 +91,10 @@ public class MainController {
         if (jRet.isStatus()) {
             parseBody(postBody, jRet);
         }
-        Map req = new HashMap();
+        Map<String, Object> req = new HashMap<>();
         if (jRet.isStatus()) {
             try {
-                req = (Map) jRet.getData().get("request");
+                req = (Map<String, Object>) jRet.getData().get("request");
             } catch (Exception e) {
                 jRet.setException(e.toString());
             }
@@ -115,7 +117,7 @@ public class MainController {
                 jRet.setException(e.toString());
             }
         }
-        List device = null;
+        List<Map<String, Object>> device = null;
         if (jRet.isStatus()) { //Получим запись устройства
             try {
                 req.put("uuid_device", userSessionInfo.getDeviceUuid());
@@ -124,7 +126,7 @@ public class MainController {
                 jRet.setException(e.toString());
             }
         }
-        if (jRet.isStatus()) { //Обновим или добавим устройство
+        if (jRet.isStatus() && device != null && user != null) { //Обновим или добавим устройство
             try {
                 req.put("id_user", user.get(0).get("id_user"));
                 if (device.size() == 0) {
@@ -161,6 +163,16 @@ public class MainController {
         } catch (Exception e) {
             jRet.setException(e.getMessage());
         }
+    }
+
+    @Value("classpath:socket.html")
+    private Resource socketHtml;
+
+    @RequestMapping(value = "/socket", method = RequestMethod.GET)
+    public ResponseEntity<?> socket() {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(Util.getResourceContent(socketHtml, "UTF-8"));
     }
 
     @RequestMapping(value = "/hello", method = RequestMethod.GET)
