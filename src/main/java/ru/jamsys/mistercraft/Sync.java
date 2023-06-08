@@ -2,6 +2,7 @@ package ru.jamsys.mistercraft;
 
 import ru.jamsys.App;
 import ru.jamsys.Util;
+import ru.jamsys.UtilJson;
 import ru.jamsys.mistercraft.jt.Data;
 
 import java.util.*;
@@ -51,7 +52,7 @@ public class Sync {
         insertData(userSessionInfo, parsedJson, "userDataRSync", result); //Он может прийти пустым, так как просто человечек не залогинен
         insertData(userSessionInfo, parsedJson, "socket", result);
 
-        String json = Util.jsonObjectToStringPretty(result);
+        String json = UtilJson.toStringPretty(result, "{}");
         System.out.println("Sync.sync() => " + json);
         return json;
     }

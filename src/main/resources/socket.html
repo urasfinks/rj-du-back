@@ -8,10 +8,13 @@
 <div id="greetings"></div>
 <script type="text/javascript">
 function connect() {
-	ws = new WebSocket('ws://localhost:8453');
+	var ws = new WebSocket('ws://localhost:8453/fb88cbf8-a959-4eb1-aafd-73c981c4c2e5');
 	ws.onmessage = function(data){
 		console.log(data);
 	}
+	setTimeout(function(){
+	    ws.send("hello");
+	}, 1000);
 }
 
 function disconnect() {

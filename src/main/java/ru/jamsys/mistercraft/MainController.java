@@ -145,7 +145,7 @@ public class MainController {
     }
 
     private void parseBody(String postBody, JsonHttpResponse jRet) {
-        WrapJsonToObject<Map> mapWrapJsonToObject = Util.jsonToObject(postBody, Map.class);
+        WrapJsonToObject<Map> mapWrapJsonToObject = UtilJson.toObject(postBody, Map.class);
         if (mapWrapJsonToObject.getException() != null) {
             jRet.setException(mapWrapJsonToObject.getException().toString());
         } else {
@@ -192,7 +192,7 @@ public class MainController {
         if (!userSessionInfo.isValidRequest()) {
             return auth();
         }
-        WrapJsonToObject<Map> mapWrapJsonToObject = Util.jsonToObject(postBody, Map.class);
+        WrapJsonToObject<Map> mapWrapJsonToObject = UtilJson.toObject(postBody, Map.class);
         if (mapWrapJsonToObject.getException() == null) {
             System.out.println("[" + new Date() + "] Request(/sync); UserSessionInfo => isRegister: " + userSessionInfo.isRegister() + "; postBody: " + postBody);
             return ResponseEntity

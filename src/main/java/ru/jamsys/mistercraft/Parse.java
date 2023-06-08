@@ -1,7 +1,7 @@
 package ru.jamsys.mistercraft;
 
 import ru.jamsys.App;
-import ru.jamsys.Util;
+import ru.jamsys.UtilJson;
 import ru.jamsys.WrapJsonToObject;
 import ru.jamsys.http.HttpClient;
 import ru.jamsys.mistercraft.jt.Data;
@@ -14,7 +14,7 @@ public class Parse {
         HttpClient httpClient = new HttpClient();
         httpClient.setUrl("https://api.cigar-register.com/api/v1/catalog/lines?filters[brand_id][]=" + brandId);
 
-        WrapJsonToObject<Map> mapWrapJsonToObject = Util.jsonToObject("""
+        WrapJsonToObject<Map> mapWrapJsonToObject = UtilJson.toObject("""
                 {
                     "accept": "application/json, text/plain, */*",
                     "accept-language": "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7",
@@ -42,7 +42,7 @@ public class Parse {
         HttpClient httpClient = new HttpClient();
         httpClient.setUrl("https://api.cigar-register.com/api/v1/catalog/cards?filters[brand_id][]=" + brandId + "&filters[line_id][]=" + lineId);
 
-        WrapJsonToObject<Map> mapWrapJsonToObject = Util.jsonToObject("""
+        WrapJsonToObject<Map> mapWrapJsonToObject = UtilJson.toObject("""
                 {
                     "accept": "application/json, text/plain, */*",
                     "accept-language": "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7",
@@ -70,7 +70,7 @@ public class Parse {
         HttpClient httpClient = new HttpClient();
         httpClient.setUrl("https://api.cigar-register.com/api/v1/catalog/card/" + cardId);
 
-        WrapJsonToObject<Map> mapWrapJsonToObject = Util.jsonToObject("""
+        WrapJsonToObject<Map> mapWrapJsonToObject = UtilJson.toObject("""
                 {
                     "accept": "application/json, text/plain, */*",
                     "accept-language": "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7",
@@ -112,7 +112,7 @@ public class Parse {
         List<Map<String, Object>> exec = App.jdbcTemplate.exec(App.postgreSQLPoolName, ParseJt.SELECT, App.jdbcTemplate.createArguments());
         System.out.println("All: " + exec.size());
         for (Map<String, Object> item : exec) {
-            WrapJsonToObject<Map> data = Util.jsonToObject((String) item.get("data"), Map.class);
+            WrapJsonToObject<Map> data = UtilJson.toObject((String) item.get("data"), Map.class);
             if (data.getException() == null) {
                 Map<String, Object> o = (Map<String, Object>) data.getObject().get("data");
                 Map<String, String> newData = new LinkedHashMap<>();
@@ -130,7 +130,7 @@ public class Parse {
 
                 Map<String, Object> arguments = App.jdbcTemplate.createArguments();
                 arguments.put("uuid_data", java.util.UUID.randomUUID().toString());
-                arguments.put("value_data", Util.jsonObjectToString(newData));
+                arguments.put("value_data", UtilJson.toString(newData, "{}"));
                 arguments.put("type_data", DataType.systemData);
                 arguments.put("parent_uuid_data", null);
                 arguments.put("id_user", 1);
