@@ -13,7 +13,12 @@ function connect() {
 		console.log(data);
 	}
 	setTimeout(function(){
-	    ws.send("hello");
+	    ws.send(JSON.stringify({
+            "request": {
+                "operation": "SUBSCRIBE",
+                "uuid_data": "test"
+            }
+        }));
 	}, 1000);
 }
 
