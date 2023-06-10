@@ -11,7 +11,6 @@ public class Subscribe implements Invoke {
         if (sessionWrap != null) {
             sessionWrap.subscribe(request.getUuidData());
         }
-        System.out.println("Hello iam subscribe");
     }
 
 }

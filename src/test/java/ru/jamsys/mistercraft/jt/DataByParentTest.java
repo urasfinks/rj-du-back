@@ -1,0 +1,22 @@
+package ru.jamsys.mistercraft.jt;
+
+import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class DataByParentTest {
+
+    @Test
+    void getSqlArguments() {
+        List<String> inArgs = new ArrayList<>();
+        inArgs.add("test1");
+        inArgs.add("test2");
+
+        DataByParent dataByParent = new DataByParent(inArgs);
+        System.out.println(dataByParent.getSql());
+        System.out.println(dataByParent.getSqlArguments());
+    }
+}

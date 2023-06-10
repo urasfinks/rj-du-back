@@ -21,11 +21,12 @@ public class SessionWrap {
         if (!listSubscribeUuidData.contains(uuidData)) {
             listSubscribeUuidData.add(uuidData);
         }
-        Util.logConsole(Thread.currentThread(), "Iam: " + session.getId() + "; Subscribe list: " + listSubscribeUuidData);
+        Util.logConsole(Thread.currentThread(), "subscribe(" + session.getId() + "); Subscribe list: " + listSubscribeUuidData);
     }
 
     public void unsubscribe(String uuidData) {
         listSubscribeUuidData.remove(uuidData);
+        Util.logConsole(Thread.currentThread(), "unsubscribe(" + session.getId() + "); Subscribe list: " + listSubscribeUuidData);
     }
 
     public boolean isSubscribed(String uuidData) {

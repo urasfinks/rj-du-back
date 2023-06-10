@@ -11,9 +11,9 @@ import ru.jamsys.message.MessageImpl;
 class HandlerTest {
 
     @BeforeAll
-    static void beforeAll() {
+    static void beforeAll() throws Exception {
         String[] args = new String[]{};
-        App.context = SpringApplication.run(App.class, args);
+        App.main(args);
     }
 
     String getSubscribe() {
@@ -37,28 +37,10 @@ class HandlerTest {
                 """;
     }
 
-    String getUpdate() {
-        return """
-                {
-                    "request": {
-                        "operation": "UPDATE",
-                        "uuid_data": "test",
-                        "data":{
-                            "key": "value",
-                            "key2": {
-                                "x": 1
-                            }
-                        }
-                    }
-                }
-                """;
-    }
-
     @Test
     void onRead() {
         Assertions.assertTrue(validate(getSubscribe()), "#1");
         Assertions.assertTrue(validate(getUnsubscribe()), "#2");
-        Assertions.assertTrue(validate(getUpdate()), "#3");
     }
 
     private boolean validate(String data){

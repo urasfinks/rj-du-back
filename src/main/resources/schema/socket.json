@@ -6,6 +6,7 @@
       "oneOf": [
         {
           "type": "object",
+          "additionalProperties": false,
           "properties": {
             "operation": {
               "type": "string",
@@ -24,6 +25,7 @@
         },
         {
           "type": "object",
+          "additionalProperties": false,
           "properties": {
             "operation": {
               "type": "string",
@@ -42,6 +44,7 @@
         },
         {
           "type": "object",
+          "additionalProperties": false,
           "properties": {
             "operation": {
               "type": "string",

@@ -4,6 +4,7 @@ import ru.jamsys.App;
 import ru.jamsys.Util;
 import ru.jamsys.UtilJson;
 import ru.jamsys.mistercraft.jt.Data;
+import ru.jamsys.mistercraft.jt.DataByParent;
 
 import java.util.*;
 
@@ -49,36 +50,75 @@ public class Sync {
         }
 
         //Блок обновления
-        insertData(userSessionInfo, parsedJson, "userDataRSync", result); //Он может прийти пустым, так как просто человечек не залогинен
-        insertData(userSessionInfo, parsedJson, "socket", result);
+        insertData(userSessionInfo, parsedJson, DataType.userDataRSync.name(), result); //Он может прийти пустым, так как просто человечек не залогинен
+        insertData(userSessionInfo, parsedJson, DataType.socket.name(), result);
+
+        if (result.containsKey(DataType.socket.name())) {
+            updateSocketParentData(result.get(DataType.socket.name()));
+        }
 
         String json = UtilJson.toStringPretty(result, "{}");
         System.out.println("Sync.sync() => " + json);
         return json;
     }
 
-    private static void insertData(UserSessionInfo userSessionInfo, Map<String, Object> parsedJson, String key, Map<String, List<Map<String, Object>>> result) {
-        List<Map<String, Object>> dataList = (List<Map<String, Object>>) parsedJson.get(key);
-        for (Map<String, Object> dataItem : dataList) {
+    private static void updateSocketParentData(List<Map<String, Object>> socketData) {
+        //Сокетные данные немного кастомная история **Описание можете посмотреть в Enum
+        Map<String, List<Map<String, Object>>> needParentDataMap = new HashMap<>();
+        for (Map<String, Object> item : socketData) {
+            String parentUuidData = (String) item.get("parent_uuid_data");
+            if (parentUuidData != null && !"".equals(parentUuidData)) {
+                if (!needParentDataMap.containsKey(parentUuidData)) {
+                    needParentDataMap.put(parentUuidData, new ArrayList<>());
+                }
+                needParentDataMap.get(parentUuidData).add(item);
+            }
+        }
+        if (needParentDataMap.size() > 0) {
             try {
-                Map<String, Object> arguments = App.jdbcTemplate.createArguments();
-                arguments.putAll(dataItem);
-                userSessionInfo.appendAuthJdbcTemplateArguments(arguments);
-                List<Map<String, Object>> exec = App.jdbcTemplate.exec(App.postgreSQLPoolName, Data.INSERT, arguments);
-                if (exec.size() > 0 && exec.get(0).containsKey("new_id_revision")) {
-                    String newIdRevisionString = (String) exec.get(0).get("new_id_revision");
-                    if (newIdRevisionString != null && Util.isNumeric(newIdRevisionString)) {
-                        dataItem.put("revision_data", Long.parseLong(newIdRevisionString));
+                //Формируем динамический SQL c конструкцией IN
+                DataByParent dataByParent = new DataByParent(needParentDataMap.keySet().stream().toList());
+                //Получаем все исходные данные через связку uuid = parent_uuid
+                List<Map<String, Object>> exec = App.jdbcTemplate.exec(App.postgreSQLPoolName, dataByParent, dataByParent.getSqlArguments());
+                for (Map<String, Object> item : exec) {
+                    //Получаем uuid_data у родителя
+                    String uuidData = (String) item.get("uuid_data");
+                    //Пробегаемся по всем зависимым данным пустышек и заменяем value родительским value
+                    for (Map<String, Object> item2 : needParentDataMap.get(uuidData)) {
+                        item2.put("value", item.get("value_data"));
                     }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        if (!result.containsKey(key)) {
-            result.put(key, new ArrayList<>());
+    }
+
+    private static void insertData(UserSessionInfo userSessionInfo, Map<String, Object> parsedJson, String key, Map<String, List<Map<String, Object>>> result) {
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> dataList = (List<Map<String, Object>>) parsedJson.get(key);
+        if (dataList != null) {
+            for (Map<String, Object> dataItem : dataList) {
+                try {
+                    Map<String, Object> arguments = App.jdbcTemplate.createArguments();
+                    arguments.putAll(dataItem);
+                    userSessionInfo.appendAuthJdbcTemplateArguments(arguments);
+                    List<Map<String, Object>> exec = App.jdbcTemplate.exec(App.postgreSQLPoolName, Data.INSERT, arguments);
+                    if (exec.size() > 0 && exec.get(0).containsKey("new_id_revision")) {
+                        String newIdRevisionString = (String) exec.get(0).get("new_id_revision");
+                        if (newIdRevisionString != null && Util.isNumeric(newIdRevisionString)) {
+                            dataItem.put("revision_data", Long.parseLong(newIdRevisionString));
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            if (!result.containsKey(key)) {
+                result.put(key, new ArrayList<>());
+            }
+            mergeRevision(dataList, result.get(key));
         }
-        mergeRevision(dataList, result.get(key));
     }
 
     private static Map<String, Long> getMaxRevisionByType(UserSessionInfo userSessionInfo) throws Exception {

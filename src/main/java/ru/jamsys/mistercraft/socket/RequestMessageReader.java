@@ -66,12 +66,9 @@ public class RequestMessageReader {
             request.setOperation(operation);
             request.setUuidData((String) parsedJson.get("uuid_data"));
             request.setRequestMessage((RequestMessage) message);
-
-            if (operation == Operation.UPDATE) {
-                @SuppressWarnings("unchecked")
-                Map<String, Object> data = (Map<String, Object>) parsedJson.get("data");
-                request.setData(data);
-            }
+            @SuppressWarnings("unchecked")
+            Map<String, Object> data = (Map<String, Object>) parsedJson.get("data");
+            request.setData(data);
             request.exec();
             //Util.logConsole(Thread.currentThread(), "onRead: " + message.getBody() + "; Request: " + request.toString());
         } else {
