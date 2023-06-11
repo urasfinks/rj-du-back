@@ -1,4 +1,4 @@
-package ru.jamsys.mistercraft.socket;
+package ru.jamsys.mistercraft;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -9,7 +9,8 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import ru.jamsys.*;
 import ru.jamsys.component.Broker;
 import ru.jamsys.component.ThreadBalancerFactory;
-import ru.jamsys.mistercraft.UserSessionInfo;
+import ru.jamsys.mistercraft.socket.RequestMessage;
+import ru.jamsys.mistercraft.socket.SessionWrap;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -17,7 +18,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
-public class Handler extends TextWebSocketHandler {
+public class WebSocketHandler extends TextWebSocketHandler {
 
     public static String nameSocketRequestReader = "SocketRequestReader";
 
