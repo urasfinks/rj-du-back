@@ -6,7 +6,7 @@ import ru.jamsys.mistercraft.socket.Handler;
 
 @Configuration
 @EnableWebSocket
-public class WebSocketConfig implements WebSocketConfigurer {
+public class Config implements WebSocketConfigurer {
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(new Handler(), "*");
     }
