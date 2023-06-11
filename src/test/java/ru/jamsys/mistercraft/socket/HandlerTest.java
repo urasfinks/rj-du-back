@@ -3,10 +3,7 @@ package ru.jamsys.mistercraft.socket;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.SpringApplication;
 import ru.jamsys.App;
-import ru.jamsys.message.Message;
-import ru.jamsys.message.MessageImpl;
 
 class HandlerTest {
 
@@ -26,6 +23,7 @@ class HandlerTest {
                 }
                 """;
     }
+
     String getUnsubscribe() {
         return """
                 {
@@ -43,10 +41,11 @@ class HandlerTest {
         Assertions.assertTrue(validate(getUnsubscribe()), "#2");
     }
 
-    private boolean validate(String data){
+    private boolean validate(String data) {
         RequestMessageReader handler = App.context.getBean(RequestMessageReader.class);
         RequestMessage message = new RequestMessage();
         message.setBody(data);
         return handler.onRead(message);
     }
+
 }
