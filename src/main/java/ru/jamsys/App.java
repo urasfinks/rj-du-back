@@ -7,6 +7,7 @@ import org.springframework.context.annotation.PropertySource;
 import ru.jamsys.component.JdbcTemplate;
 import ru.jamsys.component.Security;
 import ru.jamsys.jdbc.template.TemplateEnum;
+import ru.jamsys.mistercraft.EMail;
 import ru.jamsys.mistercraft.socket.RequestMessageReader;
 import ru.jamsys.pool.PostgreSQL;
 
@@ -22,10 +23,13 @@ public class App {
     public static JdbcTemplate jdbcTemplate;
     private static Security security;
 
+    public static EMail eMail;
+
     public static void main(String[] args) throws Exception {
         context = SpringApplication.run(App.class, args);
         initSecurity();
         initPostgreSQL();
+        eMail = App.context.getBean(EMail.class);
         App.context.getBean(RequestMessageReader.class).init();
     }
 
