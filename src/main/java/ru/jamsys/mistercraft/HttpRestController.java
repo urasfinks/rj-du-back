@@ -11,6 +11,7 @@ import ru.jamsys.component.JsonSchema;
 import ru.jamsys.mistercraft.controller.Controller;
 import ru.jamsys.mistercraft.controller.ControllerMethod;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @SuppressWarnings("unused")
@@ -63,7 +64,7 @@ public class HttpRestController {
         Util.logConsole("Request: " + postBody);
         UserSessionInfo userSessionInfo = null;
         if (checkAuth) {
-            userSessionInfo = Auth.getDeviceUuid(authHeader);
+            userSessionInfo = getDeviceUuid(authHeader);
             if (!userSessionInfo.isValidRequest()) {
                 return getUnauthorizedResponse();
             }
@@ -102,6 +103,30 @@ public class HttpRestController {
                 .status(HttpStatus.UNAUTHORIZED)
                 .header("WWW-Authenticate", "Basic realm=\"JamSys\"")
                 .body("<html><body><h1>401. Unauthorized</h1></body>");
+    }
+
+    private UserSessionInfo getDeviceUuid(String valueHeaderAuthorization) {
+        UserSessionInfo userSessionInfo = new UserSessionInfo();
+        if (valueHeaderAuthorization != null && !"".equals(valueHeaderAuthorization) && valueHeaderAuthorization.startsWith("Basic ")) {
+            String[] valueExplode = valueHeaderAuthorization.split("Basic ");
+            if (valueExplode.length == 2) {
+                byte[] decoded = Base64.getDecoder().decode(valueExplode[1]);
+                String decodedStr = new String(decoded, StandardCharsets.UTF_8);
+                if (decodedStr.startsWith("v")) {
+                    String[] map = decodedStr.split(":");
+                    if (map.length == 2) {
+                        try {
+                            userSessionInfo.setVersion(Integer.parseInt(map[0].substring(1)));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        userSessionInfo.setDeviceUuid(map[1]);
+                    }
+                }
+            }
+        }
+        userSessionInfo.check();
+        return userSessionInfo;
     }
 
 }
