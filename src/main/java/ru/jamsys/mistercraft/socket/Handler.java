@@ -40,7 +40,7 @@ public class Handler extends TextWebSocketHandler {
         if (remoteAddress != null) {
             String host = session.getRemoteAddress().getHostString();
             if (!checkCountConnectionPerHost(host)) {
-                Util.logConsole(Thread.currentThread(), "Connection[" + mapConnection.size() + "]; afterConnectionEstablished Overload host connection: " + session);
+                Util.logConsole("Connection[" + mapConnection.size() + "]; afterConnectionEstablished Overload host connection: " + session);
                 session.close(CloseStatus.SERVICE_OVERLOAD);
                 return;
             }
@@ -48,20 +48,20 @@ public class Handler extends TextWebSocketHandler {
             if (uri != null) {
                 String path = uri.getPath();
                 if (path != null && path.startsWith("/") && path.length() == 37) { //Ждём uuid устройства
-                    Util.logConsole(Thread.currentThread(), "Connection[" + mapConnection.size() + "]; afterConnectionEstablished Success: " + session);
+                    Util.logConsole("Connection[" + mapConnection.size() + "]; afterConnectionEstablished Success: " + session);
                     UserSessionInfo userSessionInfo = new UserSessionInfo();
                     userSessionInfo.setDeviceUuid(path.substring(1));
                     mapConnection.put(session, new SessionWrap(session, userSessionInfo, host));
                 } else {
-                    Util.logConsole(Thread.currentThread(), "Connection[" + mapConnection.size() + "]; afterConnectionEstablished Error: " + session);
+                    Util.logConsole("Connection[" + mapConnection.size() + "]; afterConnectionEstablished Error: " + session);
                     session.close(CloseStatus.POLICY_VIOLATION);
                 }
             } else {
-                Util.logConsole(Thread.currentThread(), "Connection[" + mapConnection.size() + "]; afterConnectionEstablished Error read uri: " + session);
+                Util.logConsole("Connection[" + mapConnection.size() + "]; afterConnectionEstablished Error read uri: " + session);
                 session.close(CloseStatus.BAD_DATA);
             }
         } else {
-            Util.logConsole(Thread.currentThread(), "Connection[" + mapConnection.size() + "]; afterConnectionEstablished Error read address: " + session);
+            Util.logConsole("Connection[" + mapConnection.size() + "]; afterConnectionEstablished Error read address: " + session);
             session.close(CloseStatus.BAD_DATA);
         }
     }
@@ -86,7 +86,7 @@ public class Handler extends TextWebSocketHandler {
     @Override
     public void afterConnectionClosed(@NotNull WebSocketSession session, @NotNull CloseStatus status) throws Exception {
         super.afterConnectionClosed(session, status);
-        Util.logConsole(Thread.currentThread(), "Connection[" + mapConnection.size() + "]; afterConnectionClosed: " + session + "; status: " + status);
+        Util.logConsole("Connection[" + mapConnection.size() + "]; afterConnectionClosed: " + session + "; status: " + status);
         mapConnection.remove(session);
     }
 

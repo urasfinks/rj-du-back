@@ -70,9 +70,9 @@ public class RequestMessageReader {
             Map<String, Object> data = (Map<String, Object>) parsedJson.get("data");
             request.setData(data);
             request.exec();
-            //Util.logConsole(Thread.currentThread(), "onRead: " + message.getBody() + "; Request: " + request.toString());
+            //Util.logConsole("onRead: " + message.getBody() + "; Request: " + request.toString());
         } else {
-            Util.logConsole(Thread.currentThread(), "onRead: " + message.getBody() + "; Exception: " + validate.getError());
+            Util.logConsole("onRead: " + message.getBody() + "; Exception: " + validate.getError());
             return false;
         }
         return true;

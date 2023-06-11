@@ -31,7 +31,7 @@ public class MainController {
 
     @RequestMapping(value = "/getcode", method = RequestMethod.POST)
     public ResponseEntity<?> getCode(@RequestBody String postBody) {
-        System.out.println(postBody);
+        Util.logConsole(postBody);
         //{"login":"urasfinks@yandex.ru"}
         JsonHttpResponse jRet = new JsonHttpResponse();
         if (jRet.isStatus()) {
@@ -78,7 +78,7 @@ public class MainController {
 
     @RequestMapping(value = "/signin", method = RequestMethod.POST)
     public ResponseEntity<?> signIn(@RequestBody String postBody, @RequestHeader("Authorization") String authorization) {
-        System.out.println(postBody);
+        Util.logConsole(postBody);
         UserSessionInfo userSessionInfo = Auth.getDeviceUuid(authorization);
         if (!userSessionInfo.isValidRequest()) {
             return auth();
@@ -194,7 +194,26 @@ public class MainController {
         }
         WrapJsonToObject<Map> mapWrapJsonToObject = UtilJson.toObject(postBody, Map.class);
         if (mapWrapJsonToObject.getException() == null) {
-            System.out.println("[" + new Date() + "] Request(/sync); UserSessionInfo => isRegister: " + userSessionInfo.isRegister() + "; postBody: " + postBody);
+            Util.logConsole("Request(/sync); UserSessionInfo => isRegister: " + userSessionInfo.isRegister() + "; postBody: " + postBody);
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(Sync.handler(userSessionInfo, mapWrapJsonToObject.getObject()));
+        } else {
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(mapWrapJsonToObject.getException().toString());
+        }
+    }
+
+    @RequestMapping(value = "/socket", method = RequestMethod.POST)
+    public ResponseEntity<?> socket(@RequestBody String postBody, @RequestHeader("Authorization") String authorization) {
+        UserSessionInfo userSessionInfo = Auth.getDeviceUuid(authorization);
+        if (!userSessionInfo.isValidRequest()) {
+            return auth();
+        }
+        WrapJsonToObject<Map> mapWrapJsonToObject = UtilJson.toObject(postBody, Map.class);
+        if (mapWrapJsonToObject.getException() == null) {
+            Util.logConsole("Request(/socket); UserSessionInfo => isRegister: " + userSessionInfo.isRegister() + "; postBody: " + postBody);
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body(Sync.handler(userSessionInfo, mapWrapJsonToObject.getObject()));

@@ -1,6 +1,7 @@
 package ru.jamsys.mistercraft.jt;
 
 import org.junit.jupiter.api.Test;
+import ru.jamsys.Util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +17,7 @@ class DataByParentTest {
         inArgs.add("test2");
 
         DataByParent dataByParent = new DataByParent(inArgs);
-        System.out.println(dataByParent.getSql());
-        System.out.println(dataByParent.getSqlArguments());
+        Util.logConsole(dataByParent.getSql());
+        Util.logConsole(dataByParent.getSqlArguments().toString());
     }
 }

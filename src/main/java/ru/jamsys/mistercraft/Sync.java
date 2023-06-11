@@ -58,7 +58,7 @@ public class Sync {
         }
 
         String json = UtilJson.toStringPretty(result, "{}");
-        System.out.println("Sync.sync() => " + json);
+        Util.logConsole("Sync.sync() => " + json);
         return json;
     }
 

@@ -1,6 +1,7 @@
 package ru.jamsys.mistercraft;
 
 import ru.jamsys.App;
+import ru.jamsys.Util;
 import ru.jamsys.UtilJson;
 import ru.jamsys.WrapJsonToObject;
 import ru.jamsys.http.HttpClient;
@@ -35,7 +36,7 @@ public class Parse {
         }
         httpClient.exec();
         String resp = new String(httpClient.getResponse());
-        System.out.println(resp);
+        Util.logConsole(resp);
     }
 
     public static void lineId(String brandId, String lineId) {
@@ -63,7 +64,7 @@ public class Parse {
         }
         httpClient.exec();
         String resp = new String(httpClient.getResponse());
-        System.out.println(resp);
+        Util.logConsole(resp);
     }
 
     public static void cardId(int cardId) throws Exception {
@@ -92,14 +93,13 @@ public class Parse {
         httpClient.exec();
 
         if (httpClient.getStatus() == 200) {
-            System.out.println(cardId);
             String resp = new String(httpClient.getResponse());
             Map<String, Object> arguments = App.jdbcTemplate.createArguments();
             arguments.put("id", cardId);
             arguments.put("data", resp);
             App.jdbcTemplate.exec(App.postgreSQLPoolName, ParseJt.INSERT, arguments);
         } else {
-            System.out.println("ERROR");
+            Util.logConsole("ERROR");
         }
 
     }
@@ -110,10 +110,11 @@ public class Parse {
 
     public static void prepare() throws Exception {
         List<Map<String, Object>> exec = App.jdbcTemplate.exec(App.postgreSQLPoolName, ParseJt.SELECT, App.jdbcTemplate.createArguments());
-        System.out.println("All: " + exec.size());
+        Util.logConsole("All: " + exec.size());
         for (Map<String, Object> item : exec) {
             WrapJsonToObject<Map> data = UtilJson.toObject((String) item.get("data"), Map.class);
             if (data.getException() == null) {
+                @SuppressWarnings("unchecked")
                 Map<String, Object> o = (Map<String, Object>) data.getObject().get("data");
                 Map<String, String> newData = new LinkedHashMap<>();
 
@@ -139,7 +140,7 @@ public class Parse {
                 App.jdbcTemplate.exec(App.postgreSQLPoolName, Data.TEST_INSERT, arguments);
             }
         }
-        System.out.println("Finish");
+        Util.logConsole("Finish");
     }
 
     public static void parse() throws Exception {
