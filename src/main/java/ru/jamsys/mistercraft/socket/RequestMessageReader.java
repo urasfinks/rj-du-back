@@ -5,11 +5,11 @@ import org.springframework.stereotype.Component;
 import ru.jamsys.Util;
 import ru.jamsys.UtilFileResource;
 import ru.jamsys.UtilJson;
+import ru.jamsys.WrapJsonToObject;
 import ru.jamsys.component.Broker;
 import ru.jamsys.component.JsonSchema;
 import ru.jamsys.component.ThreadBalancerFactory;
 import ru.jamsys.message.Message;
-import ru.jamsys.message.MessageImpl;
 import ru.jamsys.thread.balancer.ThreadBalancerImpl;
 
 import java.util.Map;
@@ -24,7 +24,7 @@ public class RequestMessageReader {
 
     public RequestMessageReader() {
         try {
-            schemaSocket = UtilFileResource.getAsString("schema/socket.json");
+            schemaSocket = UtilFileResource.getAsString("schema/SocketProtocol.json");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -57,9 +57,9 @@ public class RequestMessageReader {
     public boolean onRead(Message message) {
         JsonSchema.Result validate = validate(message.getBody());
         if (validate.isValidate()) {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> parsedJson = (Map<String, Object>) UtilJson.toObject(message.getBody(), Map.class).getObject().get("request");
 
+            WrapJsonToObject<Map<String, Map<String, Object>>> mapWrapJsonToObject = UtilJson.toMap(message.getBody());
+            Map<String, Object> parsedJson = mapWrapJsonToObject.getObject().get("request");
             Operation operation = Operation.valueOf((String) parsedJson.get("operation"));
 
             Request request = new Request();
