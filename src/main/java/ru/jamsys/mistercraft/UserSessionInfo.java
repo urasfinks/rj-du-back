@@ -15,20 +15,20 @@ public class UserSessionInfo {
     private String deviceUuid;
     private boolean checked = false;
 
-    boolean isRegister() {
+    public boolean isRegister() {
         return isValidRequest() && idUser > 0;
     }
 
-    boolean isValidRequest() {
+    public boolean isValidRequest() {
         return version > 0 && deviceUuid != null;
     }
 
-    void appendAuthJdbcTemplateArguments(Map<String, Object> arguments) {
+    public void appendAuthJdbcTemplateArguments(Map<String, Object> arguments) {
         arguments.put("id_user", idUser);
         arguments.put("uuid_device", deviceUuid);
     }
 
-    void check() {
+    public void check() {
         if (!checked) {
             checked = true;
             Map<String, Object> arguments = App.jdbcTemplate.createArguments();

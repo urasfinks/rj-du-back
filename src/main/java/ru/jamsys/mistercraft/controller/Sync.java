@@ -1,16 +1,28 @@
-package ru.jamsys.mistercraft;
+package ru.jamsys.mistercraft.controller;
 
 import ru.jamsys.App;
+import ru.jamsys.JsonHttpResponse;
 import ru.jamsys.Util;
 import ru.jamsys.UtilJson;
+import ru.jamsys.mistercraft.DataType;
+import ru.jamsys.mistercraft.UserSessionInfo;
 import ru.jamsys.mistercraft.jt.Data;
 import ru.jamsys.mistercraft.jt.DataByParent;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-public class Sync {
+public class Sync implements Controller{
+    @Override
+    public void handler(JsonHttpResponse jRet, UserSessionInfo userSessionInfo) {
+        @SuppressWarnings("unchecked")
+        Map<String, Object> req = (Map<String, Object>) jRet.getData().get("request");
+        jRet.addData("response", handler2(userSessionInfo, req));
+    }
 
-    public static String handler(UserSessionInfo userSessionInfo, Map<String, Object> parsedJson) {
+    public static String handler2(UserSessionInfo userSessionInfo, Map<String, Object> parsedJson) {
         Map<String, List<Map<String, Object>>> result = new HashMap<>();
 
         //Блок выгрузки
@@ -148,10 +160,6 @@ public class Sync {
                 Map<String, Object> appendMap = new HashMap<>();
                 appendMap.put("uuid", insertItem.get("uuid_data")); //Только номер ревизии заполняем, что бы не передавать повторно информацию
                 appendMap.put("revision", insertItem.get("revision_data")); //Только номер ревизии заполняем, что бы не передавать повторно информацию
-                /*for (Object key : insertItem.keySet()) {
-                    String newKey = key.toString().replace("_data", "");
-                    appendMap.put(newKey, insertItem.get(key));
-                }*/
                 listResultItem.add(appendMap);
             }
         }
