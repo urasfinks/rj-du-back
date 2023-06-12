@@ -15,7 +15,7 @@ function connect() {
 	setTimeout(function(){
 	    ws.send(JSON.stringify({
             "request": {
-                "operation": "SUBSCRIBE",
+                "handler": "SUBSCRIBE",
                 "uuid_data": "test"
             }
         }));

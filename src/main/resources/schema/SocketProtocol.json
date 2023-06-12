@@ -8,7 +8,7 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "operation": {
+            "handler": {
               "type": "string",
               "enum": [
                 "SUBSCRIBE"
@@ -19,7 +19,7 @@
             }
           },
           "required": [
-            "operation",
+            "handler",
             "uuid_data"
           ]
         },
@@ -27,7 +27,7 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "operation": {
+            "handler": {
               "type": "string",
               "enum": [
                 "UNSUBSCRIBE"
@@ -38,32 +38,8 @@
             }
           },
           "required": [
-            "operation",
+            "handler",
             "uuid_data"
-          ]
-        },
-        {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "operation": {
-              "type": "string",
-              "minLength": null,
-              "enum": [
-                "UPDATE"
-              ]
-            },
-            "uuid_data": {
-              "type": "string"
-            },
-            "data": {
-              "type": "object"
-            }
-          },
-          "required": [
-            "operation",
-            "uuid_data",
-            "data"
           ]
         }
       ]

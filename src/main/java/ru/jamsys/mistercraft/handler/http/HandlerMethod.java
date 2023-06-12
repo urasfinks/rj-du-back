@@ -1,6 +1,6 @@
 package ru.jamsys.mistercraft.handler.http;
 
-public enum ControllerMethod {
+public enum HandlerMethod {
 
     SIGN_IN(new AuthSignIn()),
     SYNC(new Sync()),
@@ -10,7 +10,7 @@ public enum ControllerMethod {
 
     final HttpHandler httpHandler;
 
-    ControllerMethod(HttpHandler httpHandler) {
+    HandlerMethod(HttpHandler httpHandler) {
         this.httpHandler = httpHandler;
     }
 

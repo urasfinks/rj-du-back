@@ -1,16 +1,14 @@
-package ru.jamsys.mistercraft.socket;
+package ru.jamsys.mistercraft.handler.socket;
 
-import ru.jamsys.mistercraft.handler.socket.SocketHandler;
-import ru.jamsys.mistercraft.handler.socket.Subscribe;
-import ru.jamsys.mistercraft.handler.socket.Unsubscribe;
+import ru.jamsys.mistercraft.socket.Request;
 
-public enum Operation {
+public enum HandlerMethod {
     SUBSCRIBE(new Subscribe()), //Подписаться на изменения по uuid_data
     UNSUBSCRIBE(new Unsubscribe()); //Отписаться на изменения по uuid_data
 
     final SocketHandler socketHandler;
 
-    Operation(SocketHandler socketHandler) {
+    HandlerMethod(SocketHandler socketHandler) {
         this.socketHandler = socketHandler;
     }
 

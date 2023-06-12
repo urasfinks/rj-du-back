@@ -11,6 +11,7 @@ import ru.jamsys.component.JsonSchema;
 import ru.jamsys.component.ThreadBalancerFactory;
 import ru.jamsys.message.Message;
 import ru.jamsys.mistercraft.ControllerWebSocket;
+import ru.jamsys.mistercraft.handler.socket.HandlerMethod;
 import ru.jamsys.thread.balancer.ThreadBalancerImpl;
 
 import java.util.Map;
@@ -61,10 +62,10 @@ public class RequestMessageReader {
 
             WrapJsonToObject<Map<String, Map<String, Object>>> mapWrapJsonToObject = UtilJson.toMap(message.getBody());
             Map<String, Object> parsedJson = mapWrapJsonToObject.getObject().get("request");
-            Operation operation = Operation.valueOf((String) parsedJson.get("operation"));
+            HandlerMethod handlerMethod = HandlerMethod.valueOf((String) parsedJson.get("handler"));
 
             Request request = new Request();
-            request.setOperation(operation);
+            request.setHandlerMethod(handlerMethod);
             request.setUuidData((String) parsedJson.get("uuid_data"));
             request.setRequestMessage((RequestMessage) message);
             @SuppressWarnings("unchecked")

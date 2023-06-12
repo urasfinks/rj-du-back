@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import ru.jamsys.App;
 import ru.jamsys.JsonHttpResponse;
 import ru.jamsys.Util;
-import ru.jamsys.mistercraft.handler.http.ControllerMethod;
+import ru.jamsys.mistercraft.handler.http.HandlerMethod;
 
 class HttpRestHttpHandlerTest {
 
@@ -28,7 +28,7 @@ class HttpRestHttpHandlerTest {
                 """;
         String authHeader = "Basic djQ6ZmI4OGNiZjgtYTk1OS00ZWIxLWFhZmQtNzNjOTgxYzRjMmU1";
 
-        JsonHttpResponse jsonHttpResponse = controllerHttpRest.getJsonHttpResponse(postData, true, authHeader, "schema/SocketRestUpdate.json", ControllerMethod.SOCKET_UPDATE.get());
+        JsonHttpResponse jsonHttpResponse = controllerHttpRest.getJsonHttpResponse(postData, true, authHeader, "schema/SocketRestUpdate.json", HandlerMethod.SOCKET_UPDATE.get());
         Util.logConsole("socketTest: " + jsonHttpResponse);
     }
 }

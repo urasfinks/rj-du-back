@@ -17,7 +17,7 @@ class ControllerWebSocketTest {
         return """
                 {
                     "request": {
-                        "operation": "SUBSCRIBE",
+                        "handler": "SUBSCRIBE",
                         "uuid_data": "test"
                     }
                 }
@@ -28,7 +28,7 @@ class ControllerWebSocketTest {
         return """
                 {
                     "request": {
-                        "operation": "UNSUBSCRIBE",
+                        "handler": "UNSUBSCRIBE",
                         "uuid_data": "test"
                     }
                 }
