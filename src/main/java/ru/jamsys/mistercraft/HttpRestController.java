@@ -70,7 +70,7 @@ public class HttpRestController {
                         jRet.addException(validate.getError());
                     }
                 } catch (Exception e) {
-                    jRet.addException(e.getMessage());
+                    jRet.addException(e);
                 }
             }
         }
@@ -81,10 +81,10 @@ public class HttpRestController {
                 jRet.addData("request", mapWrapJsonToObject.getObject());
                 controller.handler(jRet, userSessionInfo);
             } else {
-                jRet.addException(mapWrapJsonToObject.getException().toString());
+                jRet.addException(mapWrapJsonToObject.getException());
             }
         }
-        jRet.getData().remove("request");
+
         return jRet;
     }
 
@@ -92,6 +92,7 @@ public class HttpRestController {
         Util.logConsole("Request: " + postBody);
         JsonHttpResponse jRet = getJsonHttpResponse(postBody, checkAuth, authHeader, schemaValidation, controller);
         Util.logConsole("Response: " + jRet.toString());
+        jRet.getData().remove("request");
         return jRet.getResponseEntity();
     }
 

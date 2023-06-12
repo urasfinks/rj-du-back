@@ -21,7 +21,7 @@ public class AuthSignIn implements Controller{
                 Map<String, Object> req2 = (Map<String, Object>) jRet.getData().get("request");
                 req = req2;
             } catch (Exception e) {
-                jRet.setException(e.toString());
+                jRet.addException(e);
             }
         }
         List<Map<String, Object>> user = null;
@@ -29,17 +29,17 @@ public class AuthSignIn implements Controller{
             try {
                 user = App.jdbcTemplate.exec(App.postgreSQLPoolName, User.GET_BY_CODE, req);
                 if (user.size() == 0) {
-                    jRet.setException("No data found");
+                    jRet.addException("No data found");
                 }
             } catch (Exception e) {
-                jRet.setException(e.toString());
+                jRet.addException(e);
             }
         }
         if (jRet.isStatus()) { //Сбросим код
             try {
                 App.jdbcTemplate.exec(App.postgreSQLPoolName, User.RESET_CODE, req);
             } catch (Exception e) {
-                jRet.setException(e.toString());
+                jRet.addException(e);
             }
         }
         List<Map<String, Object>> device = null;
@@ -48,7 +48,7 @@ public class AuthSignIn implements Controller{
                 req.put("uuid_device", userSessionInfo.getDeviceUuid());
                 device = App.jdbcTemplate.exec(App.postgreSQLPoolName, Device.SELECT_BY_UUID, req);
             } catch (Exception e) {
-                jRet.setException(e.toString());
+                jRet.addException(e);
             }
         }
         if (jRet.isStatus() && device != null && user != null) { //Обновим или добавим устройство
@@ -60,7 +60,7 @@ public class AuthSignIn implements Controller{
                     App.jdbcTemplate.exec(App.postgreSQLPoolName, Device.UPDATE, req);
                 }
             } catch (Exception e) {
-                jRet.setException(e.toString());
+                jRet.addException(e);
             }
         }
         req.remove("uuid_device"); //Персональная информация, если не удалить - то доступ к ней может получить JS, а это уже не секьюрно

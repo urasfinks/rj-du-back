@@ -22,7 +22,7 @@ public class AuthGetCode implements Controller {
                 Map<String, Object> req2 = (Map<String, Object>) jRet.getData().get("request");
                 req = req2;
             } catch (Exception e) {
-                jRet.setException(e.toString());
+                jRet.addException(e);
             }
         }
         Map<String, Object> arguments = null;
@@ -38,14 +38,14 @@ public class AuthGetCode implements Controller {
                     App.jdbcTemplate.exec(App.postgreSQLPoolName, User.SET_CODE, arguments);
                 }
             } catch (Exception e) {
-                jRet.setException(e.toString());
+                jRet.addException(e);
             }
         }
         if (jRet.isStatus() && arguments != null) {
             try {
                 App.eMail.sendCode((String) arguments.get("mail"), arguments.get("code").toString());
             } catch (Exception e) {
-                jRet.setException(e.toString());
+                jRet.addException(e);
             }
         }
     }
