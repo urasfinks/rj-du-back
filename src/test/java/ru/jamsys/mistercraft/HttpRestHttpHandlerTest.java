@@ -5,9 +5,9 @@ import org.junit.jupiter.api.Test;
 import ru.jamsys.App;
 import ru.jamsys.JsonHttpResponse;
 import ru.jamsys.Util;
-import ru.jamsys.mistercraft.controller.ControllerMethod;
+import ru.jamsys.mistercraft.handler.http.ControllerMethod;
 
-class HttpRestControllerTest {
+class HttpRestHttpHandlerTest {
 
     @BeforeAll
     static void beforeAll() throws Exception {

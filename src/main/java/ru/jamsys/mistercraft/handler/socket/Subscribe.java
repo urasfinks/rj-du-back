@@ -1,15 +1,15 @@
-package ru.jamsys.mistercraft.socket.invoke;
+package ru.jamsys.mistercraft.handler.socket;
 
 import ru.jamsys.mistercraft.socket.Request;
 import ru.jamsys.mistercraft.socket.SessionWrap;
 
-public class Unsubscribe implements Invoke{
+public class Subscribe implements SocketHandler {
 
     @Override
-    public void exec(Request request) {
+    public void handler(Request request) {
         SessionWrap sessionWrap = request.getRequestMessage().getSessionWrap();
         if (sessionWrap != null) {
-            sessionWrap.unsubscribe(request.getUuidData());
+            sessionWrap.subscribe(request.getUuidData());
         }
     }
 

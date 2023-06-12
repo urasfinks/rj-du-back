@@ -1,6 +1,5 @@
 package ru.jamsys.mistercraft;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
@@ -8,8 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.jamsys.*;
 import ru.jamsys.component.JsonSchema;
-import ru.jamsys.mistercraft.controller.Controller;
-import ru.jamsys.mistercraft.controller.ControllerMethod;
+import ru.jamsys.mistercraft.handler.http.HttpHandler;
+import ru.jamsys.mistercraft.handler.http.ControllerMethod;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -53,7 +52,7 @@ public class HttpRestController {
         return getResponseEntity("{}", true, authHeader, null, ControllerMethod.TEST.get());
     }
 
-    public JsonHttpResponse getJsonHttpResponse(String postBody, boolean checkAuth, String authHeader, String schemaValidation, Controller controller) {
+    public JsonHttpResponse getJsonHttpResponse(String postBody, boolean checkAuth, String authHeader, String schemaValidation, HttpHandler httpHandler) {
         JsonHttpResponse jRet = new JsonHttpResponse();
         UserSessionInfo userSessionInfo = null;
         if (checkAuth) {
@@ -79,7 +78,7 @@ public class HttpRestController {
             WrapJsonToObject<Map<String, Object>> mapWrapJsonToObject = UtilJson.toMap(postBody);
             if (mapWrapJsonToObject.getException() == null) {
                 jRet.addData("request", mapWrapJsonToObject.getObject());
-                controller.handler(jRet, userSessionInfo);
+                httpHandler.handler(jRet, userSessionInfo);
             } else {
                 jRet.addException(mapWrapJsonToObject.getException());
             }
@@ -88,9 +87,9 @@ public class HttpRestController {
         return jRet;
     }
 
-    public ResponseEntity<?> getResponseEntity(String postBody, boolean checkAuth, String authHeader, String schemaValidation, Controller controller) {
+    public ResponseEntity<?> getResponseEntity(String postBody, boolean checkAuth, String authHeader, String schemaValidation, HttpHandler httpHandler) {
         Util.logConsole("Request: " + postBody);
-        JsonHttpResponse jRet = getJsonHttpResponse(postBody, checkAuth, authHeader, schemaValidation, controller);
+        JsonHttpResponse jRet = getJsonHttpResponse(postBody, checkAuth, authHeader, schemaValidation, httpHandler);
         Util.logConsole("Response: " + jRet.toString());
         jRet.getData().remove("request");
         return jRet.getResponseEntity();

@@ -1,4 +1,4 @@
-package ru.jamsys.mistercraft.controller;
+package ru.jamsys.mistercraft.handler.http;
 
 import jakarta.annotation.Nullable;
 import ru.jamsys.App;
@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class AuthGetCode implements Controller {
+public class AuthGetCode implements HttpHandler {
     @Override
     public void handler(JsonHttpResponse jRet, @Nullable UserSessionInfo userSessionInfo) {
         //{"login":"urasfinks@yandex.ru"}

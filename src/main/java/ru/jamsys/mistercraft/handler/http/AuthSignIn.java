@@ -1,4 +1,4 @@
-package ru.jamsys.mistercraft.controller;
+package ru.jamsys.mistercraft.handler.http;
 
 import ru.jamsys.App;
 import ru.jamsys.JsonHttpResponse;
@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class AuthSignIn implements Controller{
+public class AuthSignIn implements HttpHandler {
     @Override
     public void handler(JsonHttpResponse jRet, UserSessionInfo userSessionInfo) {
         //{"login":"urasfinks@yandex.ru", "code":12345}

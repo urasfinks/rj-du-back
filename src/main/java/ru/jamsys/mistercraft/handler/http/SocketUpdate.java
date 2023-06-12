@@ -1,4 +1,4 @@
-package ru.jamsys.mistercraft.controller;
+package ru.jamsys.mistercraft.handler.http;
 
 import ru.jamsys.*;
 import ru.jamsys.mistercraft.UserSessionInfo;
@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SocketUpdate implements Controller {
+public class SocketUpdate implements HttpHandler {
     @Override
     public void handler(JsonHttpResponse jRet, UserSessionInfo userSessionInfo) {
         // uuid_data - точно должен прийти на реальные данные

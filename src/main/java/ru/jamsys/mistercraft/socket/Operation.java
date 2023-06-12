@@ -1,20 +1,20 @@
 package ru.jamsys.mistercraft.socket;
 
-import ru.jamsys.mistercraft.socket.invoke.Invoke;
-import ru.jamsys.mistercraft.socket.invoke.Subscribe;
-import ru.jamsys.mistercraft.socket.invoke.Unsubscribe;
+import ru.jamsys.mistercraft.handler.socket.SocketHandler;
+import ru.jamsys.mistercraft.handler.socket.Subscribe;
+import ru.jamsys.mistercraft.handler.socket.Unsubscribe;
 
 public enum Operation {
     SUBSCRIBE(new Subscribe()), //Подписаться на изменения по uuid_data
     UNSUBSCRIBE(new Unsubscribe()); //Отписаться на изменения по uuid_data
 
-    final Invoke invoke;
+    final SocketHandler socketHandler;
 
-    Operation(Invoke invoke) {
-        this.invoke = invoke;
+    Operation(SocketHandler socketHandler) {
+        this.socketHandler = socketHandler;
     }
 
     public void exec(Request request) {
-        invoke.exec(request);
+        socketHandler.handler(request);
     }
 }
