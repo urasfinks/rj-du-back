@@ -99,7 +99,20 @@ public enum Data implements TemplateEnum {
                 ${IN.key_data::VARCHAR},
                 ${IN.uuid_device_data::VARCHAR}
             );
-            """, StatementType.SELECT);
+            """, StatementType.SELECT),
+
+    GET_MY_SOCKET("""
+            SELECT * FROM data
+            WHERE
+                type_data = 'socket'
+            AND uuid_data = ${IN.uuid_data::VARCHAR}
+            AND (
+                    id_user = ${IN.id_user::NUMBER}
+                    OR uuid_device_data = ${IN.uuid_device::VARCHAR}
+            );
+            """, StatementType.SELECT),
+
+    UPDATE_MY_SOCKET("UPDATE data SET value_data = ${IN.value_data::VARCHAR} WHERE id_data = ${IN.id_data::NUMBER};", StatementType.SELECT);
 
     private Template template;
 
