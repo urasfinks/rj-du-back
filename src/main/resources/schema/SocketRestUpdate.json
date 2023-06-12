@@ -1,3 +1,16 @@
 {
-  "type": "object"
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "uuid_data": {
+      "type": "string"
+    },
+    "data": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "uuid_data",
+    "data"
+  ]
 }

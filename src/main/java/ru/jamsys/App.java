@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.PropertySource;
 import ru.jamsys.component.JdbcTemplate;
+import ru.jamsys.component.JsonSchema;
 import ru.jamsys.component.Security;
 import ru.jamsys.jdbc.template.TemplateEnum;
 import ru.jamsys.mistercraft.EMail;
@@ -24,12 +25,14 @@ public class App {
     private static Security security;
 
     public static EMail eMail;
+    public static JsonSchema jsonSchema;
 
     public static void main(String[] args) throws Exception {
         context = SpringApplication.run(App.class, args);
         initSecurity();
         initPostgreSQL();
         eMail = App.context.getBean(EMail.class);
+        jsonSchema = App.context.getBean(JsonSchema.class);
         App.context.getBean(RequestMessageReader.class).init();
     }
 

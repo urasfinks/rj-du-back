@@ -12,9 +12,10 @@ public class UserSessionInfo {
 
     int version;
     private Long idUser;
-    private String deviceUuid;
+    private String deviceUuid = null;
     private boolean checked = false;
 
+    @SuppressWarnings("unused")
     public boolean isRegister() {
         return isValidRequest() && idUser > 0;
     }
@@ -29,7 +30,7 @@ public class UserSessionInfo {
     }
 
     public void check() {
-        if (!checked) {
+        if (!checked && deviceUuid != null) {
             checked = true;
             Map<String, Object> arguments = App.jdbcTemplate.createArguments();
             arguments.put("uuid_device", deviceUuid);

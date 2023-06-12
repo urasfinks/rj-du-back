@@ -18,67 +18,60 @@ import java.util.*;
 @RestController
 public class HttpRestController {
 
-    private static JsonSchema jsonSchema;
-
     @Value("classpath:socket.html")
     private Resource socketHtml;
 
-    @Autowired
-    public static void setJsonSchema(JsonSchema jsonSchema) {
-        HttpRestController.jsonSchema = jsonSchema;
-    }
-
     @RequestMapping(value = "/GetCode", method = RequestMethod.POST)
     public ResponseEntity<?> getCode(@RequestBody String postBody) {
-        return handler(postBody, false, null, "schema/GetCode.json", ControllerMethod.GET_CODE.get());
+        return getResponseEntity(postBody, false, null, "schema/GetCode.json", ControllerMethod.GET_CODE.get());
     }
 
     @RequestMapping(value = "/SignIn", method = RequestMethod.POST)
     public ResponseEntity<?> signIn(@RequestBody String postBody, @RequestHeader("Authorization") String authHeader) {
-        return handler(postBody, true, authHeader, "schema/SignIn.json", ControllerMethod.SIGN_IN.get());
+        return getResponseEntity(postBody, true, authHeader, "schema/SignIn.json", ControllerMethod.SIGN_IN.get());
     }
 
     @RequestMapping(value = "/SocketTest", method = RequestMethod.GET)
-    public ResponseEntity<?> socket() {
+    public ResponseEntity<?> socketTest() {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(Util.getResourceContent(socketHtml, "UTF-8"));
     }
 
     @RequestMapping(value = "/SocketUpdate", method = RequestMethod.POST)
-    public ResponseEntity<?> socket(@RequestBody String postBody, @RequestHeader("Authorization") String authHeader) {
-        return handler(postBody, true, authHeader, "schema/SocketRestUpdate.json", ControllerMethod.SIGN_IN.get());
+    public ResponseEntity<?> socketUpdate(@RequestBody String postBody, @RequestHeader("Authorization") String authHeader) {
+        return getResponseEntity(postBody, true, authHeader, "schema/SocketRestUpdate.json", ControllerMethod.SOCKET_UPDATE.get());
     }
 
     @RequestMapping(value = "/Sync", method = RequestMethod.POST)
     public ResponseEntity<?> sync(@RequestBody String postBody, @RequestHeader("Authorization") String authHeader) {
-        return handler(postBody, true, authHeader, null, ControllerMethod.SYNC.get());
+        return getResponseEntity(postBody, true, authHeader, null, ControllerMethod.SYNC.get());
     }
 
     @RequestMapping(value = "/Test", method = RequestMethod.GET)
     public ResponseEntity<?> test(@RequestHeader(value = "Authorization", required = false) String authHeader) {
-        return handler("{}", true, authHeader, null, ControllerMethod.TEST.get());
+        return getResponseEntity("{}", true, authHeader, null, ControllerMethod.TEST.get());
     }
 
-    public ResponseEntity<?> handler(String postBody, boolean checkAuth, String authHeader, String schemaValidation, Controller controller) {
-        Util.logConsole("Request: " + postBody);
+    public JsonHttpResponse getJsonHttpResponse(String postBody, boolean checkAuth, String authHeader, String schemaValidation, Controller controller) {
+        JsonHttpResponse jRet = new JsonHttpResponse();
         UserSessionInfo userSessionInfo = null;
         if (checkAuth) {
             userSessionInfo = getDeviceUuid(authHeader);
             if (!userSessionInfo.isValidRequest()) {
-                return getUnauthorizedResponse();
+                jRet.setUnauthorized();
             }
         }
-        JsonHttpResponse jRet = new JsonHttpResponse();
-
-        if (schemaValidation != null) {
-            try {
-                JsonSchema.Result validate = jsonSchema.validate(postBody, UtilFileResource.getAsString(schemaValidation));
-                if (!validate.isValidate()) {
-                    jRet.setException(validate.getError());
+        if (jRet.isStatus()) {
+            if (schemaValidation != null) {
+                try {
+                    JsonSchema.Result validate = App.jsonSchema.validate(postBody, UtilFileResource.getAsString(schemaValidation));
+                    if (!validate.isValidate()) {
+                        jRet.addException(validate.getError());
+                    }
+                } catch (Exception e) {
+                    jRet.addException(e.getMessage());
                 }
-            } catch (Exception e) {
-                jRet.setException(e.getMessage());
             }
         }
 
@@ -88,21 +81,18 @@ public class HttpRestController {
                 jRet.addData("request", mapWrapJsonToObject.getObject());
                 controller.handler(jRet, userSessionInfo);
             } else {
-                jRet.setException(mapWrapJsonToObject.getException().toString());
+                jRet.addException(mapWrapJsonToObject.getException().toString());
             }
         }
         jRet.getData().remove("request");
-        Util.logConsole("Response: " + jRet);
-        return ResponseEntity
-                .status(jRet.isStatus() ? HttpStatus.OK : HttpStatus.EXPECTATION_FAILED)
-                .body(jRet.toString());
+        return jRet;
     }
 
-    private ResponseEntity<?> getUnauthorizedResponse() {
-        return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
-                .header("WWW-Authenticate", "Basic realm=\"JamSys\"")
-                .body("<html><body><h1>401. Unauthorized</h1></body>");
+    public ResponseEntity<?> getResponseEntity(String postBody, boolean checkAuth, String authHeader, String schemaValidation, Controller controller) {
+        Util.logConsole("Request: " + postBody);
+        JsonHttpResponse jRet = getJsonHttpResponse(postBody, checkAuth, authHeader, schemaValidation, controller);
+        Util.logConsole("Response: " + jRet.toString());
+        return jRet.getResponseEntity();
     }
 
     private UserSessionInfo getDeviceUuid(String valueHeaderAuthorization) {
