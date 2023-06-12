@@ -10,7 +10,7 @@ import ru.jamsys.component.Broker;
 import ru.jamsys.component.JsonSchema;
 import ru.jamsys.component.ThreadBalancerFactory;
 import ru.jamsys.message.Message;
-import ru.jamsys.mistercraft.WebSocketHandler;
+import ru.jamsys.mistercraft.ControllerWebSocket;
 import ru.jamsys.thread.balancer.ThreadBalancerImpl;
 
 import java.util.Map;
@@ -50,7 +50,7 @@ public class RequestMessageReader {
     }
 
     public void init() {
-        ThreadBalancerImpl tbSocketRequestReader = threadBalancerFactory.create(WebSocketHandler.nameSocketRequestReader, 1, 5, 10, 60000);
+        ThreadBalancerImpl tbSocketRequestReader = threadBalancerFactory.create(ControllerWebSocket.nameSocketRequestReader, 1, 5, 10, 60000);
         tbSocketRequestReader.setSupplier(() -> broker.pollLast(RequestMessage.class));
         tbSocketRequestReader.setConsumer(this::onRead);
     }

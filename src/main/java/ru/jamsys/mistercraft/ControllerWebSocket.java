@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
-public class WebSocketHandler extends TextWebSocketHandler {
+public class ControllerWebSocket extends TextWebSocketHandler {
 
     public static String nameSocketRequestReader = "SocketRequestReader";
 

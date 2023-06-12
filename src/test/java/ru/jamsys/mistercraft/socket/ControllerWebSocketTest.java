@@ -5,7 +5,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import ru.jamsys.App;
 
-class WebSocketHandlerTest {
+class ControllerWebSocketTest {
 
     @BeforeAll
     static void beforeAll() throws Exception {

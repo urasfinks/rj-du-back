@@ -15,7 +15,7 @@ import java.util.*;
 
 @SuppressWarnings("unused")
 @RestController
-public class HttpRestController {
+public class ControllerHttpRest {
 
     @Value("classpath:socket.html")
     private Resource socketHtml;
