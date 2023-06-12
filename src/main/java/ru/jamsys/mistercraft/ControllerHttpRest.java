@@ -52,10 +52,10 @@ public class ControllerHttpRest {
         return getResponseEntity("{}", true, authHeader, null, HandlerMethod.TEST.get());
     }
 
-    public JsonHttpResponse getJsonHttpResponse(String postBody, boolean checkAuth, String authHeader, String schemaValidation, HttpHandler httpHandler) {
+    public JsonHttpResponse getJsonHttpResponse(String postBody, boolean checkAuthHeader, String authHeader, String schemaValidation, HttpHandler httpHandler) {
         JsonHttpResponse jRet = new JsonHttpResponse();
         UserSessionInfo userSessionInfo = null;
-        if (checkAuth) {
+        if (checkAuthHeader) {
             userSessionInfo = getDeviceUuid(authHeader);
             if (!userSessionInfo.isValidRequest()) {
                 jRet.setUnauthorized();
@@ -87,9 +87,9 @@ public class ControllerHttpRest {
         return jRet;
     }
 
-    public ResponseEntity<?> getResponseEntity(String postBody, boolean checkAuth, String authHeader, String schemaValidation, HttpHandler httpHandler) {
+    public ResponseEntity<?> getResponseEntity(String postBody, boolean checkAuthHeader, String authHeader, String schemaValidation, HttpHandler httpHandler) {
         Util.logConsole("Request: " + postBody);
-        JsonHttpResponse jRet = getJsonHttpResponse(postBody, checkAuth, authHeader, schemaValidation, httpHandler);
+        JsonHttpResponse jRet = getJsonHttpResponse(postBody, checkAuthHeader, authHeader, schemaValidation, httpHandler);
         Util.logConsole("Response: " + jRet.toString());
         jRet.getData().remove("request");
         return jRet.getResponseEntity();
