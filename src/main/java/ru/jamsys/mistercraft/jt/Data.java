@@ -101,18 +101,56 @@ public enum Data implements TemplateEnum {
             );
             """, StatementType.SELECT),
 
-    GET_MY_SOCKET("""
+    //Получаем данные, которые привязаны к устройству либо персоне, что бы понять, что мы имеем вообще хоть какое-то право на их изменение
+    CHECK_PERMISSION_SOCKET_DATA("""
             SELECT * FROM data
             WHERE
                 type_data = 'socket'
-            AND uuid_data = ${IN.uuid_data::VARCHAR}
-            AND (
-                    id_user = ${IN.id_user::NUMBER}
-                    OR uuid_device_data = ${IN.uuid_device::VARCHAR}
-            );
+                AND (
+                        uuid_data = ${IN.uuid_data::VARCHAR}
+                        OR parent_uuid_data = ${IN.uuid_data::VARCHAR}
+                )
+                AND (
+                        id_user = ${IN.id_user::NUMBER}
+                        OR uuid_device_data = ${IN.uuid_device::VARCHAR}
+                );
             """, StatementType.SELECT),
 
-    UPDATE_MY_SOCKET("UPDATE data SET value_data = ${IN.value_data::VARCHAR} WHERE id_data = ${IN.id_data::NUMBER};", StatementType.SELECT);
+    //Получить главную запись, где лежат данные
+    GET_PRIMARY_SOCKET_DATA("""
+            SELECT * FROM data
+            WHERE
+                type_data = 'socket'
+                AND uuid_data = ${IN.uuid_data::VARCHAR};
+            """, StatementType.SELECT),
+
+    //Обновление данных только после проверки, что данные есть и они привязана к персоне или устройству
+    UPDATE_PRIMARY_SOCKET_DATA("""
+            UPDATE data SET value_data = ${IN.value_data::VARCHAR}
+            WHERE id_data = ${IN.id_data::NUMBER};
+            """, StatementType.SELECT),
+
+    //Обновление ревизий у наследников
+    UPDATE_SECONDARY_SOCKET_DATA("""
+            UPDATE data SET value_data = null
+            WHERE
+                type_data = 'socket'
+                AND parent_uuid_data = ${IN.uuid_data::VARCHAR};
+            """, StatementType.SELECT),
+
+    //Получить все uuid_device причастные к PRIMARY сокет данным
+    GET_SOCKET_UUID_DEVICE("""
+            SELECT DISTINCT ON(uuid) * FROM (
+                --Выборка uuid_device для авторизованных через привязку данных к user
+            	SELECT dv.uuid_device as uuid FROM "data" da
+            	INNER JOIN device dv ON da.id_user = dv.id_user
+            	WHERE da.uuid_data = ${IN.uuid_data::VARCHAR} OR da.parent_uuid_data = ${IN.uuid_data::VARCHAR}
+            	UNION ALL
+            	--Выборка uuid_device для не авторизованных
+            	SELECT uuid_device_data as uuid FROM "data" da
+            	WHERE da.uuid_data = ${IN.uuid_data::VARCHAR} OR da.parent_uuid_data = ${IN.uuid_data::VARCHAR}
+            ) as sq1
+            """, StatementType.SELECT);
 
     private Template template;
 
