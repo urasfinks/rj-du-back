@@ -3,6 +3,7 @@ package ru.jamsys.mistercraft.handler.socket;
 import ru.jamsys.mistercraft.socket.Request;
 import ru.jamsys.mistercraft.socket.SessionWrap;
 
+@Deprecated
 public class Subscribe implements SocketHandler {
 
     @Override
