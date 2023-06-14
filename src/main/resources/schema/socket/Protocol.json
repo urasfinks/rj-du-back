@@ -41,6 +41,28 @@
             "handler",
             "uuid_data"
           ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "handler": {
+              "type": "string",
+              "enum": [
+                "BROADCAST"
+              ]
+            },
+            "uuid_data": {
+              "type": "string"
+            },
+            "data": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "handler",
+            "uuid_data"
+          ]
         }
       ]
     }

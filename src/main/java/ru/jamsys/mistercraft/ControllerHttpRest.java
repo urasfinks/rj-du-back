@@ -22,12 +22,12 @@ public class ControllerHttpRest {
 
     @RequestMapping(value = "/GetCode", method = RequestMethod.POST)
     public ResponseEntity<?> getCode(@RequestBody String postBody) {
-        return getResponseEntity(postBody, false, null, "schema/GetCode.json", HandlerMethod.GET_CODE.get());
+        return getResponseEntity(postBody, false, null, "schema/http/GetCode.json", HandlerMethod.GET_CODE.get());
     }
 
     @RequestMapping(value = "/SignIn", method = RequestMethod.POST)
     public ResponseEntity<?> signIn(@RequestBody String postBody, @RequestHeader("Authorization") String authHeader) {
-        return getResponseEntity(postBody, true, authHeader, "schema/SignIn.json", HandlerMethod.SIGN_IN.get());
+        return getResponseEntity(postBody, true, authHeader, "schema/http/SignIn.json", HandlerMethod.SIGN_IN.get());
     }
 
     @RequestMapping(value = "/SocketTest", method = RequestMethod.GET)
@@ -39,7 +39,7 @@ public class ControllerHttpRest {
 
     @RequestMapping(value = "/SocketUpdate", method = RequestMethod.POST)
     public ResponseEntity<?> socketUpdate(@RequestBody String postBody, @RequestHeader("Authorization") String authHeader) {
-        return getResponseEntity(postBody, true, authHeader, "schema/SocketRestUpdate.json", HandlerMethod.SOCKET_UPDATE.get());
+        return getResponseEntity(postBody, true, authHeader, "schema/http/UpdateSocketData.json", HandlerMethod.SOCKET_UPDATE.get());
     }
 
     @RequestMapping(value = "/Sync", method = RequestMethod.POST)
