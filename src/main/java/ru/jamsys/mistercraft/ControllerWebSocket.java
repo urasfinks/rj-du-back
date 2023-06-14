@@ -14,6 +14,7 @@ import ru.jamsys.mistercraft.socket.SessionWrap;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -42,7 +43,7 @@ public class ControllerWebSocket extends TextWebSocketHandler {
             String host = session.getRemoteAddress().getHostString();
             if (!checkCountConnectionPerHost(host)) {
                 Util.logConsole("Connection[" + mapConnection.size() + "]; afterConnectionEstablished Overload host connection: " + session);
-                session.close(CloseStatus.SERVICE_OVERLOAD);
+                close(session, CloseStatus.SERVICE_OVERLOAD);
                 return;
             }
             URI uri = session.getUri();
@@ -55,15 +56,15 @@ public class ControllerWebSocket extends TextWebSocketHandler {
                     mapConnection.put(session, new SessionWrap(session, userSessionInfo, host));
                 } else {
                     Util.logConsole("Connection[" + mapConnection.size() + "]; afterConnectionEstablished Error: " + session);
-                    session.close(CloseStatus.POLICY_VIOLATION);
+                    close(session, CloseStatus.POLICY_VIOLATION);
                 }
             } else {
                 Util.logConsole("Connection[" + mapConnection.size() + "]; afterConnectionEstablished Error read uri: " + session);
-                session.close(CloseStatus.BAD_DATA);
+                close(session, CloseStatus.BAD_DATA);
             }
         } else {
             Util.logConsole("Connection[" + mapConnection.size() + "]; afterConnectionEstablished Error read address: " + session);
-            session.close(CloseStatus.BAD_DATA);
+            close(session, CloseStatus.BAD_DATA);
         }
     }
 
@@ -91,12 +92,45 @@ public class ControllerWebSocket extends TextWebSocketHandler {
         mapConnection.remove(session);
     }
 
+    public void sendByUuidDevice(List<String> listUuidDevice, String data) {
+        Util.logConsole(listUuidDevice.toString() + "; data: " + data);
+        WebSocketSession[] webSocketSessions = mapConnection.keySet().toArray(new WebSocketSession[0]);
+        for (WebSocketSession webSocketSession : webSocketSessions) {
+            SessionWrap sessionWrap = mapConnection.get(webSocketSession);
+            if (sessionWrap != null && listUuidDevice.contains(sessionWrap.getUserSessionInfo().getDeviceUuid())) {
+                send(webSocketSession, data);
+            }
+        }
+    }
+
+    public void sendByUuidData(String uuidData, String data) {
+        WebSocketSession[] webSocketSessions = mapConnection.keySet().toArray(new WebSocketSession[0]);
+        for (WebSocketSession webSocketSession : webSocketSessions) {
+            SessionWrap sessionWrap = mapConnection.get(webSocketSession);
+            if (sessionWrap != null) {
+                if (sessionWrap.isSubscribed(uuidData)) {
+                    send(webSocketSession, data);
+                }
+            }
+        }
+    }
+
     private void send(@NotNull WebSocketSession session, String data) {
         try {
             session.sendMessage(new TextMessage(data));
         } catch (Exception e) {
             e.printStackTrace();
+            close(session, CloseStatus.SERVER_ERROR);
         }
+    }
+
+    private void close(@NotNull WebSocketSession session, CloseStatus closeStatus) {
+        try {
+            session.close(closeStatus);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        mapConnection.remove(session);
     }
 
 }
