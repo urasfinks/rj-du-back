@@ -22,13 +22,15 @@ class HttpRestHttpHandlerTest {
                 {
                     "uuid_data": "test",
                     "data":{
-                        "test2": "Hello world2"
+                        "test": "Hello world 10",
+                        "test2": "Hello world 11"
                     }
                 }
                 """;
         String authHeader = "Basic djQ6ZmI4OGNiZjgtYTk1OS00ZWIxLWFhZmQtNzNjOTgxYzRjMmU1";
 
-        JsonHttpResponse jsonHttpResponse = controllerHttpRest.getJsonHttpResponse(postData, true, authHeader, "schema/SocketRestUpdate.json", HandlerMethod.SOCKET_UPDATE.get());
+        JsonHttpResponse jsonHttpResponse = controllerHttpRest.getJsonHttpResponse(postData, true, authHeader, "schema/http/UpdateSocketData.json", HandlerMethod.SOCKET_UPDATE.get());
         Util.logConsole("socketTest: " + jsonHttpResponse);
+        Util.sleepMillis(1000);
     }
 }
