@@ -3,8 +3,10 @@ package ru.jamsys.mistercraft.handler.socket;
 import ru.jamsys.mistercraft.socket.Request;
 
 public enum HandlerMethod {
-    SUBSCRIBE(new Subscribe()), //Подписаться на изменения по uuid_data
-    UNSUBSCRIBE(new Unsubscribe()); //Отписаться на изменения по uuid_data
+
+    BROADCAST(new Broadcast()), // Рассылка уведомлений клиентам
+    SUBSCRIBE(new Subscribe()), // Подписаться на изменения по uuid_data
+    UNSUBSCRIBE(new Unsubscribe()); // Отписаться на изменения по uuid_data
 
     final SocketHandler socketHandler;
 
