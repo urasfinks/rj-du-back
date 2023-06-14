@@ -26,7 +26,7 @@ public class RequestMessageReader {
 
     public RequestMessageReader() {
         try {
-            schemaSocket = UtilFileResource.getAsString("schema/SocketProtocol.json");
+            schemaSocket = UtilFileResource.getAsString("schema/socket/Protocol.json");
         } catch (Exception e) {
             e.printStackTrace();
         }
