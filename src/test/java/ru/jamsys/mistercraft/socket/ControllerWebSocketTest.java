@@ -35,10 +35,25 @@ class ControllerWebSocketTest {
                 """;
     }
 
+    String getBroadCast() {
+        return """
+                {
+                    "request": {
+                        "handler": "BROADCAST",
+                        "uuid_data": "test",
+                        "data": {
+                            "message": "Hello world"
+                        }
+                    }
+                }
+                """;
+    }
+
     @Test
     void onRead() {
         Assertions.assertTrue(validate(getSubscribe()), "#1");
         Assertions.assertTrue(validate(getUnsubscribe()), "#2");
+        Assertions.assertTrue(validate(getBroadCast()), "#3");
     }
 
     private boolean validate(String data) {
