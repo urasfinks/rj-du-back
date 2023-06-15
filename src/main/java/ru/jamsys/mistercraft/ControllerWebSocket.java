@@ -8,6 +8,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import ru.jamsys.*;
 import ru.jamsys.component.Broker;
+import ru.jamsys.component.JsonSchema;
 import ru.jamsys.component.ThreadBalancerFactory;
 import ru.jamsys.mistercraft.socket.RequestMessage;
 import ru.jamsys.mistercraft.socket.SessionWrap;
@@ -23,7 +24,8 @@ public class ControllerWebSocket extends TextWebSocketHandler {
 
     public static String nameSocketRequestReader = "SocketRequestReader";
 
-    Map<WebSocketSession, SessionWrap> mapConnection = new ConcurrentHashMap<>();
+
+    public static Map<WebSocketSession, SessionWrap> mapConnection = new ConcurrentHashMap<>();
 
     @Override
     protected void handleTextMessage(@NotNull WebSocketSession session, @NotNull TextMessage message) throws Exception {
@@ -92,26 +94,27 @@ public class ControllerWebSocket extends TextWebSocketHandler {
         mapConnection.remove(session);
     }
 
-    public void sendByUuidDevice(List<String> listUuidDevice, String data) {
-        Util.logConsole(listUuidDevice.toString() + "; data: " + data);
-        WebSocketSession[] webSocketSessions = mapConnection.keySet().toArray(new WebSocketSession[0]);
-        for (WebSocketSession webSocketSession : webSocketSessions) {
-            SessionWrap sessionWrap = mapConnection.get(webSocketSession);
-            if (sessionWrap != null && listUuidDevice.contains(sessionWrap.getUserSessionInfo().getDeviceUuid())) {
-                send(webSocketSession, data);
-            }
-        }
-    }
 
-    public void sendByUuidData(String uuidData, String data) {
-        WebSocketSession[] webSocketSessions = mapConnection.keySet().toArray(new WebSocketSession[0]);
-        for (WebSocketSession webSocketSession : webSocketSessions) {
-            SessionWrap sessionWrap = mapConnection.get(webSocketSession);
-            if (sessionWrap != null) {
-                if (sessionWrap.isSubscribed(uuidData)) {
+    //Отправка по списку uuidDevice либо сокетам, кто явно подписался на uuidData
+    public void send(List<String> listUuidDevice, String uuidData, String data) {
+        JsonSchema.Result validate = App.validateSocketResponse(data);
+        if (validate.isValidate()) {
+            WebSocketSession[] webSocketSessions = mapConnection.keySet().toArray(new WebSocketSession[0]);
+            Util.logConsole(listUuidDevice.toString() + "; data: " + data + "; count connection: " + webSocketSessions.length);
+            for (WebSocketSession webSocketSession : webSocketSessions) {
+                SessionWrap sessionWrap = mapConnection.get(webSocketSession);
+                if (
+                        sessionWrap != null
+                                && (
+                                listUuidDevice.contains(sessionWrap.getUserSessionInfo().getDeviceUuid())
+                                        || sessionWrap.isSubscribed(uuidData)
+                        )
+                ) {
                     send(webSocketSession, data);
                 }
             }
+        } else {
+            new RuntimeException(validate.getError()).printStackTrace();
         }
     }
 
