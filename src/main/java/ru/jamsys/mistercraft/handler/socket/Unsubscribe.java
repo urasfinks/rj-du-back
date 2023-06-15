@@ -3,7 +3,7 @@ package ru.jamsys.mistercraft.handler.socket;
 import ru.jamsys.mistercraft.socket.Request;
 import ru.jamsys.mistercraft.socket.SessionWrap;
 
-@Deprecated
+// Возможное использование в Web
 public class Unsubscribe implements SocketHandler {
 
     @Override
