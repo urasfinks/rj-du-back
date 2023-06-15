@@ -81,7 +81,7 @@ public class SocketUpdate implements HttpHandler {
             mapWrapJsonToObject = UtilJson.toMap(dbValue);
         }
 
-        if (jRet.isStatus() && mapWrapJsonToObject == null){ //Парсим данные из БД
+        if (jRet.isStatus() && mapWrapJsonToObject == null) { //Парсим данные из БД
             jRet.addException("Пустые сокетные данные в серверной БД");
         }
 
@@ -119,8 +119,7 @@ public class SocketUpdate implements HttpHandler {
             Map<Object, Object> requestObject = new HashMap<>();
             requestObject.put("handler", "BROADCAST");
             requestObject.put("uuid_data", req.get("uuid_data"));
-            Map<Object, Object> dataObject = new HashMap<>();
-            requestObject.put("data", dataObject);
+            requestObject.put("data", getBroadcastData());
 
             Map<Object, Object> wrapRequestObject = new HashMap<>();
             wrapRequestObject.put("request", requestObject);
@@ -129,5 +128,13 @@ public class SocketUpdate implements HttpHandler {
             broker.add(RequestMessage.class, requestMessage);
             threadBalancerFactory.getThreadBalancer(ControllerWebSocket.nameSocketRequestReader).wakeUp();
         }
+    }
+
+    private Map<String, Object> getBroadcastData() {
+        Map<String, Object> result = new HashMap<>();
+        Map<String, Object> data = new HashMap<>();
+        data.put("handler", "SYNC");
+        result.put("response", data);
+        return result;
     }
 }
