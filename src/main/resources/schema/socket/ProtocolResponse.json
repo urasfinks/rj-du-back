@@ -1,0 +1,31 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "response": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "handler": {
+              "type": "string",
+              "enum": [
+                "SYNC"
+              ]
+            },
+            "data": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "handler"
+          ]
+        }
+      ]
+    }
+  },
+  "required": [
+    "response"
+  ]
+}
