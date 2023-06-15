@@ -25,14 +25,15 @@ public class Broadcast implements SocketHandler {
     public void handler(Request request) {
         try {
             //request.getUuidData(); // этот uuid - должен являться PRIMARY сокетных данных
+            String primaryUuidData = request.getUuidData();
             Map<String, Object> arguments = jdbcTemplate.createArguments();
-            arguments.put("uuid_data", request.getUuidData());
+            arguments.put("uuid_data", primaryUuidData);
             List<Map<String, Object>> exec = jdbcTemplate.exec(App.postgreSQLPoolName, Data.GET_SOCKET_UUID_DEVICE, arguments);
             List<String> listUUidDevice = new ArrayList<>();
             for (Map<String, Object> item : exec) {
                 listUUidDevice.add((String) item.get("uuid"));
             }
-            controllerWebSocket.sendByUuidDevice(listUUidDevice, UtilJson.toString(request.getData(), "{}"));
+            controllerWebSocket.send(listUUidDevice, primaryUuidData, UtilJson.toString(request.getData(), "{}"));
         } catch (Exception e) {
             e.printStackTrace();
         }

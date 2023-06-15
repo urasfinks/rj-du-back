@@ -19,14 +19,15 @@ import java.util.Map;
 @Component
 public class RequestMessageReader {
 
-    String schemaSocket;
+    String schemaSocketRequest;
+
     JsonSchema jsonSchema;
     Broker broker;
     ThreadBalancerFactory threadBalancerFactory;
 
     public RequestMessageReader() {
         try {
-            schemaSocket = UtilFileResource.getAsString("schema/socket/Protocol.json");
+            schemaSocketRequest = UtilFileResource.getAsString("schema/socket/ProtocolRequest.json");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -57,7 +58,7 @@ public class RequestMessageReader {
     }
 
     public boolean onRead(Message message) {
-        JsonSchema.Result validate = validate(message.getBody());
+        JsonSchema.Result validate = validateRequest(message.getBody());
         if (validate.isValidate()) {
 
             WrapJsonToObject<Map<String, Map<String, Object>>> mapWrapJsonToObject = UtilJson.toMap(message.getBody());
@@ -81,8 +82,10 @@ public class RequestMessageReader {
     }
 
 
-    public JsonSchema.Result validate(String data) {
-        return jsonSchema.validate(data, schemaSocket);
+    public JsonSchema.Result validateRequest(String data) {
+        return jsonSchema.validate(data, schemaSocketRequest);
     }
+
+
 
 }
