@@ -23,6 +23,7 @@ public class App {
     public static ConfigurableApplicationContext context;
     public static JdbcTemplate jdbcTemplate;
     private static Security security;
+    private static String schemaSocketResponse;
 
     public static EMail eMail;
     public static JsonSchema jsonSchema;
@@ -32,6 +33,7 @@ public class App {
         initSecurity();
         initPostgreSQL();
         eMail = App.context.getBean(EMail.class);
+        schemaSocketResponse = UtilFileResource.getAsString("schema/socket/ProtocolResponse.json");
         jsonSchema = App.context.getBean(JsonSchema.class);
         App.context.getBean(RequestMessageReader.class).init();
     }
@@ -50,6 +52,10 @@ public class App {
         PostgreSQL postgreSQL = new PostgreSQL(postgreSQLPoolName, 1, 10, 60000);
         postgreSQL.initial(jdbcTemplate.getUri(), jdbcTemplate.getUser(), security, jdbcTemplate.getSecurityKey());
         context.getBean(JdbcTemplate.class).addPool(postgreSQL);
+    }
+
+    public static JsonSchema.Result validateSocketResponse(String data) {
+        return jsonSchema.validate(data, schemaSocketResponse);
     }
 
 }
