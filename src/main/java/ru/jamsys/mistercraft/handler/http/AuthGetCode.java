@@ -30,7 +30,7 @@ public class AuthGetCode implements HttpHandler {
             try {
                 arguments = App.jdbcTemplate.createArguments();
                 arguments.put("mail", req.get("mail"));
-                arguments.put("code", Util.random(10000, 99999));
+                arguments.put("code", Util.random(100000, 999999));
                 List<Map<String, Object>> user = App.jdbcTemplate.exec(App.postgreSQLPoolName, User.GET_BY_MAIL, req);
                 if (user.size() == 0) {
                     App.jdbcTemplate.exec(App.postgreSQLPoolName, User.INSERT, arguments);
