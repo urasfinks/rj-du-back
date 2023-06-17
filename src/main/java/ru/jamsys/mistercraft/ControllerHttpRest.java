@@ -52,6 +52,16 @@ public class ControllerHttpRest {
         return getResponseEntity("{}", true, authHeader, null, HandlerMethod.TEST.get());
     }
 
+    @RequestMapping(value = "/GenCodeUuid", method = RequestMethod.GET)
+    public ResponseEntity<?> genCodeUuid() {
+        return getResponseEntity("{}", false, null, null, HandlerMethod.GEN_CODE_UUID.get());
+    }
+
+    @RequestMapping(value = "/GetCodeUuid", method = RequestMethod.POST)
+    public ResponseEntity<?> getCodeUuid(@RequestBody String postBody) {
+        return getResponseEntity(postBody, false, null, "schema/http/GetCodeUuid.json", HandlerMethod.GET_CODE_UUID.get());
+    }
+
     public JsonHttpResponse getJsonHttpResponse(String postBody, boolean checkAuthHeader, String authHeader, String schemaValidation, HttpHandler httpHandler) {
         JsonHttpResponse jRet = new JsonHttpResponse();
         UserSessionInfo userSessionInfo = null;
@@ -66,6 +76,8 @@ public class ControllerHttpRest {
                 try {
                     JsonSchema.Result validate = App.jsonSchema.validate(postBody, UtilFileResource.getAsString(schemaValidation));
                     if (!validate.isValidate()) {
+                        jRet.addException("Request: " + postBody);
+                        jRet.addException("Schema: " + postBody);
                         jRet.addException(validate.getError());
                     }
                 } catch (Exception e) {

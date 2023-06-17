@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "code": {
+      "type": "integer",
+      "minimum": 100000,
+      "maximum": 999999
+    }
+  },
+  "required": [
+    "code"
+  ]
+}

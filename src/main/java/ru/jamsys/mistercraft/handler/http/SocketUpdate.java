@@ -137,4 +137,5 @@ public class SocketUpdate implements HttpHandler {
         result.put("response", data);
         return result;
     }
+
 }
