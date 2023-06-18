@@ -22,7 +22,7 @@ public class Sync implements HttpHandler {
         jRet.addData("response", handler2(userSessionInfo, req));
     }
 
-    public static String handler2(UserSessionInfo userSessionInfo, Map<String, Object> parsedJson) {
+    public static Map<String, List<Map<String, Object>>> handler2(UserSessionInfo userSessionInfo, Map<String, Object> parsedJson) {
         Map<String, List<Map<String, Object>>> result = new HashMap<>();
 
         //Блок выгрузки
@@ -69,9 +69,9 @@ public class Sync implements HttpHandler {
             updateSocketParentData(result.get(DataType.socket.name()));
         }
 
-        String json = UtilJson.toStringPretty(result, "{}");
-        Util.logConsole("Sync.sync() => " + json);
-        return json;
+        //String json = UtilJson.toStringPretty(result, "{}");
+        //Util.logConsole("Sync.sync() => " + json);
+        return result;
     }
 
     private static void updateSocketParentData(List<Map<String, Object>> socketData) {
@@ -120,6 +120,8 @@ public class Sync implements HttpHandler {
                         String newIdRevisionString = (String) exec.get(0).get("new_id_revision");
                         if (newIdRevisionString != null && Util.isNumeric(newIdRevisionString)) {
                             dataItem.put("revision_data", Long.parseLong(newIdRevisionString));
+                        } else {
+                            dataItem.put("revision_data", null);
                         }
                     }
                 } catch (Exception e) {
@@ -145,7 +147,18 @@ public class Sync implements HttpHandler {
     }
 
     public static void mergeRevision(List<Map<String, Object>> listInsertItem, List<Map<String, Object>> listResultItem) {
+        // Так как у нас сначала происходит выборка данных в серверной БД
+        // А после происходит обновление данных пришедших в запросе
+        // Первичные отобранные данные могли измениться, поэтому мы им будем обнуляем данные
+        // Что бы не посылать клиенту теже данны которые он нам прислал в запросе
         for (Map<String, Object> insertItem : listInsertItem) {
+            if (insertItem.get("revision_data") == null) {
+                // revision_data может вернуться пустой после Insert
+                // если мы попытались обновить существующие сокетные данные при помощи синхронизация
+                // Обновление сокетных данных надо делать через rest api
+                continue;
+            }
+
             boolean find = false;
             for (Map<String, Object> item : listResultItem) {
                 if (item.get("uuid").equals(insertItem.get("uuid_data"))) {
@@ -163,6 +176,7 @@ public class Sync implements HttpHandler {
                 listResultItem.add(appendMap);
             }
         }
+
         listResultItem.sort((lhs, rhs) -> {
             long l = Long.parseLong(lhs.get("revision").toString());
             long r = Long.parseLong(rhs.get("revision").toString());
