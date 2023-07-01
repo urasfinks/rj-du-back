@@ -8,6 +8,7 @@ import ru.jamsys.mistercraft.UserSessionInfo;
 import ru.jamsys.mistercraft.jt.Data;
 import ru.jamsys.mistercraft.socket.RequestMessage;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -81,7 +82,7 @@ public class SocketUpdate implements HttpHandler {
             mapWrapJsonToObject = UtilJson.toMap(dbValue);
         }
 
-        if (jRet.isStatus() && mapWrapJsonToObject == null) { //Парсим данные из БД
+        if (jRet.isStatus() && mapWrapJsonToObject == null) {
             jRet.addException("Пустые сокетные данные в серверной БД");
         }
 
@@ -92,6 +93,8 @@ public class SocketUpdate implements HttpHandler {
         if (jRet.isStatus() && mapWrapJsonToObject != null) { //Если всё ок - вливаем данные из БД в мапу + мержим с входными данными запроса
             merge.putAll(mapWrapJsonToObject.getObject());
             merge.putAll(requestData);
+            //Если любой ключ равен null - удаляем ключ
+            removeNullValue(merge);
         }
 
         if (jRet.isStatus() && listData != null) { //Обновляем главные сокетные данные
@@ -136,6 +139,15 @@ public class SocketUpdate implements HttpHandler {
         data.put("handler", "SYNC");
         result.put("response", data);
         return result;
+    }
+
+    public static void removeNullValue(Map references) {
+        Object[] objects = references.keySet().toArray();
+        for (Object key : objects) {
+            if (references.get(key) == null) {
+                references.remove(key);
+            }
+        }
     }
 
 }
