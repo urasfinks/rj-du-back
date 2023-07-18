@@ -8,10 +8,7 @@ import ru.jamsys.mistercraft.UserSessionInfo;
 import ru.jamsys.mistercraft.jt.Data;
 import ru.jamsys.mistercraft.socket.RequestMessage;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class SocketUpdate implements HttpHandler {
 
@@ -32,7 +29,7 @@ public class SocketUpdate implements HttpHandler {
         Map<String, Object> req = (Map<String, Object>) jRet.getData().get("request");
         @SuppressWarnings("unchecked")
         Map<String, Object> requestData = (Map<String, Object>) req.get("data");
-        Map<String, Object> merge = new HashMap<>();
+        Map<String, Object> merge = new LinkedHashMap<>();
 
         List<Map<String, Object>> listData = null;
 
