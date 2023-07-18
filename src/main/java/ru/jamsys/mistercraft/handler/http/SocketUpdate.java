@@ -26,16 +26,16 @@ public class SocketUpdate implements HttpHandler {
         // Теоретически существует uuid_data и parent_uuid_data - почитайте DataType.java как это сопоставляется с сокетными данными
 
         @SuppressWarnings("unchecked")
-        Map<String, Object> req = (Map<String, Object>) jRet.getData().get("request");
+        Map<String, Object> request = (Map<String, Object>) jRet.getData().get("request");
         @SuppressWarnings("unchecked")
-        Map<String, Object> requestData = (Map<String, Object>) req.get("data");
+        Map<String, Object> requestData = (Map<String, Object>) request.get("data");
         Map<String, Object> merge = new LinkedHashMap<>();
 
         List<Map<String, Object>> listData = null;
 
         if (jRet.isStatus()) { //Проверка прав доступа
             Map<String, Object> arguments = App.jdbcTemplate.createArguments();
-            arguments.put("uuid_data", req.get("uuid_data"));
+            arguments.put("uuid_data", request.get("uuid_data"));
             try {
                 userSessionInfo.appendAuthJdbcTemplateArguments(arguments);
                 listData = App.jdbcTemplate.exec(App.postgreSQLPoolName, Data.CHECK_PERMISSION_SOCKET_DATA, arguments);
@@ -52,7 +52,7 @@ public class SocketUpdate implements HttpHandler {
         if (jRet.isStatus()) { //Получаем главную запись с данными для последующего обновления
             try {
                 Map<String, Object> arguments = App.jdbcTemplate.createArguments();
-                arguments.put("uuid_data", req.get("uuid_data"));
+                arguments.put("uuid_data", request.get("uuid_data"));
                 listData = App.jdbcTemplate.exec(App.postgreSQLPoolName, Data.GET_PRIMARY_SOCKET_DATA, arguments);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -107,7 +107,7 @@ public class SocketUpdate implements HttpHandler {
         if (jRet.isStatus() && listData != null) { //Обновляем ревизии дочерних сокетных данных
             try {
                 Map<String, Object> arguments = App.jdbcTemplate.createArguments();
-                arguments.put("uuid_data", req.get("uuid_data"));
+                arguments.put("uuid_data", request.get("uuid_data"));
                 App.jdbcTemplate.exec(App.postgreSQLPoolName, Data.UPDATE_SECONDARY_SOCKET_DATA, arguments);
             } catch (Exception e) {
                 jRet.addException(e);
@@ -118,7 +118,7 @@ public class SocketUpdate implements HttpHandler {
 
             Map<Object, Object> requestObject = new HashMap<>();
             requestObject.put("handler", "BROADCAST");
-            requestObject.put("uuid_data", req.get("uuid_data"));
+            requestObject.put("uuid_data", request.get("uuid_data"));
             requestObject.put("data", getBroadcastData());
 
             Map<Object, Object> wrapRequestObject = new HashMap<>();

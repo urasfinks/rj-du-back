@@ -42,6 +42,11 @@ public class ControllerHttpRest {
         return getResponseEntity(postBody, true, authHeader, "schema/http/UpdateSocketData.json", HandlerMethod.SOCKET_UPDATE.get());
     }
 
+    @RequestMapping(value = "/SocketInsert", method = RequestMethod.POST)
+    public ResponseEntity<?> socketInsert(@RequestBody String postBody, @RequestHeader("Authorization") String authHeader) {
+        return getResponseEntity(postBody, true, authHeader, "schema/http/InsertSocketData.json", HandlerMethod.SOCKET_INSERT.get());
+    }
+
     @RequestMapping(value = "/Sync", method = RequestMethod.POST)
     public ResponseEntity<?> sync(@RequestBody String postBody, @RequestHeader("Authorization") String authHeader) {
         return getResponseEntity(postBody, true, authHeader, null, HandlerMethod.SYNC.get());
@@ -74,10 +79,10 @@ public class ControllerHttpRest {
         if (jRet.isStatus()) {
             if (schemaValidation != null) {
                 try {
-                    JsonSchema.Result validate = App.jsonSchema.validate(postBody, UtilFileResource.getAsString(schemaValidation));
+                    String schema = UtilFileResource.getAsString(schemaValidation);
+                    JsonSchema.Result validate = App.jsonSchema.validate(postBody, schema);
                     if (!validate.isValidate()) {
-                        jRet.addException("Request: " + postBody);
-                        jRet.addException("Schema: " + postBody);
+                        jRet.addException("Request: " + postBody + "\n Schema: " + schema);
                         jRet.addException(validate.getError());
                     }
                 } catch (Exception e) {
