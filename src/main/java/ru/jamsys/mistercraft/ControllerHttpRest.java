@@ -42,9 +42,9 @@ public class ControllerHttpRest {
         return getResponseEntity(postBody, true, authHeader, "schema/http/UpdateSocketData.json", HandlerMethod.SOCKET_UPDATE.get());
     }
 
-    @RequestMapping(value = "/SocketInsert", method = RequestMethod.POST)
-    public ResponseEntity<?> socketInsert(@RequestBody String postBody, @RequestHeader("Authorization") String authHeader) {
-        return getResponseEntity(postBody, true, authHeader, "schema/http/InsertSocketData.json", HandlerMethod.SOCKET_INSERT.get());
+    @RequestMapping(value = "/SocketExtend", method = RequestMethod.POST)
+    public ResponseEntity<?> socketExtend(@RequestBody String postBody, @RequestHeader("Authorization") String authHeader) {
+        return getResponseEntity(postBody, true, authHeader, "schema/http/InsertSocketData.json", HandlerMethod.SOCKET_EXTEND.get());
     }
 
     @RequestMapping(value = "/Sync", method = RequestMethod.POST)

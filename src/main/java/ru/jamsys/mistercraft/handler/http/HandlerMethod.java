@@ -6,7 +6,7 @@ public enum HandlerMethod {
     SYNC(new Sync()),
     TEST(new Test()),
     SOCKET_UPDATE(new SocketUpdate()),
-    SOCKET_INSERT(new SocketInsert()),
+    SOCKET_EXTEND(new SocketExtend()),
     GEN_CODE_UUID(new GenCodeUuid()),
     GET_CODE_UUID(new GetCodeUuid()),
     GET_CODE(new AuthGetCode());

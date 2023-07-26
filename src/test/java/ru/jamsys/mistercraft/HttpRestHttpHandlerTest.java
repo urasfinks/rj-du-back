@@ -35,7 +35,7 @@ class HttpRestHttpHandlerTest {
     }
 
     @Test
-    void socketInsert() {
+    void socketExtend() {
         ControllerHttpRest controllerHttpRest = new ControllerHttpRest();
         String postData = """
                 {
@@ -52,7 +52,7 @@ class HttpRestHttpHandlerTest {
                 """;
         String authHeader = "Basic djQ6YjgxZDk4OGEtMDU1MC00Njg4LWJmNDMtNWExNTNlYzhhZWVi";
 
-        JsonHttpResponse jsonHttpResponse = controllerHttpRest.getJsonHttpResponse(postData, true, authHeader, "schema/http/InsertSocketData.json", HandlerMethod.SOCKET_INSERT.get());
+        JsonHttpResponse jsonHttpResponse = controllerHttpRest.getJsonHttpResponse(postData, true, authHeader, "schema/http/InsertSocketData.json", HandlerMethod.SOCKET_EXTEND.get());
         Util.logConsole("socketTest: " + jsonHttpResponse);
         Util.sleepMillis(1000);
     }

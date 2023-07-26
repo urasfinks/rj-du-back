@@ -11,12 +11,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SocketInsert implements HttpHandler {
+public class SocketExtend implements HttpHandler {
 
     final Broker broker;
     final ThreadBalancerFactory threadBalancerFactory;
 
-    public SocketInsert() {
+    public SocketExtend() {
         this.broker = App.context.getBean(Broker.class);
         threadBalancerFactory = App.context.getBean(ThreadBalancerFactory.class);
     }
