@@ -1,0 +1,9 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "ru.jamsys.fiveGm",
+    "sha256_cert_fingerprints":
+    ["5D:F7:91:2C:28:7F:05:6A:30:B7:6C:1C:2E:65:F2:8E:E0:CA:DB:DC:D1:FD:3C:EA:D3:E9:54:9D:82:24:5F:69"]
+  }
+}]

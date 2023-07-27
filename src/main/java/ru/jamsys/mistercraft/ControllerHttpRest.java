@@ -3,6 +3,7 @@ package ru.jamsys.mistercraft;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.jamsys.*;
@@ -19,6 +20,12 @@ public class ControllerHttpRest {
 
     @Value("classpath:socket.html")
     private Resource socketHtml;
+
+    @Value("classpath:.well-known/assetlinks.json")
+    private Resource assetLinks;
+
+    @Value("classpath:.well-known/apple-app-site-association.json")
+    private Resource appleAppSiteAssociation;
 
     @RequestMapping(value = "/GetCode", method = RequestMethod.POST)
     public ResponseEntity<?> getCode(@RequestBody String postBody) {
@@ -66,6 +73,23 @@ public class ControllerHttpRest {
     public ResponseEntity<?> getCodeUuid(@RequestBody String postBody) {
         return getResponseEntity(postBody, false, null, "schema/http/GetCodeUuid.json", HandlerMethod.GET_CODE_UUID.get());
     }
+
+    //---> Mobile DeepLink
+    @GetMapping(value = "/apple-app-site-association", produces = MediaType.APPLICATION_JSON_VALUE)
+    public String addResourceHandlers() {
+        return Util.getResourceContent(appleAppSiteAssociation, "UTF-8");
+    }
+
+    @GetMapping(value = "/.well-known/apple-app-site-association", produces = MediaType.APPLICATION_JSON_VALUE)
+    public String addResourceHandlers2() {
+        return Util.getResourceContent(appleAppSiteAssociation, "UTF-8");
+    }
+
+    @GetMapping(value = "/.well-known/assetlinks.json", produces = MediaType.APPLICATION_JSON_VALUE)
+    public String addResourceHandlers3() {
+        return Util.getResourceContent(assetLinks, "UTF-8");
+    }
+    //<--- Mobile DeepLink
 
     public JsonHttpResponse getJsonHttpResponse(String postBody, boolean checkAuthHeader, String authHeader, String schemaValidation, HttpHandler httpHandler) {
         JsonHttpResponse jRet = new JsonHttpResponse();
