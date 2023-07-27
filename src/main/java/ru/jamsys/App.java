@@ -50,7 +50,7 @@ public class App {
     private static void initPostgreSQL() {
         jdbcTemplate = App.context.getBean(JdbcTemplate.class);
         PostgreSQL postgreSQL = new PostgreSQL(postgreSQLPoolName, 1, 10, 60000);
-        postgreSQL.initial(jdbcTemplate.getUri(), jdbcTemplate.getUser(), security, jdbcTemplate.getSecurityKey());
+        postgreSQL.initial(jdbcTemplate.getUri(), jdbcTemplate.getUser(), false, security, jdbcTemplate.getSecurityKey());
         context.getBean(JdbcTemplate.class).addPool(postgreSQL);
     }
 

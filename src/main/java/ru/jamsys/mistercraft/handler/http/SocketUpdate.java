@@ -128,6 +128,11 @@ public class SocketUpdate implements HttpHandler {
             broker.add(RequestMessage.class, requestMessage);
             threadBalancerFactory.getThreadBalancer(ControllerWebSocket.nameSocketRequestReader).wakeUp();
         }
+        try { //Освобождаем блокировку
+            App.jdbcTemplate.exec(App.postgreSQLPoolName, Data.UNLOCK, App.jdbcTemplate.createArguments());
+        } catch (Exception e) {
+            jRet.addException(e);
+        }
     }
 
     private Map<String, Object> getBroadcastData() {

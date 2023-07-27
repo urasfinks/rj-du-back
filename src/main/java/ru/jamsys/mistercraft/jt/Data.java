@@ -121,7 +121,8 @@ public enum Data implements TemplateEnum {
             SELECT * FROM data
             WHERE
                 type_data = 'socket'
-                AND uuid_data = ${IN.uuid_data::VARCHAR};
+                AND uuid_data = ${IN.uuid_data::VARCHAR}
+                FOR UPDATE;
             """, StatementType.SELECT),
 
     //Обновление данных только после проверки, что данные есть и они привязана к персоне или устройству
@@ -150,6 +151,13 @@ public enum Data implements TemplateEnum {
             	SELECT uuid_device_data as uuid FROM "data" da
             	WHERE da.uuid_data = ${IN.uuid_data::VARCHAR} OR da.parent_uuid_data = ${IN.uuid_data::VARCHAR}
             ) as sq1
+            """, StatementType.SELECT),
+
+    UNLOCK("""
+            COMMIT;
+            """, StatementType.SELECT),
+    LOCK("""
+            SELECT * FROM data WHERE id_data = 82561 FOR UPDATE;
             """, StatementType.SELECT);
 
     private Template template;
