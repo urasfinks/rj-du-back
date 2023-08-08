@@ -28,7 +28,7 @@ public class Broadcast implements SocketHandler {
             String primaryUuidData = request.getUuidData();
             Map<String, Object> arguments = jdbcTemplate.createArguments();
             arguments.put("uuid_data", primaryUuidData);
-            List<Map<String, Object>> exec = jdbcTemplate.exec(App.postgreSQLPoolName, Data.GET_SOCKET_UUID_DEVICE, arguments);
+            List<Map<String, Object>> exec = jdbcTemplate.execute(App.postgresqlPoolName, Data.GET_SOCKET_UUID_DEVICE, arguments);
             List<String> listUUidDevice = new ArrayList<>();
             for (Map<String, Object> item : exec) {
                 listUUidDevice.add((String) item.get("uuid"));

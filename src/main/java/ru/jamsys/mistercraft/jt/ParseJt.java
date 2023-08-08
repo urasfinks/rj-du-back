@@ -6,8 +6,8 @@ import ru.jamsys.jdbc.template.TemplateEnum;
 
 public enum ParseJt implements TemplateEnum {
 
-    SELECT("SELECT * from parse order by id", StatementType.SELECT),
-    INSERT("INSERT INTO parse (id, data) values (${IN.id::NUMBER}, ${IN.data::VARCHAR})", StatementType.SELECT);
+    SELECT("SELECT * from parse order by id", StatementType.SELECT_WITH_AUTO_COMMIT),
+    INSERT("INSERT INTO parse (id, data) values (${IN.id::NUMBER}, ${IN.data::VARCHAR})", StatementType.SELECT_WITH_AUTO_COMMIT);
 
     private Template template;
 

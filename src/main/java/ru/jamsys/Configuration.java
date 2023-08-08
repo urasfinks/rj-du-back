@@ -47,6 +47,7 @@ public class Configuration implements WebSocketConfigurer {
         connector.setPort(HTTP_PORT);
         connector.setSecure(false);
         connector.setRedirectPort(HTTPS_PORT);
+        connector.setAsyncTimeout(1000);
         return connector;
     }
 }

@@ -41,7 +41,7 @@ public class DataByParent implements TemplateEnum {
     @Override
     public Template getTemplate() {
         try {
-            return new Template(sql, StatementType.SELECT);
+            return new Template(sql, StatementType.SELECT_WITH_AUTO_COMMIT);
         } catch (Exception e) {
             e.printStackTrace();
         }

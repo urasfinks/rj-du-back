@@ -1,14 +1,21 @@
 package ru.jamsys.mistercraft.handler.http;
 
-import ru.jamsys.*;
+import ru.jamsys.App;
+import ru.jamsys.JsonHttpResponse;
+import ru.jamsys.UtilJson;
+import ru.jamsys.WrapJsonToObject;
 import ru.jamsys.component.Broker;
 import ru.jamsys.component.ThreadBalancerFactory;
+import ru.jamsys.jdbc.template.Executor;
 import ru.jamsys.mistercraft.ControllerWebSocket;
 import ru.jamsys.mistercraft.UserSessionInfo;
 import ru.jamsys.mistercraft.jt.Data;
 import ru.jamsys.mistercraft.socket.RequestMessage;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class SocketUpdate implements HttpHandler {
 
@@ -38,7 +45,7 @@ public class SocketUpdate implements HttpHandler {
             arguments.put("uuid_data", request.get("uuid_data"));
             try {
                 userSessionInfo.appendAuthJdbcTemplateArguments(arguments);
-                listData = App.jdbcTemplate.exec(App.postgreSQLPoolName, Data.CHECK_PERMISSION_SOCKET_DATA, arguments);
+                listData = App.jdbcTemplate.execute(App.postgresqlPoolName, Data.CHECK_PERMISSION_SOCKET_DATA, arguments);
             } catch (Exception e) {
                 e.printStackTrace();
                 jRet.addException(e);
@@ -48,12 +55,24 @@ public class SocketUpdate implements HttpHandler {
         if (jRet.isStatus() && (listData == null || listData.size() == 0)) {
             jRet.addException("Нет доступа");
         }
+        Executor executor = null;
+        if (jRet.isStatus()) {
+            try {
+                executor = App.jdbcTemplate.getExecutor(App.postgresqlPoolName);
+            } catch (Exception e) {
+                e.printStackTrace();
+                jRet.addException(e);
+            }
+        }
+        if (executor == null) {
+            jRet.addException("Пустой executor");
+        }
 
         if (jRet.isStatus()) { //Получаем главную запись с данными для последующего обновления
             try {
                 Map<String, Object> arguments = App.jdbcTemplate.createArguments();
                 arguments.put("uuid_data", request.get("uuid_data"));
-                listData = App.jdbcTemplate.exec(App.postgreSQLPoolName, Data.GET_PRIMARY_SOCKET_DATA, arguments);
+                listData = executor.execute(Data.GET_PRIMARY_SOCKET_DATA, arguments);
             } catch (Exception e) {
                 e.printStackTrace();
                 jRet.addException(e);
@@ -99,7 +118,7 @@ public class SocketUpdate implements HttpHandler {
                 Map<String, Object> arguments = App.jdbcTemplate.createArguments();
                 arguments.put("value_data", UtilJson.toStringPretty(merge, "{}"));
                 arguments.put("id_data", listData.get(0).get("id_data"));
-                App.jdbcTemplate.exec(App.postgreSQLPoolName, Data.UPDATE_PRIMARY_SOCKET_DATA, arguments);
+                executor.execute(Data.UPDATE_PRIMARY_SOCKET_DATA, arguments);
             } catch (Exception e) {
                 jRet.addException(e);
             }
@@ -108,7 +127,7 @@ public class SocketUpdate implements HttpHandler {
             try {
                 Map<String, Object> arguments = App.jdbcTemplate.createArguments();
                 arguments.put("uuid_data", request.get("uuid_data"));
-                App.jdbcTemplate.exec(App.postgreSQLPoolName, Data.UPDATE_SECONDARY_SOCKET_DATA, arguments);
+                executor.execute(Data.UPDATE_SECONDARY_SOCKET_DATA, arguments);
             } catch (Exception e) {
                 jRet.addException(e);
             }
@@ -129,7 +148,8 @@ public class SocketUpdate implements HttpHandler {
             threadBalancerFactory.getThreadBalancer(ControllerWebSocket.nameSocketRequestReader).wakeUp();
         }
         try { //Освобождаем блокировку
-            App.jdbcTemplate.exec(App.postgreSQLPoolName, Data.UNLOCK, App.jdbcTemplate.createArguments());
+            executor.execute(Data.UNLOCK, App.jdbcTemplate.createArguments());
+            executor.close();
         } catch (Exception e) {
             jRet.addException(e);
         }

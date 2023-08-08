@@ -27,7 +27,7 @@ public class AuthSignIn implements HttpHandler {
         List<Map<String, Object>> user = null;
         if (jRet.isStatus()) {
             try {
-                user = App.jdbcTemplate.exec(App.postgreSQLPoolName, User.GET_BY_CODE, req);
+                user = App.jdbcTemplate.execute(App.postgresqlPoolName, User.GET_BY_CODE, req);
                 if (user.size() == 0) {
                     jRet.addException("No data found");
                 }
@@ -37,7 +37,7 @@ public class AuthSignIn implements HttpHandler {
         }
         if (jRet.isStatus()) { //Сбросим код
             try {
-                App.jdbcTemplate.exec(App.postgreSQLPoolName, User.RESET_CODE, req);
+                App.jdbcTemplate.execute(App.postgresqlPoolName, User.RESET_CODE, req);
             } catch (Exception e) {
                 jRet.addException(e);
             }
@@ -46,7 +46,7 @@ public class AuthSignIn implements HttpHandler {
         if (jRet.isStatus()) { //Получим запись устройства
             try {
                 req.put("uuid_device", userSessionInfo.getDeviceUuid());
-                device = App.jdbcTemplate.exec(App.postgreSQLPoolName, Device.SELECT_BY_UUID, req);
+                device = App.jdbcTemplate.execute(App.postgresqlPoolName, Device.SELECT_BY_UUID, req);
             } catch (Exception e) {
                 jRet.addException(e);
             }
@@ -55,9 +55,9 @@ public class AuthSignIn implements HttpHandler {
             try {
                 req.put("id_user", user.get(0).get("id_user"));
                 if (device.size() == 0) {
-                    App.jdbcTemplate.exec(App.postgreSQLPoolName, Device.INSERT, req);
+                    App.jdbcTemplate.execute(App.postgresqlPoolName, Device.INSERT, req);
                 } else {
-                    App.jdbcTemplate.exec(App.postgreSQLPoolName, Device.UPDATE, req);
+                    App.jdbcTemplate.execute(App.postgresqlPoolName, Device.UPDATE, req);
                 }
             } catch (Exception e) {
                 jRet.addException(e);

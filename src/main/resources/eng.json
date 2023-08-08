@@ -1,0 +1,15 @@
+{
+  "label": "Hello",
+  "children": [
+    {
+      "id": 1,
+      "eng": "Hello",
+      "rus": "Привет"
+    },
+    {
+      "id": 2,
+      "eng": "World",
+      "rus": "Страна"
+    }
+  ]
+}

@@ -10,11 +10,11 @@ public enum Data implements TemplateEnum {
             SELECT
                 type_data AS key,
                 max(revision_data) AS max
-            FROM data WHERE (type_data IN ('template', 'systemData', 'js', 'any') AND id_user = 1 )
+            FROM data WHERE (type_data IN ('template', 'systemData', 'js', 'any', 'json') AND id_user = 1 )
             OR ( type_data = 'userDataRSync' AND id_user = ${IN.id_user::NUMBER} )
             OR ( type_data = 'socket' AND uuid_device_data = ${IN.uuid_device::VARCHAR} )
             GROUP BY type_data;
-            """, StatementType.SELECT),
+            """, StatementType.SELECT_WITH_AUTO_COMMIT),
 
     SELECT_SYSTEM_DATA_RANGE("""
             SELECT
@@ -31,7 +31,7 @@ public enum Data implements TemplateEnum {
             AND revision_data > ${IN.revision_data::NUMBER}
             ORDER BY revision_data ASC
             LIMIT 1000;
-            """, StatementType.SELECT),
+            """, StatementType.SELECT_WITH_AUTO_COMMIT),
 
     SELECT_USER_DATA_RANGE("""
             SELECT
@@ -48,7 +48,7 @@ public enum Data implements TemplateEnum {
             AND revision_data > ${IN.revision_data::NUMBER}
             ORDER BY revision_data ASC
             LIMIT 1000;
-            """, StatementType.SELECT),
+            """, StatementType.SELECT_WITH_AUTO_COMMIT),
 
     SELECT_SOCKET_DATA_RANGE("""
             SELECT
@@ -65,7 +65,7 @@ public enum Data implements TemplateEnum {
             AND revision_data > ${IN.revision_data::NUMBER}
             ORDER BY revision_data ASC
             LIMIT 1000
-            """, StatementType.SELECT),
+            """, StatementType.SELECT_WITH_AUTO_COMMIT),
 
     INSERT("""
             CALL add_data(
@@ -80,7 +80,7 @@ public enum Data implements TemplateEnum {
                 ${IN.uuid_device::VARCHAR},
                 ${OUT.new_id_revision::VARCHAR}
             );
-            """, StatementType.CALL),
+            """, StatementType.CALL_WITH_AUTO_COMMIT),
     TEST_INSERT("""
             INSERT INTO data (
                 uuid_data,
@@ -99,7 +99,7 @@ public enum Data implements TemplateEnum {
                 ${IN.key_data::VARCHAR},
                 ${IN.uuid_device_data::VARCHAR}
             );
-            """, StatementType.SELECT),
+            """, StatementType.SELECT_WITH_AUTO_COMMIT),
 
     //Получаем данные, которые привязаны к устройству либо персоне, что бы понять, что мы имеем вообще хоть какое-то право на их изменение
     CHECK_PERMISSION_SOCKET_DATA("""
@@ -114,7 +114,7 @@ public enum Data implements TemplateEnum {
                         id_user = ${IN.id_user::NUMBER}
                         OR uuid_device_data = ${IN.uuid_device::VARCHAR}
                 );
-            """, StatementType.SELECT),
+            """, StatementType.SELECT_WITH_AUTO_COMMIT),
 
     //Получить главную запись, где лежат данные
     GET_PRIMARY_SOCKET_DATA("""
@@ -123,13 +123,13 @@ public enum Data implements TemplateEnum {
                 type_data = 'socket'
                 AND uuid_data = ${IN.uuid_data::VARCHAR}
                 FOR UPDATE;
-            """, StatementType.SELECT),
+            """, StatementType.SELECT_WITHOUT_AUTO_COMMIT),
 
     //Обновление данных только после проверки, что данные есть и они привязана к персоне или устройству
     UPDATE_PRIMARY_SOCKET_DATA("""
             UPDATE data SET value_data = ${IN.value_data::VARCHAR}
             WHERE id_data = ${IN.id_data::NUMBER};
-            """, StatementType.SELECT),
+            """, StatementType.SELECT_WITHOUT_AUTO_COMMIT),
 
     //Обновление ревизий у наследников
     UPDATE_SECONDARY_SOCKET_DATA("""
@@ -137,7 +137,7 @@ public enum Data implements TemplateEnum {
             WHERE
                 type_data = 'socket'
                 AND parent_uuid_data = ${IN.uuid_data::VARCHAR};
-            """, StatementType.SELECT),
+            """, StatementType.SELECT_WITH_AUTO_COMMIT),
 
     //Получить все uuid_device причастные к PRIMARY сокет данным
     GET_SOCKET_UUID_DEVICE("""
@@ -151,14 +151,14 @@ public enum Data implements TemplateEnum {
             	SELECT uuid_device_data as uuid FROM "data" da
             	WHERE da.uuid_data = ${IN.uuid_data::VARCHAR} OR da.parent_uuid_data = ${IN.uuid_data::VARCHAR}
             ) as sq1
-            """, StatementType.SELECT),
+            """, StatementType.SELECT_WITH_AUTO_COMMIT),
 
     UNLOCK("""
             COMMIT;
-            """, StatementType.SELECT),
+            """, StatementType.SELECT_WITHOUT_AUTO_COMMIT),
     LOCK("""
             SELECT * FROM data WHERE id_data = 82561 FOR UPDATE;
-            """, StatementType.SELECT);
+            """, StatementType.SELECT_WITHOUT_AUTO_COMMIT);
 
     private Template template;
 

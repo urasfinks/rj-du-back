@@ -3,7 +3,6 @@ package ru.jamsys.mistercraft.handler.http;
 import ru.jamsys.App;
 import ru.jamsys.JsonHttpResponse;
 import ru.jamsys.Util;
-import ru.jamsys.UtilJson;
 import ru.jamsys.mistercraft.DataType;
 import ru.jamsys.mistercraft.UserSessionInfo;
 import ru.jamsys.mistercraft.jt.Data;
@@ -40,12 +39,12 @@ public class Sync implements HttpHandler {
                     arguments.put("revision_data", rqRevision);
                     userSessionInfo.appendAuthJdbcTemplateArguments(arguments);
                     List<Map<String, Object>> exec = switch (dataType) {
-                        case js, any, systemData, template ->
-                                App.jdbcTemplate.exec(App.postgreSQLPoolName, Data.SELECT_SYSTEM_DATA_RANGE, arguments);
+                        case js, any, systemData, template, json ->
+                                App.jdbcTemplate.execute(App.postgresqlPoolName, Data.SELECT_SYSTEM_DATA_RANGE, arguments);
                         case userDataRSync ->
-                                App.jdbcTemplate.exec(App.postgreSQLPoolName, Data.SELECT_USER_DATA_RANGE, arguments);
+                                App.jdbcTemplate.execute(App.postgresqlPoolName, Data.SELECT_USER_DATA_RANGE, arguments);
                         case socket ->
-                                App.jdbcTemplate.exec(App.postgreSQLPoolName, Data.SELECT_SOCKET_DATA_RANGE, arguments);
+                                App.jdbcTemplate.execute(App.postgresqlPoolName, Data.SELECT_SOCKET_DATA_RANGE, arguments);
                     };
                     result.put(dataType.toString(), exec);
                 } else if (dbRevision < rqRevision) { //Рассинхрон версий
@@ -91,7 +90,7 @@ public class Sync implements HttpHandler {
                 //Формируем динамический SQL c конструкцией IN
                 DataByParent dataByParent = new DataByParent(needParentDataMap.keySet().stream().toList());
                 //Получаем все исходные данные через связку uuid = parent_uuid
-                List<Map<String, Object>> exec = App.jdbcTemplate.exec(App.postgreSQLPoolName, dataByParent, dataByParent.getSqlArguments());
+                List<Map<String, Object>> exec = App.jdbcTemplate.execute(App.postgresqlPoolName, dataByParent, dataByParent.getSqlArguments());
                 for (Map<String, Object> item : exec) {
                     //Получаем uuid_data у родителя
                     String uuidData = (String) item.get("uuid_data");
@@ -115,7 +114,7 @@ public class Sync implements HttpHandler {
                     Map<String, Object> arguments = App.jdbcTemplate.createArguments();
                     arguments.putAll(dataItem);
                     userSessionInfo.appendAuthJdbcTemplateArguments(arguments);
-                    List<Map<String, Object>> exec = App.jdbcTemplate.exec(App.postgreSQLPoolName, Data.INSERT, arguments);
+                    List<Map<String, Object>> exec = App.jdbcTemplate.execute(App.postgresqlPoolName, Data.INSERT, arguments);
                     if (exec.size() > 0 && exec.get(0).containsKey("new_id_revision")) {
                         String newIdRevisionString = (String) exec.get(0).get("new_id_revision");
                         if (newIdRevisionString != null && Util.isNumeric(newIdRevisionString)) {
@@ -139,7 +138,7 @@ public class Sync implements HttpHandler {
         Map<String, Long> dbMapRevision = new HashMap<>();
         Map<String, Object> arguments = App.jdbcTemplate.createArguments();
         userSessionInfo.appendAuthJdbcTemplateArguments(arguments);
-        List<Map<String, Object>> exec = App.jdbcTemplate.exec(App.postgreSQLPoolName, Data.SELECT_MAX_REVISION_BY_TYPE, arguments);
+        List<Map<String, Object>> exec = App.jdbcTemplate.execute(App.postgresqlPoolName, Data.SELECT_MAX_REVISION_BY_TYPE, arguments);
         for (Map<String, Object> row : exec) {
             dbMapRevision.put((String) row.get("key"), (Long) row.get("max"));
         }

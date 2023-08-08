@@ -44,6 +44,18 @@ public class ControllerHttpRest {
                 .body(Util.getResourceContent(socketHtml, "UTF-8"));
     }
 
+    @RequestMapping(value = "/Timeout", method = RequestMethod.GET)
+    public ResponseEntity<?> timeout() {
+        try {
+            Thread.sleep(5000);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body("Timeout 5sec complete");
+    }
+
     @RequestMapping(value = "/SocketUpdate", method = RequestMethod.POST)
     public ResponseEntity<?> socketUpdate(@RequestBody String postBody, @RequestHeader("Authorization") String authHeader) {
         return getResponseEntity(postBody, true, authHeader, "schema/http/UpdateSocketData.json", HandlerMethod.SOCKET_UPDATE.get());
@@ -131,8 +143,8 @@ public class ControllerHttpRest {
     public ResponseEntity<?> getResponseEntity(String postBody, boolean checkAuthHeader, String authHeader, String schemaValidation, HttpHandler httpHandler) {
         Util.logConsole("Request: " + postBody);
         JsonHttpResponse jRet = getJsonHttpResponse(postBody, checkAuthHeader, authHeader, schemaValidation, httpHandler);
-        Util.logConsole("Response: " + jRet.toString());
         jRet.getData().remove("request");
+        Util.logConsole("Response: " + jRet);
         return jRet.getResponseEntity();
     }
 

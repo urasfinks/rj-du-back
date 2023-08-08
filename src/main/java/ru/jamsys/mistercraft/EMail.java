@@ -48,6 +48,8 @@ public class EMail {
         email.setSSLOnConnect(true);
         email.setFrom("noreply@e-humidor.ru");
         email.setCharset("UTF-8");
+        email.setSocketConnectionTimeout(1000);
+        email.setSocketTimeout(1000);
     }
 
     public static void test() throws EmailException {

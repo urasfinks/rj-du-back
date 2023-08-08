@@ -4,7 +4,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import ru.jamsys.App;
+import ru.jamsys.jdbc.template.Executor;
 import ru.jamsys.mistercraft.jt.Data;
+
 
 import java.util.Map;
 
@@ -61,11 +63,14 @@ class ControllerWebSocketTest {
 
     @Test
     void lock() throws Exception {
+        Executor executor = App.jdbcTemplate.getExecutor(App.postgresqlPoolName);
+
         Map<String, Object> arguments = App.jdbcTemplate.createArguments();
-        App.jdbcTemplate.exec(App.postgreSQLPoolName, Data.LOCK, arguments);
+        executor.execute(Data.LOCK, arguments);
         Thread.sleep(10000);
-        App.jdbcTemplate.exec(App.postgreSQLPoolName, Data.UNLOCK, arguments);
+        executor.execute(Data.UNLOCK, arguments);
         Thread.sleep(10000);
+        executor.close();
     }
 
     private boolean validate(String data) {

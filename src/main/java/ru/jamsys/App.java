@@ -15,11 +15,11 @@ import ru.jamsys.pool.PostgreSQL;
 import java.util.List;
 import java.util.Map;
 
-@PropertySource("application-prod.properties")
+@PropertySource("application-local.properties")
 @SpringBootApplication
 public class App {
 
-    public static String postgreSQLPoolName = "First";
+    public static String postgresqlPoolName = "First";
     public static ConfigurableApplicationContext context;
     public static JdbcTemplate jdbcTemplate;
     private static Security security;
@@ -39,7 +39,7 @@ public class App {
     }
 
     public static List<Map<String, Object>> query(TemplateEnum templateEnum, Map<String, Object> arguments) throws Exception {
-        return jdbcTemplate.exec(App.postgreSQLPoolName, templateEnum, arguments);
+        return jdbcTemplate.execute(App.postgresqlPoolName, templateEnum, arguments);
     }
 
     private static void initSecurity() throws Exception {
@@ -49,8 +49,8 @@ public class App {
 
     private static void initPostgreSQL() {
         jdbcTemplate = App.context.getBean(JdbcTemplate.class);
-        PostgreSQL postgreSQL = new PostgreSQL(postgreSQLPoolName, 1, 10, 60000);
-        postgreSQL.initial(jdbcTemplate.getUri(), jdbcTemplate.getUser(), false, security, jdbcTemplate.getSecurityKey());
+        PostgreSQL postgreSQL = new PostgreSQL(postgresqlPoolName, 1, 10, 60000);
+        postgreSQL.initial(jdbcTemplate.getUri(), jdbcTemplate.getUser(), security, jdbcTemplate.getSecurityKey());
         context.getBean(JdbcTemplate.class).addPool(postgreSQL);
     }
 
