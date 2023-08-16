@@ -37,14 +37,18 @@ public enum DataType {
 
     // Что-то другое, которое никак не подходит под существующие группы
     // На текущий момент таких данных вроде нет, получается задел на будущее
-    any; // Владелец - сервер
+    any, // Владелец - сервер
+    // Base64 large object
+    blobRSync, //Владелец - пользователь
+    // Base64 large object
+    blob; // Владелец - сервер
 
     public boolean isUserData(String dataType) {
         return isUserData(DataType.valueOf(dataType));
     }
 
     public boolean isUserData(DataType dataType) {
-        return dataType == DataType.userDataRSync;
+        return dataType == DataType.userDataRSync || dataType == DataType.blobRSync;
     }
 
     public boolean isUserData() {

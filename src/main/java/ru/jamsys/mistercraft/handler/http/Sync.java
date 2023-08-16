@@ -39,9 +39,9 @@ public class Sync implements HttpHandler {
                     arguments.put("revision_data", rqRevision);
                     userSessionInfo.appendAuthJdbcTemplateArguments(arguments);
                     List<Map<String, Object>> exec = switch (dataType) {
-                        case js, any, systemData, template, json ->
+                        case js, any, systemData, template, json, blob ->
                                 App.jdbcTemplate.execute(App.postgresqlPoolName, Data.SELECT_SYSTEM_DATA_RANGE, arguments);
-                        case userDataRSync ->
+                        case userDataRSync, blobRSync ->
                                 App.jdbcTemplate.execute(App.postgresqlPoolName, Data.SELECT_USER_DATA_RANGE, arguments);
                         case socket ->
                                 App.jdbcTemplate.execute(App.postgresqlPoolName, Data.SELECT_SOCKET_DATA_RANGE, arguments);
@@ -62,6 +62,7 @@ public class Sync implements HttpHandler {
 
         //Блок обновления
         insertData(userSessionInfo, parsedJson, DataType.userDataRSync.name(), result); //Он может прийти пустым, так как просто человечек не залогинен
+        insertData(userSessionInfo, parsedJson, DataType.blobRSync.name(), result); //Он может прийти пустым, так как просто человечек не залогинен
         insertData(userSessionInfo, parsedJson, DataType.socket.name(), result);
 
         if (result.containsKey(DataType.socket.name())) {

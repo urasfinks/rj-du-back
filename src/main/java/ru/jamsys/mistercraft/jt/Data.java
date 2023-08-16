@@ -10,8 +10,8 @@ public enum Data implements TemplateEnum {
             SELECT
                 type_data AS key,
                 max(revision_data) AS max
-            FROM data WHERE (type_data IN ('template', 'systemData', 'js', 'any', 'json') AND id_user = 1 )
-            OR ( type_data = 'userDataRSync' AND id_user = ${IN.id_user::NUMBER} )
+            FROM data WHERE (type_data IN ('template', 'systemData', 'js', 'any', 'json', 'blob') AND id_user = 1 )
+            OR ( type_data IN ('userDataRSync', 'blobRSync') AND id_user = ${IN.id_user::NUMBER})
             OR ( type_data = 'socket' AND uuid_device_data = ${IN.uuid_device::VARCHAR} )
             GROUP BY type_data;
             """, StatementType.SELECT_WITH_AUTO_COMMIT),

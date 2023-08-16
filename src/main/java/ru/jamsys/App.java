@@ -15,7 +15,7 @@ import ru.jamsys.pool.PostgreSQL;
 import java.util.List;
 import java.util.Map;
 
-@PropertySource("application-local.properties")
+@PropertySource("application-docker.properties")
 @SpringBootApplication
 public class App {
 
