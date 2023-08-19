@@ -12,7 +12,7 @@ public enum Data implements TemplateEnum {
                 max(revision_data) AS max
             FROM data WHERE (type_data IN ('template', 'systemData', 'js', 'any', 'json', 'blob') AND id_user = 1 )
             OR ( type_data IN ('userDataRSync', 'blobRSync') AND id_user = ${IN.id_user::NUMBER})
-            OR ( type_data = 'socket' AND uuid_device_data = ${IN.uuid_device::VARCHAR} )
+            OR ( type_data = 'socket' AND (uuid_device_data = ${IN.uuid_device::VARCHAR} OR id_user = ${IN.id_user::NUMBER}))
             GROUP BY type_data;
             """, StatementType.SELECT_WITH_AUTO_COMMIT),
 
@@ -61,7 +61,7 @@ public enum Data implements TemplateEnum {
                 value_data as value,
                 key_data as key
             FROM data WHERE type_data = ${IN.type_data::VARCHAR}
-            AND uuid_device_data = ${IN.uuid_device::VARCHAR}
+            AND ( uuid_device_data = ${IN.uuid_device::VARCHAR} OR id_user = ${IN.id_user::NUMBER} )
             AND revision_data > ${IN.revision_data::NUMBER}
             ORDER BY revision_data ASC
             LIMIT 1000
