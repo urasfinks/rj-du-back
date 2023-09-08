@@ -67,6 +67,10 @@ public enum Data implements TemplateEnum {
             LIMIT 1000
             """, StatementType.SELECT_WITH_AUTO_COMMIT),
 
+    SELECT("""
+            SELECT * FROM data WHERE uuid_data = ${IN.uuid_data::VARCHAR}
+            """, StatementType.SELECT_WITH_AUTO_COMMIT),
+
     INSERT("""
             CALL add_data(
             	${IN.uuid_data::VARCHAR},
