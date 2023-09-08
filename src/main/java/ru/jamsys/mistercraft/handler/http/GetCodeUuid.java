@@ -13,7 +13,7 @@ public class GetCodeUuid implements HttpHandler {
         Map<String, Object> req = (Map<String, Object>) jRet.getData().get("request");
         Integer code = (Integer) req.get("code");
         if (jRet.isStatus() && code == null) {
-            jRet.addException("Код в запросу пустой");
+            jRet.addException("Код в запросе пустой");
         }
         CodeObject codeObject = GenCodeUuid.map.get(code);
         if (jRet.isStatus() && codeObject == null) {

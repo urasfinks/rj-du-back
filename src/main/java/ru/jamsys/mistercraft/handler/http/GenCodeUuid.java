@@ -17,6 +17,12 @@ public class GenCodeUuid implements HttpHandler {
 
     @Override
     public void handler(JsonHttpResponse jRet, UserSessionInfo userSessionInfo) {
+        Map<String, Object> req = (Map<String, Object>) jRet.getData().get("request");
+        String uuid = null;
+        if (req.containsKey("uuid")) {
+            uuid = (String) req.get("uuid");
+        }
+        final String x = uuid;
         clearMap();
         sync(jsonHttpResponse -> {
             int maxCount = 5000;
@@ -24,7 +30,7 @@ public class GenCodeUuid implements HttpHandler {
             while (true) {
                 Integer random = Util.random(100000, 999999);
                 if (!map.containsKey(random)) {
-                    CodeObject codeObject = new CodeObject();
+                    CodeObject codeObject = new CodeObject(x);
                     codeObject.setCode(random);
                     map.put(random, codeObject);
                     jsonHttpResponse.addData("code", codeObject.getCode());

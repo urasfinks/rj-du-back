@@ -9,4 +9,9 @@ public class CodeObject {
     String uuid = java.util.UUID.randomUUID().toString();
     int code;
 
+    public CodeObject(String uuid) {
+        if (uuid != null) {
+            this.uuid = uuid;
+        }
+    }
 }
