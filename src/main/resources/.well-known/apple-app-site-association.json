@@ -10,7 +10,7 @@
       {
         "appID": "QVHB6RUQD6.ru.jamsys.fiveGame",
         "paths": [
-          "/link/*"
+          "/deeplink/*"
         ]
       }
     ]
