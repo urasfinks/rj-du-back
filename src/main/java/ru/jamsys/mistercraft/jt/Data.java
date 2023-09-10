@@ -3,18 +3,47 @@ package ru.jamsys.mistercraft.jt;
 import ru.jamsys.jdbc.template.StatementType;
 import ru.jamsys.jdbc.template.Template;
 import ru.jamsys.jdbc.template.TemplateEnum;
+import ru.jamsys.mistercraft.DataType;
 
 public enum Data implements TemplateEnum {
+
+    REMOVE("""
+            UPDATE data SET
+                is_remove_data = 1
+            WHERE
+                uuid_data = ${IN.uuid_data::VARCHAR}
+                AND is_remove_data = 0
+                AND (uuid_device_data = ${IN.uuid_device::VARCHAR} OR id_user = ${IN.id_user::NUMBER})
+                AND type_data IN ('%s', '%s', '%s')
+            """.formatted(
+            DataType.blobRSync.name(),
+            DataType.userDataRSync.name(),
+            DataType.socket.name()
+    ), StatementType.SELECT_WITH_AUTO_COMMIT),
 
     SELECT_MAX_REVISION_BY_TYPE("""
             SELECT
                 type_data AS key,
                 max(revision_data) AS max
-            FROM data WHERE (type_data IN ('template', 'systemData', 'js', 'any', 'json', 'blob') AND id_user = 1 )
-            OR ( type_data IN ('userDataRSync', 'blobRSync') AND id_user = ${IN.id_user::NUMBER})
-            OR ( type_data = 'socket' AND (uuid_device_data = ${IN.uuid_device::VARCHAR} OR id_user = ${IN.id_user::NUMBER}))
+            FROM data WHERE (type_data IN ('%s', '%s', '%s', '%s', '%s', '%s') AND id_user = 1 )
+            OR ( type_data IN ('%s', '%s') AND id_user = ${IN.id_user::NUMBER})
+            OR ( type_data = '%s' AND (uuid_device_data = ${IN.uuid_device::VARCHAR} OR id_user = ${IN.id_user::NUMBER}))
             GROUP BY type_data;
-            """, StatementType.SELECT_WITH_AUTO_COMMIT),
+            """.formatted(
+
+            DataType.template.name(),
+            DataType.systemData.name(),
+            DataType.js.name(),
+            DataType.any.name(),
+            DataType.json.name(),
+            DataType.blob.name(),
+
+            DataType.userDataRSync.name(),
+            DataType.blobRSync.name(),
+
+            DataType.socket.name()
+
+    ), StatementType.SELECT_WITH_AUTO_COMMIT),
 
     SELECT_SYSTEM_DATA_RANGE("""
             SELECT
@@ -109,7 +138,7 @@ public enum Data implements TemplateEnum {
     CHECK_PERMISSION_SOCKET_DATA("""
             SELECT * FROM data
             WHERE
-                type_data = 'socket'
+                type_data = '%s'
                 AND (
                         uuid_data = ${IN.uuid_data::VARCHAR}
                         OR parent_uuid_data = ${IN.uuid_data::VARCHAR}
@@ -118,16 +147,16 @@ public enum Data implements TemplateEnum {
                         id_user = ${IN.id_user::NUMBER}
                         OR uuid_device_data = ${IN.uuid_device::VARCHAR}
                 );
-            """, StatementType.SELECT_WITH_AUTO_COMMIT),
+            """.formatted(DataType.socket.name()), StatementType.SELECT_WITH_AUTO_COMMIT),
 
     //Получить главную запись, где лежат данные
     GET_PRIMARY_SOCKET_DATA("""
             SELECT * FROM data
             WHERE
-                type_data = 'socket'
+                type_data = '%s'
                 AND uuid_data = ${IN.uuid_data::VARCHAR}
                 FOR UPDATE;
-            """, StatementType.SELECT_WITHOUT_AUTO_COMMIT),
+            """.formatted(DataType.socket.name()), StatementType.SELECT_WITHOUT_AUTO_COMMIT),
 
     //Обновление данных только после проверки, что данные есть и они привязана к персоне или устройству
     UPDATE_PRIMARY_SOCKET_DATA("""
@@ -139,9 +168,9 @@ public enum Data implements TemplateEnum {
     UPDATE_SECONDARY_SOCKET_DATA("""
             UPDATE data SET value_data = null
             WHERE
-                type_data = 'socket'
+                type_data = '%s'
                 AND parent_uuid_data = ${IN.uuid_data::VARCHAR};
-            """, StatementType.SELECT_WITH_AUTO_COMMIT),
+            """.formatted(DataType.socket.name()), StatementType.SELECT_WITH_AUTO_COMMIT),
 
     //Получить все uuid_device причастные к PRIMARY сокет данным
     GET_SOCKET_UUID_DEVICE("""
