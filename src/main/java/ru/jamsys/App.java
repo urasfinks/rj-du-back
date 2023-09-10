@@ -8,6 +8,7 @@ import ru.jamsys.component.JdbcTemplate;
 import ru.jamsys.component.JsonSchema;
 import ru.jamsys.component.Security;
 import ru.jamsys.jdbc.template.TemplateEnum;
+import ru.jamsys.mistercraft.AudioInsert;
 import ru.jamsys.mistercraft.EMail;
 import ru.jamsys.mistercraft.socket.RequestMessageReader;
 import ru.jamsys.pool.PostgreSQL;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 @PropertySource("application-docker.properties")
+//@PropertySource("application-local.properties")
 @SpringBootApplication
 public class App {
 
@@ -36,6 +38,9 @@ public class App {
         schemaSocketResponse = UtilFileResource.getAsString("schema/socket/ProtocolResponse.json");
         jsonSchema = App.context.getBean(JsonSchema.class);
         App.context.getBean(RequestMessageReader.class).init();
+
+        //AudioInsert.parse();
+
     }
 
     public static List<Map<String, Object>> query(TemplateEnum templateEnum, Map<String, Object> arguments) throws Exception {
