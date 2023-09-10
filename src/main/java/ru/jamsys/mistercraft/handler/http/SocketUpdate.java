@@ -63,9 +63,9 @@ public class SocketUpdate implements HttpHandler {
                 e.printStackTrace();
                 jRet.addException(e);
             }
-        }
-        if (executor == null) {
-            jRet.addException("Пустой executor");
+            if (executor == null) {
+                jRet.addException("Пустой executor");
+            }
         }
 
         if (jRet.isStatus()) { //Получаем главную запись с данными для последующего обновления
@@ -148,8 +148,10 @@ public class SocketUpdate implements HttpHandler {
             threadBalancerFactory.getThreadBalancer(ControllerWebSocket.nameSocketRequestReader).wakeUp();
         }
         try { //Освобождаем блокировку
-            executor.execute(Data.UNLOCK, App.jdbcTemplate.createArguments());
-            executor.close();
+            if (executor != null) {
+                executor.execute(Data.UNLOCK, App.jdbcTemplate.createArguments());
+                executor.close();
+            }
         } catch (Exception e) {
             jRet.addException(e);
         }
