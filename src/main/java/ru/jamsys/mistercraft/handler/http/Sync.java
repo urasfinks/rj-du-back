@@ -17,18 +17,26 @@ public class Sync implements HttpHandler {
     @Override
     public void handler(JsonHttpResponse jRet, UserSessionInfo userSessionInfo) {
         @SuppressWarnings("unchecked")
-        Map<String, Object> req = (Map<String, Object>) jRet.getData().get("request");
-        jRet.addData("response", handler2(userSessionInfo, req));
-    }
+        Map<String, Object> parsedJson = (Map<String, Object>) jRet.getData().get("request");
 
-    public static Map<String, List<Map<String, Object>>> handler2(UserSessionInfo userSessionInfo, Map<String, Object> parsedJson) {
         Map<String, List<Map<String, Object>>> result = new HashMap<>();
-
+        int totalCounterItem = 0;
+        int totalByte = 0;
         //Блок выгрузки
         try {
+            // Для начала удалим, всё что уже всё на устройстве)
+            //Да, это всё равно пойдёт ревизией обратно, но уже немного подрезанное
+            if (parsedJson.containsKey("removed")) {
+                @SuppressWarnings("unchecked")
+                List<String> removed = (List<String>) parsedJson.get("removed");
+                for (String uuid : removed) {
+                    remove(uuid, userSessionInfo);
+                }
+            }
             @SuppressWarnings("unchecked")
             Map<String, Integer> rqMaxRevisionByType = (Map<String, Integer>) parsedJson.get("maxRevisionByType");
             Map<String, Long> dbMaxRevisionByType = getMaxRevisionByType(userSessionInfo);
+
 
             for (DataType dataType : DataType.values()) {
                 int rqRevision = rqMaxRevisionByType.getOrDefault(dataType.toString(), 0);
@@ -46,13 +54,30 @@ public class Sync implements HttpHandler {
                         case socket ->
                                 App.jdbcTemplate.execute(App.postgresqlPoolName, Data.SELECT_SOCKET_DATA_RANGE, arguments);
                     };
+                    totalCounterItem += exec.size();
+                    for (Map<String, Object> item : exec) {
+                        //Что бы канал слишком не забивать данными, немного почистим содержимое удаляемых данных
+                        if (item.get("is_remove").toString().equals("1")) {
+                            item.remove("value");
+                            item.remove("date_update");
+                            item.remove("date_add");
+                            // Низя удалять parentUuid, key  так как по нему могут быть слушатели
+                            // DynamicPage._subscribedOnReload из Enum SubscribeReloadGroup
+                            //item.remove("parent_uuid");
+                            //item.remove("key");
+                            // Низя удалять revision, а то дальше где-то NPE)
+                            //item.remove("revision");
+                        }
+                        if (item.containsKey("value")) {
+                            totalByte += ((String) item.get("value")).length();
+                        }
+                    }
                     result.put(dataType.toString(), exec);
                 } else if (dbRevision < rqRevision) { //Рассинхрон версий
                     List<Map<String, Object>> needUpgradeServerType = new ArrayList<>();
                     Map<String, Object> map = new HashMap<>();
                     map.put("needUpgrade", dbRevision);
                     needUpgradeServerType.add(map);
-
                     result.put(dataType.toString(), needUpgradeServerType);
                 }
             }
@@ -69,8 +94,38 @@ public class Sync implements HttpHandler {
             updateSocketParentData(result.get(DataType.socket.name()));
         }
 
-        //String json = UtilJson.toStringPretty(result, "{}");
-        //Util.logConsole("Sync.sync() => " + json);
+        jRet.addData("totalByte", totalByte);
+        jRet.addData("totalCountItem", totalCounterItem);
+        jRet.addData("response", sizeControl(result, jRet));
+    }
+
+    public static Map<String, List<Map<String, Object>>> sizeControl(Map<String, List<Map<String, Object>>> input, JsonHttpResponse jRet) {
+        Map<String, List<Map<String, Object>>> result = new HashMap<>();
+        int limitByte = 100 * 1024;
+        int countItem = 0;
+        jRet.addData("limitByte", limitByte);
+        for (String type : input.keySet()) {
+            if (limitByte <= 0) {
+                break;
+            }
+            List<Map<String, Object>> cloneObjects = new ArrayList<>();
+            result.put(type, cloneObjects);
+            List<Map<String, Object>> list = input.get(type);
+            for (Map<String, Object> item : list) {
+                if (item.containsKey("value")) {
+                    int length = ((String) item.get("value")).length();
+                    item.put("valueSizeByte", length);
+                    limitByte -= length;
+                }
+                cloneObjects.add(item);
+                countItem++;
+                if (limitByte <= 0) {
+                    break;
+                }
+            }
+        }
+        jRet.addData("limitByteOffset", limitByte);
+        jRet.addData("countItem", countItem);
         return result;
     }
 
@@ -144,6 +199,13 @@ public class Sync implements HttpHandler {
             dbMapRevision.put((String) row.get("key"), (Long) row.get("max"));
         }
         return dbMapRevision;
+    }
+
+    private static void remove(String uuid, UserSessionInfo userSessionInfo) throws Exception {
+        Map<String, Object> arguments = App.jdbcTemplate.createArguments();
+        userSessionInfo.appendAuthJdbcTemplateArguments(arguments);
+        arguments.put("uuid_data", uuid);
+        App.jdbcTemplate.execute(App.postgresqlPoolName, Data.REMOVE, arguments);
     }
 
     public static void mergeRevision(List<Map<String, Object>> listInsertItem, List<Map<String, Object>> listResultItem) {
