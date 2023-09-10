@@ -8,11 +8,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.jamsys.*;
 import ru.jamsys.component.JsonSchema;
-import ru.jamsys.mistercraft.handler.http.HttpHandler;
 import ru.jamsys.mistercraft.handler.http.HandlerMethod;
+import ru.jamsys.mistercraft.handler.http.HttpHandler;
 
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Base64;
+import java.util.Map;
 
 @SuppressWarnings("unused")
 @RestController
@@ -68,7 +69,7 @@ public class ControllerHttpRest {
 
     @RequestMapping(value = "/Sync", method = RequestMethod.POST)
     public ResponseEntity<?> sync(@RequestBody String postBody, @RequestHeader("Authorization") String authHeader) {
-        return getResponseEntity(postBody, true, authHeader, null, HandlerMethod.SYNC.get());
+        return getResponseEntity(postBody, true, authHeader, null, HandlerMethod.SYNC.get(), false);
     }
 
     @RequestMapping(value = "/Test", method = RequestMethod.GET)
@@ -141,10 +142,16 @@ public class ControllerHttpRest {
     }
 
     public ResponseEntity<?> getResponseEntity(String postBody, boolean checkAuthHeader, String authHeader, String schemaValidation, HttpHandler httpHandler) {
+        return getResponseEntity(postBody, checkAuthHeader, authHeader, schemaValidation, httpHandler, true);
+    }
+
+    public ResponseEntity<?> getResponseEntity(String postBody, boolean checkAuthHeader, String authHeader, String schemaValidation, HttpHandler httpHandler, boolean debug) {
         Util.logConsole("Request: " + postBody);
         JsonHttpResponse jRet = getJsonHttpResponse(postBody, checkAuthHeader, authHeader, schemaValidation, httpHandler);
         jRet.getData().remove("request");
-        Util.logConsole("Response: " + jRet);
+        if (debug) {
+            Util.logConsole("Response: " + jRet);
+        }
         return jRet.getResponseEntity();
     }
 
@@ -159,7 +166,7 @@ public class ControllerHttpRest {
                     String[] map = decodedStr.split(":");
                     if (map.length == 2) {
                         try {
-                            userSessionInfo.setVersion(Integer.parseInt(map[0].substring(1)));
+                            userSessionInfo.setVersion(Long.parseLong(map[0].substring(1)));
                         } catch (Exception e) {
                             e.printStackTrace();
                         }

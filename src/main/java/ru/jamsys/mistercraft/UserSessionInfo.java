@@ -10,7 +10,7 @@ import java.util.Map;
 @Data
 public class UserSessionInfo {
 
-    int version;
+    long version;
     private Long idUser;
     private String deviceUuid = null;
     private boolean checked = false;
