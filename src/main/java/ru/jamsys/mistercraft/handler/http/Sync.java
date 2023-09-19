@@ -68,7 +68,7 @@ public class Sync implements HttpHandler {
                             // Низя удалять revision, а то дальше где-то NPE)
                             //item.remove("revision");
                         }
-                        if (item.containsKey("value")) {
+                        if (item.containsKey("value") && item.get("value") != null) {
                             totalByte += ((String) item.get("value")).length();
                         }
                     }
@@ -78,27 +78,29 @@ public class Sync implements HttpHandler {
                 }
             }
         } catch (Exception e) {
+            jRet.addException(e);
             e.printStackTrace();
         }
+        if (jRet.isStatus()) {
+            //Блок обновления
+            //userDataRSync может прийти пустым, так как просто человечек не залогинен
+            insertData(userSessionInfo, parsedJson, DataType.userDataRSync.name(), result);
+            //blobRSync может прийти пустым, так как просто человечек не залогинен
+            insertData(userSessionInfo, parsedJson, DataType.blobRSync.name(), result);
+            insertData(userSessionInfo, parsedJson, DataType.socket.name(), result);
 
-        //Блок обновления
-        //userDataRSync может прийти пустым, так как просто человечек не залогинен
-        insertData(userSessionInfo, parsedJson, DataType.userDataRSync.name(), result);
-        //blobRSync может прийти пустым, так как просто человечек не залогинен
-        insertData(userSessionInfo, parsedJson, DataType.blobRSync.name(), result);
-        insertData(userSessionInfo, parsedJson, DataType.socket.name(), result);
+            // Если пришли новые данные с типом socket у которых установлен parrent_uuid
+            // Скорее всего это новая установка (наследование) и надо по мимо регистрации их в серверной БД
+            // Надо выдать последнюю ревизию родителя
 
-        // Если пришли новые данные с типом socket у которых установлен parrent_uuid
-        // Скорее всего это новая установка (наследование) и надо по мимо регистрации их в серверной БД
-        // Надо выдать последнюю ревизию родителя
-
-        if (result.containsKey(DataType.socket.name())) {
-            updateSocketParentData(result.get(DataType.socket.name()));
+            if (result.containsKey(DataType.socket.name())) {
+                updateSocketParentData(result.get(DataType.socket.name()));
+            }
+            jRet.addData("totalByte", totalByte);
+            jRet.addData("totalCountItem", totalCounterItem);
+            jRet.addData("upgrade", sizeControl(result, jRet));
+            jRet.addData("serverNeedUpgrade", needUpgrade);
         }
-        jRet.addData("totalByte", totalByte);
-        jRet.addData("totalCountItem", totalCounterItem);
-        jRet.addData("upgrade", sizeControl(result, jRet));
-        jRet.addData("serverNeedUpgrade", needUpgrade);
     }
 
     //#1

@@ -30,7 +30,7 @@ public class SocketUpdate implements HttpHandler {
     @Override
     public void handler(JsonHttpResponse jRet, UserSessionInfo userSessionInfo) {
         // req.get("uuid_data") - точно должен прийти на PRIMARY данные
-        // Теоретически существует uuid_data и parent_uuid_data - почитайте DataType.java как это сопоставляется с сокетными данными
+        // Cуществует uuid_data и parent_uuid_data - почитайте DataType.java как это сопоставляется с сокетными данными
 
         @SuppressWarnings("unchecked")
         Map<String, Object> request = (Map<String, Object>) jRet.getData().get("request");
