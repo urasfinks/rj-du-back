@@ -16,15 +16,16 @@ import java.util.Map;
 public class Sync implements HttpHandler {
     @Override
     public void handler(JsonHttpResponse jRet, UserSessionInfo userSessionInfo) {
-        @SuppressWarnings("unchecked")
-        Map<String, Object> parsedJson = (Map<String, Object>) jRet.getData().get("request");
-
-        Map<String, List<Map<String, Object>>> result = new HashMap<>();
-        int totalCounterItem = 0;
-        int totalByte = 0;
-        //Блок выгрузки
-        Map<String, Long> needUpgrade = new HashMap<>();
         try {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> parsedJson = (Map<String, Object>) jRet.getData().get("request");
+
+            Map<String, List<Map<String, Object>>> result = new HashMap<>();
+            int totalCounterItem = 0;
+            int totalByte = 0;
+            //Блок выгрузки
+            Map<String, Long> needUpgrade = new HashMap<>();
+
             // Для начала удалим, всё что уже всё на устройстве)
             //Да, это всё равно пойдёт ревизией обратно, но уже немного подрезанное (зануление value_data)
             if (parsedJson.containsKey("removed")) {
@@ -77,11 +78,7 @@ public class Sync implements HttpHandler {
                     needUpgrade.put(dataType.toString(), dbRevision);
                 }
             }
-        } catch (Exception e) {
-            jRet.addException(e);
-            e.printStackTrace();
-        }
-        if (jRet.isStatus()) {
+
             //Блок обновления
             //userDataRSync может прийти пустым, так как просто человечек не залогинен
             insertData(userSessionInfo, parsedJson, DataType.userDataRSync.name(), result);
@@ -100,6 +97,9 @@ public class Sync implements HttpHandler {
             jRet.addData("totalCountItem", totalCounterItem);
             jRet.addData("upgrade", sizeControl(result, jRet));
             jRet.addData("serverNeedUpgrade", needUpgrade);
+
+        } catch (Exception e) {
+            jRet.addException(e);
         }
     }
 
