@@ -18,6 +18,7 @@ import java.util.Map;
 
 @PropertySource("application-docker.properties")
 //@PropertySource("application-local.properties")
+//@PropertySource("application-local-without-ssl.properties")
 @SpringBootApplication
 public class App {
 
