@@ -78,8 +78,8 @@ public class ControllerHttpRest {
     }
 
     @RequestMapping(value = "/GenCodeUuid", method = RequestMethod.POST)
-    public ResponseEntity<?> genCodeUuid(@RequestBody String postBody) {
-        return getResponseEntity(postBody, false, null, "schema/http/GenCodeUuid.json", HandlerMethod.GEN_CODE_UUID.get());
+    public ResponseEntity<?> genCodeUuid(@RequestBody String postBody, @RequestHeader("Authorization") String authHeader) {
+        return getResponseEntity(postBody, true, authHeader, "schema/http/GenCodeUuid.json", HandlerMethod.GEN_CODE_UUID.get());
     }
 
     @RequestMapping(value = "/GetCodeUuid", method = RequestMethod.POST)
