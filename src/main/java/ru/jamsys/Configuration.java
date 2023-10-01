@@ -15,7 +15,7 @@ import ru.jamsys.mistercraft.ControllerWebSocket;
 public class Configuration implements WebSocketConfigurer {
 
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(new ControllerWebSocket(), "*");
+        registry.addHandler(new ControllerWebSocket(), "/socket/*");
     }
 
     private static final int HTTP_PORT = 80;

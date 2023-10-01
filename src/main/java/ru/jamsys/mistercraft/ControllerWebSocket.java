@@ -51,10 +51,10 @@ public class ControllerWebSocket extends TextWebSocketHandler {
             URI uri = session.getUri();
             if (uri != null) {
                 String path = uri.getPath();
-                if (path != null && path.startsWith("/") && path.length() == 37) { //Ждём uuid устройства
+                if (path != null && path.startsWith("/socket") && path.length() == 44) { //Ждём uuid устройства
                     Util.logConsole("Connection[" + mapConnection.size() + "]; afterConnectionEstablished Success: " + session);
                     UserSessionInfo userSessionInfo = new UserSessionInfo();
-                    userSessionInfo.setDeviceUuid(path.substring(1));
+                    userSessionInfo.setDeviceUuid(path.substring(8));
                     mapConnection.put(session, new SessionWrap(session, userSessionInfo, host));
                 } else {
                     Util.logConsole("Connection[" + mapConnection.size() + "]; afterConnectionEstablished Error: " + session);
