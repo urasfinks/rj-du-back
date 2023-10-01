@@ -79,7 +79,7 @@ public class ControllerWebSocket extends TextWebSocketHandler {
                 if (sessionWrap.getRemoteAddress().equals(host)) {
                     countConnectionPerHost++;
                 }
-                if (countConnectionPerHost > 5) {
+                if (countConnectionPerHost > 12) { //Наверное 12 человек играть можно в codenames
                     return false;
                 }
             }
