@@ -132,7 +132,11 @@ public class ControllerHttpRest {
             WrapJsonToObject<Map<String, Object>> mapWrapJsonToObject = UtilJson.toMap(postBody);
             if (mapWrapJsonToObject.getException() == null) {
                 jRet.addData("request", mapWrapJsonToObject.getObject());
-                httpHandler.handler(jRet, userSessionInfo);
+                try {
+                    httpHandler.handler(jRet, userSessionInfo);
+                } catch (Exception e) {
+                    jRet.addException(e);
+                }
             } else {
                 jRet.addException(mapWrapJsonToObject.getException());
             }

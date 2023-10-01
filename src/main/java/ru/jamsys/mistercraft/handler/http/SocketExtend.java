@@ -55,7 +55,11 @@ public class SocketExtend implements HttpHandler {
         request.put("data", requestData);
 
         HttpHandler httpHandler = ru.jamsys.mistercraft.handler.http.HandlerMethod.SOCKET_UPDATE.get();
-        httpHandler.handler(jRet, userSessionInfo);
+        try {
+            httpHandler.handler(jRet, userSessionInfo);
+        } catch (Exception e) {
+            jRet.addException(e);
+        }
     }
 
     public static boolean containsMethod(String test) {
