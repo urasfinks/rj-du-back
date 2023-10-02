@@ -4,6 +4,7 @@ public enum HandlerMethod {
 
     SIGN_IN(new AuthSignIn()),
     SYNC(new Sync()),
+    DATA(new Data()),
     TEST(new Test()),
     SOCKET_UPDATE(new SocketUpdate()),
     SOCKET_EXTEND(new SocketExtend()),

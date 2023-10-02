@@ -72,6 +72,11 @@ public class ControllerHttpRest {
         return getResponseEntity(postBody, true, authHeader, null, HandlerMethod.SYNC.get(), false);
     }
 
+    @RequestMapping(value = "/Data", method = RequestMethod.POST)
+    public ResponseEntity<?> data(@RequestBody String postBody) {
+        return getResponseEntity(postBody, false, null, "schema/http/Data.json", HandlerMethod.DATA.get(), false);
+    }
+
     @RequestMapping(value = "/Test", method = RequestMethod.GET)
     public ResponseEntity<?> test(@RequestHeader(value = "Authorization", required = false) String authHeader) {
         return getResponseEntity("{}", true, authHeader, null, HandlerMethod.TEST.get());
