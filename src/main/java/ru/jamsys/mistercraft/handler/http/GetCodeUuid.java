@@ -2,7 +2,6 @@ package ru.jamsys.mistercraft.handler.http;
 
 import ru.jamsys.JsonHttpResponse;
 import ru.jamsys.mistercraft.UserSessionInfo;
-import ru.jamsys.mistercraft.handler.http.code.CodeObject;
 
 import java.util.Map;
 
@@ -15,13 +14,13 @@ public class GetCodeUuid implements HttpHandler {
         if (jRet.isStatus() && code == null) {
             jRet.addException("Код в запросе пустой");
         }
-        CodeObject codeObject = GenCodeUuid.map.get(code);
-        if (jRet.isStatus() && codeObject == null) {
+        String dataUuid = GenCodeUuid.codeManager.get(code);
+        if (jRet.isStatus() && dataUuid == null) {
             jRet.addException("Код не найден либо его срок истёк");
         }
-        if (jRet.isStatus() && codeObject != null) {
-            jRet.addData("code", codeObject.getCode());
-            jRet.addData("uuid", codeObject.getUuid());
+        if (jRet.isStatus() && dataUuid != null) {
+            jRet.addData("code", code);
+            jRet.addData("uuid", dataUuid);
         }
     }
 }
