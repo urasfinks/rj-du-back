@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <script type="text/javascript" src="/js/jquery-3.7.1.min.js"></script>
+    <script type="text/javascript" src="/js/Directive.js"></script>
+    <script type="text/javascript" src="/js/GameTeam.js"></script>
+    <script type="text/javascript" src="/js/GameWord.js"></script>
+    <script type="text/javascript" src="/js/GameRun.js"></script>
+    <script type="text/javascript" src="/js/GameFinish.js"></script>
+    <link rel="stylesheet" type="text/css" href="/css/main.css"/>
+    <meta charset="UTF-8">
+    <title>FiveGame</title>
+</head>
+<body>
+<div id="team" style="display: none;">
+    <div class="m1 p1">Участники игры:</div>
+    <div id="teamUndefined" class="round m1 bg-grey"></div>
+    <div id="teamRed" class="round m1 bg-red"></div>
+    <div id="teamBlue" class="round m1 bg-blue"></div>
+</div>
+<div id="word" style="display: none;">
+    <div class="m1 p1">Генерация карточек:</div>
+    <div id="genWord"></div>
+</div>
+<div id="run" style="display: none;">
+    <table style="width: 100%;">
+        <tr>
+            <td valign="top" class="info">
+                <div class="p1">
+                    <span>Ход:&nbsp;&nbsp;&nbsp;</span>
+                    <span id="runTeam" class="round p1"></span>
+                </div>
+                <br>
+                <div class="p1">
+                    <span>Время партии:&nbsp;&nbsp;&nbsp;</span>
+                    <span id="session"></span>
+                </div>
+                <br>
+                <div class="p1">
+                    <span>Счёт:&nbsp;&nbsp;&nbsp;</span>
+                    <span class="bg-red round p1">
+                        <span id="scoreRed"></span> /
+                        <span id="allRed"></span>
+                    </span>
+                    &nbsp;&nbsp;&nbsp;
+                    <span class="bg-blue round p1">
+                        <span id="scoreBlue"></span> /
+                        <span id="allBlue"></span>
+                    </span>
+                </div>
+                <br>
+                <div class="round p1 m1 team">
+                    Красные:<br><span id="usersRed"></span>
+                </div>
+                <br>
+                <div class="round p1 m1 team">
+                    Синие:<br><span id="usersBlue"></span>
+                </div>
+            </td>
+            <td valign="top">
+                <div id="gridWord"></div>
+            </td>
+        </tr>
+    </table>
+</div>
+<div id="finish" style="display: none;">
+    <table style="width: 100%;">
+        <tr>
+            <td valign="top" class="info">
+                <div class="p1">
+                    <span id="desc" class="round"></span>
+                </div>
+                <br>
+                <div class="p1">
+                    <span>Счёт:&nbsp;&nbsp;&nbsp;</span>
+                    <span class="bg-red round p1">
+                        <span id="scoreRedFinish"></span> /
+                        <span id="allRedFinish"></span>
+                    </span>
+                    &nbsp;&nbsp;&nbsp;
+                    <span class="bg-blue round p1">
+                        <span id="scoreBlueFinish"></span> /
+                        <span id="allBlueFinish"></span>
+                    </span>
+                </div>
+                <br>
+                <div class="round p1 m1 team">
+                    Красные:<br><span id="usersRedFinish"></span>
+                </div>
+                <br>
+                <div class="round p1 m1 team">
+                    Синие:<br><span id="usersBlueFinish"></span>
+                </div>
+            </td>
+            <td valign="top">
+                <div id="gridWordFinish"></div>
+            </td>
+        </tr>
+    </table>
+</div>
+<script type="text/javascript" src="/js/main.js"></script>
+</body>
+</html>

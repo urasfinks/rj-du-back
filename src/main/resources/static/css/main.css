@@ -1,0 +1,129 @@
+body {
+    margin: 0;
+    padding-bottom: 3rem;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #222;
+}
+#team,#word{
+    font-size: 170%;
+    color: #777;
+}
+
+.bg-red {
+    background-color: #e64331;
+    color: white;
+}
+
+.bg-blue {
+    background-color: #4695ef;
+    color: white;
+}
+.bg-grey{
+    background-color: #333;
+    color: white;
+}
+
+.gridWord {
+    width: 100%;
+}
+
+.decoration-none {
+    text-decoration: none;
+}
+
+.decoration-lineThrough {
+    text-decoration: line-through;
+}
+
+.weight-bold {
+    font-weight: bold;
+}
+
+.weight-normal {
+    font-weight: normal;
+}
+
+.card {
+    position: relative;
+    text-align: center;
+    height: 11.5vh;
+    margin: 0.5vh;
+
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+
+    -ms-flex-align: center;
+    -webkit-align-items: center;
+    -webkit-box-align: center;
+    align-items: center;
+
+    align-items: center;
+    justify-content: center;
+
+    -webkit-border-radius: 10pt;
+    -moz-border-radius: 10pt;
+    border-radius: 10pt;
+    font-size: 170%;
+}
+
+.round {
+    -webkit-border-radius: 10pt;
+    -moz-border-radius: 10pt;
+    border-radius: 10pt;
+}
+
+.info {
+    padding: 10pt;
+    color: white;
+    font-size: 180%;
+    margin: 10pt;
+}
+
+.p1 {
+    padding: 10pt;
+}
+
+.m1 {
+    margin: 10pt;
+}
+
+.team {
+    background-color: #333;
+}
+
+.selected {
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    border-radius: 50%;
+    width: 15pt;
+    height: 15pt;
+    position: absolute;
+    top: 4pt;
+    right: 4pt;
+}
+
+.tapCount {
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    border-radius: 50%;
+    background-color: #6ed64a;
+    color: white;
+    width: 30pt;
+    height: 30pt;
+    text-align: center;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+
+    -ms-flex-align: center;
+    -webkit-align-items: center;
+    -webkit-box-align: center;
+    align-items: center;
+
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 4pt;
+    right: 4pt;
+}

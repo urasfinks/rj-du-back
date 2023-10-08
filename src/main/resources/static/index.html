@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <!-- Basic Page Needs
+    ================================================== -->
+    <meta charset="utf-8">
+    <title>FiveGame | игры</title>
+
+    <!-- Mobile Specific Metas
+    ================================================== -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="FiveGame | игры">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="images/favicon50.png"/>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+
+    <!-- PLUGINS CSS STYLE -->
+    <link rel="stylesheet" href="plugins/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="plugins/themify-icons/themify-icons.css">
+    <link rel="stylesheet" href="plugins/slick/slick.css">
+    <link rel="stylesheet" href="plugins/slick/slick-theme.css">
+    <link rel="stylesheet" href="plugins/fancybox/jquery.fancybox.min.css">
+    <link rel="stylesheet" href="plugins/aos/aos.css">
+
+    <!-- CUSTOM CSS -->
+    <link href="css/style.css?time=6" rel="stylesheet">
+
+</head>
+
+<body class="body-wrapper" data-spy="scroll" data-target=".privacy-nav">
+
+
+<nav class="navbar main-nav navbar-expand-lg px-2 px-sm-0 py-2 py-lg-0">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <img src="images/favicon50.png" alt="logo">&nbsp;&nbsp;<span
+                class="logo-text">FiveGame</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="ti-menu"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item dropdown active">
+                    <a class="nav-link" href="/">Главная</a>
+                    <!-- Dropdown list -->
+                </li>
+
+                <li class="nav-item @@contact">
+                    <a class="nav-link" href="contact.html">Контакты</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!--====================================
+=            Hero Section            =
+=====================================-->
+<section class="section gradient-banner">
+    <div class="shapes-container">
+        <div class="shape" data-aos="fade-down-left" data-aos-duration="1500" data-aos-delay="100"></div>
+        <div class="shape" data-aos="fade-down" data-aos-duration="1000" data-aos-delay="100"></div>
+        <div class="shape" data-aos="fade-up-right" data-aos-duration="1000" data-aos-delay="200"></div>
+        <div class="shape" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="200"></div>
+        <div class="shape" data-aos="fade-down-left" data-aos-duration="1000" data-aos-delay="100"></div>
+        <div class="shape" data-aos="fade-down-left" data-aos-duration="1000" data-aos-delay="100"></div>
+        <div class="shape" data-aos="zoom-in" data-aos-duration="1000" data-aos-delay="300"></div>
+        <div class="shape" data-aos="fade-down-right" data-aos-duration="500" data-aos-delay="200"></div>
+        <div class="shape" data-aos="fade-down-right" data-aos-duration="500" data-aos-delay="100"></div>
+        <div class="shape" data-aos="zoom-out" data-aos-duration="2000" data-aos-delay="500"></div>
+        <div class="shape" data-aos="fade-up-right" data-aos-duration="500" data-aos-delay="200"></div>
+        <div class="shape" data-aos="fade-down-left" data-aos-duration="500" data-aos-delay="100"></div>
+        <div class="shape" data-aos="fade-up" data-aos-duration="500" data-aos-delay="0"></div>
+        <div class="shape" data-aos="fade-down" data-aos-duration="500" data-aos-delay="0"></div>
+        <div class="shape" data-aos="fade-up-right" data-aos-duration="500" data-aos-delay="100"></div>
+        <div class="shape" data-aos="fade-down-left" data-aos-duration="500" data-aos-delay="0"></div>
+    </div>
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6 order-2 order-md-1 text-center text-md-left">
+                <h1 class="text-white font-weight-bold mb-4">Бесплатное приложение FiveGame, online игры</h1>
+                <p class="text-white mb-5">Играй с друзьями и коллегами</p>
+                <a href="#platform" class="btn btn-main-md rounded-pill">Скачать бесплатно</a>
+            </div>
+            <div class="col-md-6 text-center order-1 order-md-2">
+                <img class="img-fluid" style="max-width:87%;" src="images/mobile_1_23.png" alt="screenshot">
+            </div>
+        </div>
+    </div>
+</section>
+<!--====  End of Hero Section  ====-->
+
+<section class="section pt-0 position-relative pull-top">
+    <div class="container">
+        <div class="rounded-pill shadow p-5 bg-black">
+            <form class="row" onsubmit="connect(); return false;">
+                <div class="col-lg-8 col-md-6 mt-5 mt-md-0 text-center">
+                    <input id="code" class="rounded-pill btn-main-md"
+                           style="font-size: 1rem;line-height: 1rem;width: 100%;font-weight: normal;" type="text"
+                           name="subject" placeholder="Введите код ля подключения к игре"
+                           required>
+                </div>
+                <div class="col-lg-4 col-md-6 mt-5 mt-md-0 text-center">
+                    <input type="submit" href="javascript:connect();" class="btn btn-main-md rounded-pill" style="width: 100%;" value="Присоединиться к игре"/>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!--==================================
+=            Feature Grid            =
+===================================-->
+<section class="feature section pt-0">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6 justify-content-center">
+                <!-- Feature Mockup -->
+                <div class="image-content m-center-left" data-aos="fade-right">
+                    <img class="img-fluid" style="max-width:70%;" src="images/mobile_81.png" alt="iphone">
+                </div>
+            </div>
+            <div class="col-lg-6 mr-auto align-self-center">
+                <div class="feature-content">
+                    <!-- Feature Title -->
+                    <h2>Быстрое подключение и контроль</h2>
+                    <!-- Feature Description -->
+                    <p class="desc">Больше не надо тянуть жребий, есть механизм случайного распределения по командам.
+                        Если не все участники хотят устанавливать приложение, их можно добавить как статических
+                        персонажей, а для общей статистики вывести на экран телевизора саму игру</p>
+                </div>
+                <!-- Testimonial Quote -->
+                <div class="testimonial">
+                    <p>
+                        "Организатору доступно:<br>
+                        - Поделится ссылкой на игру<br>
+                        - Добавить статических персонажей<br>
+                        - переопределить состав команды<br>
+                        - выбрать карточки<br>
+                        - создать собственный набор слов"
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="feature section pt-0">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6 ml-auto align-self-center">
+                <div class="feature-content">
+                    <!-- Feature Title -->
+                    <h2>История игр</h2>
+                    <!-- Feature Description -->
+                    <p>Все игры в которых вы были организатором или участником сохраняются в вашем телефоне. Через
+                        историю можно подклчится снова к игре, предположим если во время игры у вас сел телефон или
+                        просто посмотреть когда и с кем вы играли и чем закончилась игра</p>
+                </div>
+                <!-- Testimonial Quote -->
+                <div class="testimonial">
+                    <p>
+                        "Данные игры обновляются моментально, без необходимости обновлять страницу"
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-6 justify-content-center">
+                <!-- Feature mockup -->
+                <div class="image-content m-center-right" data-aos="fade-left">
+                    <img class="img-fluid" style="max-width:70%;" src="images/mobile_8.png" alt="ipad">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!--====  End of Feature Grid  ====-->
+
+
+<section class="call-to-action-app section bg-blue" id="platform">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <h2>Начинай прямо сейчас</h2>
+                <p>Скачивай приложение <a href="">FiveGame</a>
+                    <br>Быстрое, простое, бесплатное</p>
+                <ul class="list-inline">
+                    <li class="list-inline-item">
+                        <a href="https://apps.apple.com/ru/app/mytodo/id1639810855" target="_blank"
+                           class="btn btn-rounded-icon">
+                            <i class="ti-apple"></i>
+                            Iphone
+                        </a>
+                    </li>
+                    <li class="list-inline-item">
+                        <a href="/apk/fiveGame.apk" target="_blank" class="btn btn-rounded-icon">
+                            <i class="ti-android"></i>
+                            Android
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!--============================
+=            Footer            =
+=============================-->
+<footer>
+    <div class="text-center py-4">
+        <small class="text-secondary">Все права защищены &copy;
+            <script>document.write(new Date().getFullYear())</script>
+            . Дизайн &amp; Разработка <a href="https://5gm.ru/">5gm.ru</a> &nbsp;&bull;&nbsp; <a
+                    href="/privacy-policy.html">Политика конфиденциальности</a> </small>
+    </div>
+</footer>
+
+
+<!-- To Top -->
+<!--
+<div class="scroll-top-to">
+    <i class="ti-angle-up"></i>
+</div>
+-->
+<!-- JAVASCRIPTS -->
+<script src="plugins/jquery/jquery.min.js"></script>
+<script src="plugins/bootstrap/bootstrap.min.js"></script>
+<script src="plugins/slick/slick.min.js"></script>
+<script src="plugins/fancybox/jquery.fancybox.min.js"></script>
+<script src="plugins/syotimer/jquery.syotimer.min.js"></script>
+<script src="plugins/aos/aos.js"></script>
+
+<script src="js/script.js"></script>
+<script type="text/javascript">
+    function connect(){
+        try {
+            $.ajax({
+                url: '/GetCodeUuid',
+                method: 'post',
+                contentType: "application/json",
+                dataType: 'json',
+                data: JSON.stringify({"code": $("#code").val()*1}),
+                success: function (data) {
+                    var anchor = document.createElement('a');
+                    anchor.href = '/game.html#'+data.data.uuid;
+                    //anchor.target="_blank";
+                    anchor.click();
+                },
+                error: function(xhr){
+                    var err = JSON.parse(xhr.responseText);
+                    alert(err.description);
+                }
+            });
+        } catch (e) {
+            error(e.toString());
+        }
+
+    }
+</script>
+</body>
+
+</html>
