@@ -1,7 +1,6 @@
 var uuid = location.href.split("#")[1];
-var url = (window.location.protocol == "https" ? "wss" : "ws") + "://" + window.location.hostname + "/socket/" + uuid;
-
-//var url = "wss://5gm.ru/socket/" + uuid;
+var protocol = location.protocol.toLowerCase() == "https:" ? "wss" : "ws";
+var url = protocol + "://" + location.host.toString() + "/socket/" + uuid;
 
 function error(data) {
     alert(data);
