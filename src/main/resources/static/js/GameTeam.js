@@ -3,6 +3,18 @@ function team(socketData) {
     $("#teamUndefined").html(getListPersonGroup(socketData, "undefined"));
     $("#teamRed").html(getListPersonGroup(socketData, "red"));
     $("#teamBlue").html(getListPersonGroup(socketData, "blue"));
+
+    var uuid = location.href.split("#")[1];
+    var protocol = location.protocol.toLowerCase();
+    document.getElementById("qrcode").innerHTML = "";
+    var qrcode = new QRCode(document.getElementById("qrcode"), {
+        text: protocol + "//" + location.host.toString() + "/deeplink/v10/ConnectAlternativeWord/socketUuid/" + uuid,
+        width: 600,
+        height: 600,
+        colorDark: "#222",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+    });
 }
 
 function getListPersonGroup(socketData, team) {

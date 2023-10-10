@@ -8,16 +8,29 @@
     <script type="text/javascript" src="/js/GameWord.js"></script>
     <script type="text/javascript" src="/js/GameRun.js"></script>
     <script type="text/javascript" src="/js/GameFinish.js"></script>
+    <script type="text/javascript" src="/js/qrcode.js"></script>
     <link rel="stylesheet" type="text/css" href="/css/main.css"/>
     <meta charset="UTF-8">
     <title>FiveGame</title>
 </head>
 <body>
 <div id="team" style="display: none;">
-    <div class="m1 p1">Участники игры:</div>
-    <div id="teamUndefined" class="round m1 bg-grey"></div>
-    <div id="teamRed" class="round m1 bg-red"></div>
-    <div id="teamBlue" class="round m1 bg-blue"></div>
+    <table style="width: 100%;height: 100vh;">
+        <tr>
+            <td style="width: 100%;">
+                <div class="m1 p1">Участники игры:</div>
+                <div id="teamUndefined" class="round m1 bg-grey"></div>
+                <div id="teamRed" class="round m1 bg-red"></div>
+                <div id="teamBlue" class="round m1 bg-blue"></div>
+            </td>
+            <td>
+                <div style="padding: 6rem;">
+                    <div id="qrcode"></div>
+                </div>
+            </td>
+        </tr>
+    </table>
+
 </div>
 <div id="word" style="display: none;">
     <div class="m1 p1">Генерация карточек:</div>
