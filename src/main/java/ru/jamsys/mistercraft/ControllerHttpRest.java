@@ -1,5 +1,6 @@
 package ru.jamsys.mistercraft;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
@@ -108,6 +109,12 @@ public class ControllerHttpRest {
         return Util.getResourceContent(assetLinks, "UTF-8");
     }
     //<--- Mobile DeepLink
+
+    @RequestMapping(value = "/deeplink/**", method = RequestMethod.GET)
+    public void method(HttpServletResponse httpServletResponse) {
+        httpServletResponse.setHeader("Location", "/");
+        httpServletResponse.setStatus(302);
+    }
 
     public JsonHttpResponse getJsonHttpResponse(String postBody, boolean checkAuthHeader, String authHeader, String schemaValidation, HttpHandler httpHandler) {
         JsonHttpResponse jRet = new JsonHttpResponse();
