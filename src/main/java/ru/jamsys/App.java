@@ -8,7 +8,6 @@ import ru.jamsys.component.JdbcTemplate;
 import ru.jamsys.component.JsonSchema;
 import ru.jamsys.component.Security;
 import ru.jamsys.jdbc.template.TemplateEnum;
-import ru.jamsys.mistercraft.AudioInsert;
 import ru.jamsys.mistercraft.EMail;
 import ru.jamsys.mistercraft.socket.RequestMessageReader;
 import ru.jamsys.pool.PostgreSQL;
@@ -16,6 +15,8 @@ import ru.jamsys.pool.PostgreSQL;
 import java.util.List;
 import java.util.Map;
 
+//@PropertySource("watch-ready/application-local-without-ssl.properties")
+//@PropertySource("watch-ready/application-docker.properties")
 @PropertySource("application-docker.properties")
 //@PropertySource("application-local.properties")
 //@PropertySource("application-local-without-ssl.properties")
