@@ -1,5 +1,6 @@
 package ru.jamsys.mistercraft;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -13,8 +14,7 @@ import ru.jamsys.mistercraft.handler.http.HandlerMethod;
 import ru.jamsys.mistercraft.handler.http.HttpHandler;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.Map;
+import java.util.*;
 
 @SuppressWarnings("unused")
 @RestController
@@ -91,6 +91,15 @@ public class ControllerHttpRest {
     @RequestMapping(value = "/GetCodeUuid", method = RequestMethod.POST)
     public ResponseEntity<?> getCodeUuid(@RequestBody String postBody) {
         return getResponseEntity(postBody, false, null, "schema/http/GetCodeUuid.json", HandlerMethod.GET_CODE_UUID.get());
+    }
+
+    @RequestMapping(value = "/Comment", method = RequestMethod.POST)
+    public ResponseEntity<?> comment(HttpServletRequest request) {
+        Map<String, String> postData = getPostData(request);
+        postData.put("g-recaptcha-response", "1");
+        String postBody = UtilJson.toString(postData, "{}");
+
+        return getResponseEntity(postBody, false, null, "schema/http/Comment.json", HandlerMethod.COMMENT.get());
     }
 
     //---> Mobile DeepLink
@@ -193,6 +202,15 @@ public class ControllerHttpRest {
         }
         userSessionInfo.check();
         return userSessionInfo;
+    }
+
+    Map<String, String> getPostData(HttpServletRequest request) {
+        Map<String, String> result = new LinkedHashMap<>();
+        List<String> list = Collections.list(request.getParameterNames());
+        for (String item : list) {
+            result.put(item, request.getParameter(item));
+        }
+        return result;
     }
 
 }

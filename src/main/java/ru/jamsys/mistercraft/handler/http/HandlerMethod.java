@@ -10,6 +10,7 @@ public enum HandlerMethod {
     SOCKET_EXTEND(new SocketExtend()),
     GEN_CODE_UUID(new GenCodeUuid()),
     GET_CODE_UUID(new GetCodeUuid()),
+    COMMENT(new Comment()),
     GET_CODE(new AuthGetCode());
 
     final HttpHandler httpHandler;

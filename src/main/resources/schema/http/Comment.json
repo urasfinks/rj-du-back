@@ -1,0 +1,37 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "email": {
+      "type": "string",
+      "description": "Email",
+      "pattern": "^\\S+@\\S+\\.\\S+$",
+      "format": "email",
+      "minLength": 6,
+      "maxLength": 127
+    },
+    "subject": {
+      "type": "string",
+      "minLength": 1
+    },
+    "message": {
+      "type": "string",
+      "minLength": 1
+    },
+    "g-recaptcha-response": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "required": [
+    "name",
+    "email",
+    "subject",
+    "message",
+    "g-recaptcha-response"
+  ]
+}
