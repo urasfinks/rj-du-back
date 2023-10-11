@@ -95,10 +95,7 @@ public class ControllerHttpRest {
 
     @RequestMapping(value = "/Comment", method = RequestMethod.POST)
     public ResponseEntity<?> comment(HttpServletRequest request) {
-        Map<String, String> postData = getPostData(request);
-        postData.put("g-recaptcha-response", "1");
-        String postBody = UtilJson.toString(postData, "{}");
-
+        String postBody = UtilJson.toString(getPostData(request), "{}");
         return getResponseEntity(postBody, false, null, "schema/http/Comment.json", HandlerMethod.COMMENT.get());
     }
 

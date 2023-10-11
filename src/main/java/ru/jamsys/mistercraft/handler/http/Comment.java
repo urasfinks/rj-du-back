@@ -23,6 +23,7 @@ public class Comment implements HttpHandler {
         }
         if (jRet.isStatus()) {
             Telegram telegram = App.context.getBean(Telegram.class);
+            req.remove("g-recaptcha-response");
             telegram.syncSend("290029195", UtilJson.toString(req, "{}"), jRet);
         }
         if (jRet.isStatus()) {
