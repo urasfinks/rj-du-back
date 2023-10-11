@@ -26,10 +26,5 @@ public class Comment implements HttpHandler {
             req.remove("g-recaptcha-response");
             telegram.syncSend("290029195", UtilJson.toString(req, "{}"), jRet);
         }
-        if (jRet.isStatus()) {
-            jRet.setRawBody("Спасибо, сообщение отправлено");
-        } else {
-            jRet.setRawBody("Сообщение не отправлено, причина: " + jRet.getDescription());
-        }
     }
 }

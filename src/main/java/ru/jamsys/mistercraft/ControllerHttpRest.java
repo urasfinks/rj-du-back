@@ -96,7 +96,13 @@ public class ControllerHttpRest {
     @RequestMapping(value = "/Comment", method = RequestMethod.POST)
     public ResponseEntity<?> comment(HttpServletRequest request) {
         String postBody = UtilJson.toString(getPostData(request), "{}");
-        return getResponseEntity(postBody, false, null, "schema/http/Comment.json", HandlerMethod.COMMENT.get());
+        JsonHttpResponse jRet = getJRet(postBody, false, null, "schema/http/Comment.json", HandlerMethod.COMMENT.get(), true);
+        if (jRet.isStatus()) {
+            jRet.setRawBody("Спасибо, сообщение отправлено");
+        } else {
+            jRet.setRawBody("Сообщение не отправлено, причина: " + jRet.getDescription());
+        }
+        return jRet.getResponseEntity();
     }
 
     //---> Mobile DeepLink
@@ -163,18 +169,22 @@ public class ControllerHttpRest {
         return jRet;
     }
 
-    public ResponseEntity<?> getResponseEntity(String postBody, boolean checkAuthHeader, String authHeader, String schemaValidation, HttpHandler httpHandler) {
-        return getResponseEntity(postBody, checkAuthHeader, authHeader, schemaValidation, httpHandler, true);
-    }
-
-    public ResponseEntity<?> getResponseEntity(String postBody, boolean checkAuthHeader, String authHeader, String schemaValidation, HttpHandler httpHandler, boolean debug) {
+    public JsonHttpResponse getJRet(String postBody, boolean checkAuthHeader, String authHeader, String schemaValidation, HttpHandler httpHandler, boolean debug) {
         Util.logConsole("Request: " + postBody);
         JsonHttpResponse jRet = getJsonHttpResponse(postBody, checkAuthHeader, authHeader, schemaValidation, httpHandler);
         jRet.getData().remove("request");
         if (debug) {
             Util.logConsole("Response: " + jRet);
         }
-        return jRet.getResponseEntity();
+        return jRet;
+    }
+
+    public ResponseEntity<?> getResponseEntity(String postBody, boolean checkAuthHeader, String authHeader, String schemaValidation, HttpHandler httpHandler) {
+        return getResponseEntity(postBody, checkAuthHeader, authHeader, schemaValidation, httpHandler, true);
+    }
+
+    public ResponseEntity<?> getResponseEntity(String postBody, boolean checkAuthHeader, String authHeader, String schemaValidation, HttpHandler httpHandler, boolean debug) {
+        return getJRet(postBody, checkAuthHeader, authHeader, schemaValidation, httpHandler, debug).getResponseEntity();
     }
 
     private UserSessionInfo getDeviceUuid(String valueHeaderAuthorization) {
