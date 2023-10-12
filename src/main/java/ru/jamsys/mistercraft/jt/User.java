@@ -8,6 +8,8 @@ public enum User implements TemplateEnum {
 
     GET_BY_MAIL("SELECT * FROM \"user\" WHERE mail_user = lower(${IN.mail::VARCHAR});", StatementType.SELECT_WITH_AUTO_COMMIT),
 
+    GET_BY_CODE_APPLE_REVIEW("SELECT * FROM \"user\" WHERE mail_user = lower(${IN.mail::VARCHAR});", StatementType.SELECT_WITH_AUTO_COMMIT),
+
     GET_BY_CODE("SELECT * FROM \"user\" WHERE mail_user = lower(${IN.mail::VARCHAR}) AND code_user = ${IN.code::NUMBER};", StatementType.SELECT_WITH_AUTO_COMMIT),
 
     RESET_CODE("UPDATE \"user\" set code_user = null WHERE mail_user = lower(${IN.mail::VARCHAR});", StatementType.SELECT_WITH_AUTO_COMMIT),

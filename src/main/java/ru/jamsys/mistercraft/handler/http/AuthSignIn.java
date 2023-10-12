@@ -6,28 +6,33 @@ import ru.jamsys.mistercraft.UserSessionInfo;
 import ru.jamsys.mistercraft.jt.Device;
 import ru.jamsys.mistercraft.jt.User;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class AuthSignIn implements HttpHandler {
     @Override
     public void handler(JsonHttpResponse jRet, UserSessionInfo userSessionInfo) {
-        //{"login":"urasfinks@yandex.ru", "code":12345}
-        Map<String, Object> req = new HashMap<>();
-        if (jRet.isStatus()) {
-            try {
-                @SuppressWarnings("unchecked")
-                Map<String, Object> req2 = (Map<String, Object>) jRet.getData().get("request");
-                req = req2;
-            } catch (Exception e) {
-                jRet.addException(e);
-            }
+        //{"mail":"urasfinks@yandex.ru", "code":12345}
+        @SuppressWarnings("unchecked")
+        Map<String, Object> req = (Map<String, Object>) jRet.getData().get("request");
+        String mail = (String) req.get("mail");
+        Integer code = (Integer) req.get("code");
+        boolean isAppleReviewAppStore = false;
+        if (mail.equals("admin@admin.ru") && code != null && code == 214365) {//Apple Review App Store
+            isAppleReviewAppStore = true;
+            req.put("code", null);
+        } else if (code == null) {
+            jRet.addException("Код не может быть пустым");
         }
+
         List<Map<String, Object>> user = null;
         if (jRet.isStatus()) {
             try {
-                user = App.jdbcTemplate.execute(App.postgresqlPoolName, User.GET_BY_CODE, req);
+                if (isAppleReviewAppStore) {
+                    user = App.jdbcTemplate.execute(App.postgresqlPoolName, User.GET_BY_CODE_APPLE_REVIEW, req);
+                } else {
+                    user = App.jdbcTemplate.execute(App.postgresqlPoolName, User.GET_BY_CODE, req);
+                }
                 if (user.size() == 0) {
                     jRet.addException("No data found");
                 }
