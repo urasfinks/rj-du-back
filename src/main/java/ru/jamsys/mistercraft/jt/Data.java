@@ -21,6 +21,19 @@ public enum Data implements TemplateEnum {
             DataType.socket.name()
     ), StatementType.SELECT_WITH_AUTO_COMMIT),
 
+    REMOVE_ALL("""
+            UPDATE data SET
+                is_remove_data = 1
+            WHERE
+                is_remove_data = 0
+                AND (uuid_device_data = ${IN.uuid_device::VARCHAR} OR id_user = ${IN.id_user::NUMBER})
+                AND type_data IN ('%s', '%s', '%s')
+            """.formatted(
+            DataType.blobRSync.name(),
+            DataType.userDataRSync.name(),
+            DataType.socket.name()
+    ), StatementType.SELECT_WITH_AUTO_COMMIT),
+
     SELECT_MAX_REVISION_BY_TYPE("""
             SELECT
                 type_data AS key,

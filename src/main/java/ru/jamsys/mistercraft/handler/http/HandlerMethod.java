@@ -3,6 +3,7 @@ package ru.jamsys.mistercraft.handler.http;
 public enum HandlerMethod {
 
     SIGN_IN(new AuthSignIn()),
+    LOGOUT_WITH_REMOVE(new LogoutWithRemove()),
     SYNC(new Sync()),
     DATA(new Data()),
     TEST(new Test()),

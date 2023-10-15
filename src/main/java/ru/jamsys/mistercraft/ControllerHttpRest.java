@@ -34,6 +34,11 @@ public class ControllerHttpRest {
         return getResponseEntity(postBody, false, null, "schema/http/GetCode.json", HandlerMethod.GET_CODE.get());
     }
 
+    @RequestMapping(value = "/LogoutWithRemove", method = RequestMethod.GET)
+    public ResponseEntity<?> logoutWithRemove(@RequestHeader("Authorization") String authHeader) {
+        return getResponseEntity("{}", true, authHeader, null, HandlerMethod.LOGOUT_WITH_REMOVE.get());
+    }
+
     @RequestMapping(value = "/SignIn", method = RequestMethod.POST)
     public ResponseEntity<?> signIn(@RequestBody String postBody, @RequestHeader("Authorization") String authHeader) {
         return getResponseEntity(postBody, true, authHeader, "schema/http/SignIn.json", HandlerMethod.SIGN_IN.get());
