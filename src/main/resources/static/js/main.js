@@ -73,6 +73,9 @@ function getData() {
             data: JSON.stringify({uuid: uuid}),
             success: function (data) {
                 add(JSON.parse(data.data.data));
+            },
+            error: function (data) {
+                error(JSON.parse(data.responseText).description);
             }
         });
     } catch (e) {
