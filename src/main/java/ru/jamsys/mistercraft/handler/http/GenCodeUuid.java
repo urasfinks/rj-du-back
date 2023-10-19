@@ -15,8 +15,11 @@ import java.util.function.Consumer;
 public class GenCodeUuid implements HttpHandler {
 
     static AtomicBoolean available = new AtomicBoolean(true);
-
     static TokenManager<Integer, String> codeManager = new TokenManager<>(); // 12356: dataUuid
+
+    // Надо, что бы к данным нельзя было обращаться всё время
+    // Если это не сделать, та как принимать решение - можно выдать данные или нет через Api
+    // На код опираться нельзя, так как у нас их ограниченное кол-во 100000 - 999999 и мы не можем хранить их сутки
     static TokenManager<String, String> dataManager = new TokenManager<>(); // dataUuid: deviceUuid
 
     @Override
@@ -49,7 +52,8 @@ public class GenCodeUuid implements HttpHandler {
                 int count = 0;
                 while (true) {
                     Integer random = Util.random(100000, 999999);
-                    if (codeManager.add(random, uuid, 60 * 5 * 1000)) {
+                    //if (codeManager.add(random, uuid, 60 * 5 * 1000)) {
+                    if (codeManager.add(random, uuid, 60 * 60 * 24 * 3 * 1000)) {
                         jsonHttpResponse.addData("code", random);
                         jsonHttpResponse.addData("uuid", uuid);
                         break;
