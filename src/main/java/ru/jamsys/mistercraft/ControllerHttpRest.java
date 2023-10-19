@@ -8,11 +8,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import ru.jamsys.*;
 import ru.jamsys.component.JsonSchema;
 import ru.jamsys.mistercraft.handler.http.HandlerMethod;
 import ru.jamsys.mistercraft.handler.http.HttpHandler;
+import ru.jamsys.mistercraft.jt.Data;
 
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -106,6 +109,46 @@ public class ControllerHttpRest {
             jRet.setRawBody("Спасибо, сообщение отправлено");
         } else {
             jRet.setRawBody("Сообщение не отправлено, причина: " + jRet.getDescription());
+        }
+        return jRet.getResponseEntity();
+    }
+
+    @RequestMapping(value = "/Upload", method = RequestMethod.POST)
+    public ResponseEntity<?> upload(@RequestHeader(value = "Authorization", required = false) String authHeader, @RequestParam("name") String name, @RequestParam("key") String key, @RequestParam("file") MultipartFile file) {
+        JsonHttpResponse jRet = new JsonHttpResponse();
+        UserSessionInfo userSessionInfo = getDeviceUuid(authHeader);
+        if (!userSessionInfo.isValidRequest()
+                || !userSessionInfo.isRegister()
+                || userSessionInfo.getIdUser() != 5
+        ) {
+            jRet.setUnauthorized();
+        }
+        if (jRet.isStatus() && file.isEmpty()) {
+            jRet.addException("Файл пустой");
+        }
+        if (jRet.isStatus()) {
+            try {
+                String base64Data = UtilBase64.base64Encode(file.getBytes(), false);
+                Map<String, Object> arguments0 = App.jdbcTemplate.createArguments();
+                arguments0.put("uuid_data", name);
+                List<Map<String, Object>> exec = App.jdbcTemplate.execute(App.postgresqlPoolName, Data.SELECT, arguments0);
+                if (exec.isEmpty()) {
+                    Map<String, Object> arguments = App.jdbcTemplate.createArguments();
+                    arguments.put("uuid_data", name);
+                    arguments.put("value_data", base64Data);
+                    arguments.put("type_data", "blob");
+                    arguments.put("parent_uuid_data", null);
+                    arguments.put("date_add_data", new BigDecimal(System.currentTimeMillis()));
+                    arguments.put("is_remove_data", 0);
+                    arguments.put("id_user", 1);
+                    arguments.put("key_data", key);
+                    arguments.put("uuid_device", null);
+                    arguments.put("new_id_revision", new BigDecimal(0));
+                    App.jdbcTemplate.execute(App.postgresqlPoolName, Data.INSERT, arguments);
+                }
+            } catch (Exception e) {
+                jRet.addException(e);
+            }
         }
         return jRet.getResponseEntity();
     }

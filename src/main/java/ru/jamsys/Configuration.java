@@ -1,5 +1,6 @@
 package ru.jamsys;
 
+import jakarta.servlet.MultipartConfigElement;
 import lombok.Setter;
 import org.apache.catalina.Context;
 import org.apache.catalina.connector.Connector;
@@ -7,8 +8,10 @@ import org.apache.tomcat.util.descriptor.web.SecurityCollection;
 import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
+import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
 import org.springframework.context.annotation.Bean;
+import org.springframework.util.unit.DataSize;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
@@ -61,5 +64,13 @@ public class Configuration implements WebSocketConfigurer {
         connector.setRedirectPort(HTTPS_PORT);
         connector.setAsyncTimeout(1000);
         return connector;
+    }
+
+    @Bean
+    MultipartConfigElement multipartConfigElement() {
+        MultipartConfigFactory factory = new MultipartConfigFactory();
+        factory.setMaxFileSize(DataSize.ofMegabytes(12));
+        factory.setMaxRequestSize(DataSize.ofMegabytes(12));
+        return factory.createMultipartConfig();
     }
 }
