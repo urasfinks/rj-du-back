@@ -11,7 +11,7 @@ import java.util.Map;
 public class UserSessionInfo {
 
     long version;
-    private Long idUser;
+    private long idUser;
     private String deviceUuid = null;
     private boolean checked = false;
 
