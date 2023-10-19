@@ -15,11 +15,11 @@ import ru.jamsys.pool.PostgreSQL;
 import java.util.List;
 import java.util.Map;
 
-//@PropertySource("watch-ready/application-local-without-ssl.properties")
+@PropertySource("watch-ready/application-local-without-ssl.properties")
 //@PropertySource("watch-ready/application-docker.properties")
 //@PropertySource("application-docker.properties")
 //@PropertySource("application-local.properties")
-@PropertySource("application-local-without-ssl.properties")
+//@PropertySource("application-local-without-ssl.properties")
 @SpringBootApplication
 public class App {
 
