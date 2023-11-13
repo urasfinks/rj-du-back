@@ -11,13 +11,13 @@ import java.util.Map;
 public class UserSessionInfo {
 
     long version;
-    private long idUser;
+    private Long idUser; //idUser может быть равен null
     private String deviceUuid = null;
     private boolean checked = false;
 
     @SuppressWarnings("unused")
     public boolean isRegister() {
-        return isValidRequest() && idUser > 0;
+        return isValidRequest() && idUser != null && idUser > 0;
     }
 
     public boolean isValidRequest() {
