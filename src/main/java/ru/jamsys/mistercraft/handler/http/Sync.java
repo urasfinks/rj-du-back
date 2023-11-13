@@ -37,10 +37,16 @@ public class Sync implements HttpHandler {
             }
             @SuppressWarnings("unchecked")
             Map<String, Long> rqMaxRevisionByType = (Map<String, Long>) parsedJson.get("maxRevisionByType");
+            boolean authJustNow = parsedJson.containsKey("authJustNow") && (boolean) parsedJson.get("authJustNow");
             Map<String, Long> dbMaxRevisionByType = getMaxRevisionByType(userSessionInfo);
 
             for (DataType dataType : DataType.values()) {
                 long rqRevision = ((Number) rqMaxRevisionByType.getOrDefault(dataType.toString(), 0L)).longValue();
+                //Бывает такое, что клиент сначала без авторизации что-то создаёт, а потом авторизуется
+                //В этом случае надо клиентские данные начинать сканить с самого начала
+                if (authJustNow && dataType.isUserData()) {
+                    rqRevision = 0;
+                }
                 long dbRevision = dbMaxRevisionByType.getOrDefault(dataType.toString(), 0L);
                 if (dbRevision > rqRevision) {
                     Map<String, Object> arguments = App.jdbcTemplate.createArguments();
