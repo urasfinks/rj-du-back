@@ -44,7 +44,7 @@ public class Sync implements HttpHandler {
                 long rqRevision = ((Number) rqMaxRevisionByType.getOrDefault(dataType.toString(), 0L)).longValue();
                 //Бывает такое, что клиент сначала без авторизации что-то создаёт, а потом авторизуется
                 //В этом случае надо клиентские данные начинать сканить с самого начала
-                if (authJustNow && dataType.isUserData()) {
+                if (authJustNow && (dataType.isUserData() || dataType == DataType.socket)) {
                     rqRevision = 0;
                 }
                 long dbRevision = dbMaxRevisionByType.getOrDefault(dataType.toString(), 0L);
