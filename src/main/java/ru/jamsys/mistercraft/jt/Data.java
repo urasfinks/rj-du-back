@@ -204,7 +204,11 @@ public enum Data implements TemplateEnum {
             """, StatementType.SELECT_WITHOUT_AUTO_COMMIT),
     LOCK("""
             SELECT * FROM data WHERE id_data = 82561 FOR UPDATE;
-            """, StatementType.SELECT_WITHOUT_AUTO_COMMIT);
+            """, StatementType.SELECT_WITHOUT_AUTO_COMMIT),
+
+    UPDATE_ID_USER_BEFORE_SIGN_IN("""
+            UPDATE data SET id_user = ${IN.id_user::NUMBER} WHERE id_user is null AND uuid_device_data = ${IN.uuid_device::VARCHAR}
+            """, StatementType.SELECT_WITH_AUTO_COMMIT);
 
     private Template template;
 

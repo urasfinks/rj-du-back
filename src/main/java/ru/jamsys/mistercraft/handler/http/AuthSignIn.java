@@ -3,6 +3,7 @@ package ru.jamsys.mistercraft.handler.http;
 import ru.jamsys.App;
 import ru.jamsys.JsonHttpResponse;
 import ru.jamsys.mistercraft.UserSessionInfo;
+import ru.jamsys.mistercraft.jt.Data;
 import ru.jamsys.mistercraft.jt.Device;
 import ru.jamsys.mistercraft.jt.User;
 
@@ -56,7 +57,7 @@ public class AuthSignIn implements HttpHandler {
                 jRet.addException(e);
             }
         }
-        if (jRet.isStatus() && device != null && user != null) { //Обновим или добавим устройство
+        if (jRet.isStatus() && device != null && user != null) { //Обновим или добавим uuid устройства для пользователя
             try {
                 req.put("id_user", user.get(0).get("id_user"));
                 if (device.size() == 0) {
@@ -64,6 +65,15 @@ public class AuthSignIn implements HttpHandler {
                 } else {
                     App.jdbcTemplate.execute(App.postgresqlPoolName, Device.UPDATE, req);
                 }
+            } catch (Exception e) {
+                jRet.addException(e);
+            }
+        }
+        if (jRet.isStatus()) {
+            // Если всё прошло успешно, обновим не привязанные сокетные данные к персоне, что бы не потерять данные
+            // при разлогинивание, когда происходит перезапись uuid устройства
+            try {
+                App.jdbcTemplate.execute(App.postgresqlPoolName, Data.UPDATE_ID_USER_BEFORE_SIGN_IN, req, true);
             } catch (Exception e) {
                 jRet.addException(e);
             }
