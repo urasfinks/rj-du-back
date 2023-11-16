@@ -73,7 +73,7 @@ public class AuthSignIn implements HttpHandler {
             // Если всё прошло успешно, обновим не привязанные сокетные данные к персоне, что бы не потерять данные
             // при разлогинивание, когда происходит перезапись uuid устройства
             try {
-                App.jdbcTemplate.execute(App.postgresqlPoolName, Data.UPDATE_ID_USER_BEFORE_SIGN_IN, req, true);
+                App.jdbcTemplate.execute(App.postgresqlPoolName, Data.UPDATE_ID_USER_BEFORE_SIGN_IN, req);
             } catch (Exception e) {
                 jRet.addException(e);
             }
