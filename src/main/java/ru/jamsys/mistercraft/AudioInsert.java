@@ -1,7 +1,6 @@
 package ru.jamsys.mistercraft;
 
 import ru.jamsys.App;
-import ru.jamsys.Util;
 import ru.jamsys.UtilBase64;
 import ru.jamsys.UtilFile;
 import ru.jamsys.mistercraft.jt.Data;
@@ -28,7 +27,7 @@ public class AudioInsert {
                     arguments.put("value_data", base64Data);
                     arguments.put("type_data", "blob");
                     arguments.put("parent_uuid_data", null);
-                    arguments.put("date_add_data", new BigDecimal(System.currentTimeMillis()));
+                    arguments.put("date_add_data", new BigDecimal(System.currentTimeMillis() / 1000));
                     arguments.put("is_remove_data", 0);
                     arguments.put("id_user", 1);
                     arguments.put("key_data", "speech");

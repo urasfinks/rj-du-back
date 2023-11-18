@@ -62,10 +62,10 @@ public enum Data implements TemplateEnum {
             SELECT
                 uuid_data as uuid,
                 parent_uuid_data as parent_uuid,
-                date_add_data as date_add,
+                trunc(extract(epoch from date_add_data)) as date_add,
                 is_remove_data as is_remove,
                 revision_data as revision,
-                date_update_data as date_update,
+                trunc(extract(epoch from date_update_data)) as date_update,
                 value_data as value,
                 key_data as key
             FROM data WHERE type_data = ${IN.type_data::VARCHAR}
@@ -79,10 +79,10 @@ public enum Data implements TemplateEnum {
             SELECT
                 uuid_data as uuid,
                 parent_uuid_data as parent_uuid,
-                date_add_data as date_add,
+                trunc(extract(epoch from date_add_data)) as date_add,
                 is_remove_data as is_remove,
                 revision_data as revision,
-                date_update_data as date_update,
+                trunc(extract(epoch from date_update_data)) as date_update,
                 value_data as value,
                 key_data as key
             FROM data WHERE type_data = ${IN.type_data::VARCHAR}
@@ -96,10 +96,10 @@ public enum Data implements TemplateEnum {
             SELECT
                 uuid_data as uuid,
                 parent_uuid_data as parent_uuid,
-                date_add_data as date_add,
+                trunc(extract(epoch from date_add_data)) as date_add,
                 is_remove_data as is_remove,
                 revision_data as revision,
-                date_update_data as date_update,
+                trunc(extract(epoch from date_update_data)) as date_update,
                 value_data as value,
                 key_data as key
             FROM data WHERE type_data = ${IN.type_data::VARCHAR}

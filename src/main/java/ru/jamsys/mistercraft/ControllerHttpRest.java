@@ -138,7 +138,7 @@ public class ControllerHttpRest {
                     arguments.put("value_data", base64Data);
                     arguments.put("type_data", "blob");
                     arguments.put("parent_uuid_data", null);
-                    arguments.put("date_add_data", new BigDecimal(System.currentTimeMillis()));
+                    arguments.put("date_add_data", new BigDecimal(System.currentTimeMillis() / 1000));
                     arguments.put("is_remove_data", 0);
                     arguments.put("id_user", 1);
                     arguments.put("key_data", key);
@@ -218,7 +218,7 @@ public class ControllerHttpRest {
     }
 
     public JsonHttpResponse getJRet(String postBody, boolean checkAuthHeader, String authHeader, String schemaValidation, HttpHandler httpHandler, boolean debug) {
-        Util.logConsole("Request: " + postBody);
+        Util.logConsole("Request(" + httpHandler.toString() + "): " + postBody);
         JsonHttpResponse jRet = getJsonHttpResponse(postBody, checkAuthHeader, authHeader, schemaValidation, httpHandler);
         jRet.getData().remove("request");
         if (debug) {
