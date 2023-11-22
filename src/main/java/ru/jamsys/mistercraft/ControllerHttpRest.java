@@ -26,6 +26,9 @@ public class ControllerHttpRest {
     @Value("classpath:socket.html")
     private Resource socketHtml;
 
+    @Value("classpath:deeplink.html")
+    private Resource deeplink;
+
     @Value("classpath:.well-known/assetlinks.json")
     private Resource assetLinks;
 
@@ -171,9 +174,16 @@ public class ControllerHttpRest {
     //<--- Mobile DeepLink
 
     @RequestMapping(value = "/deeplink/**", method = RequestMethod.GET)
-    public void method(HttpServletResponse httpServletResponse) {
-        httpServletResponse.setHeader("Location", "/");
-        httpServletResponse.setStatus(302);
+    //public void deeplink(HttpServletResponse httpServletResponse) {
+    public String deeplink() {
+        //httpServletResponse.setHeader("Location", "/");
+        //httpServletResponse.setStatus(302);
+        return Util.getResourceContent(deeplink, "UTF-8");
+    }
+
+    @RequestMapping(value = "/testDeeplink/**", method = RequestMethod.GET)
+    public String testDeeplink() {
+        return Util.getResourceContent(deeplink, "UTF-8");
     }
 
     public JsonHttpResponse getJsonHttpResponse(String postBody, boolean checkAuthHeader, String authHeader, String schemaValidation, HttpHandler httpHandler) {
