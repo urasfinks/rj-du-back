@@ -6,15 +6,31 @@
 </head>
 <body style="background: #222;">
 <script type="text/javascript">
-    var sp = location.href.split("/");
-    sp.shift();
-    sp.shift();
-    sp.shift();
-    var deeplink = "ru-5gm://domain/"+sp.join("/");
-    window.location.replace(deeplink);
-    setTimeout(function () {
-        window.location.replace("https://apps.apple.com/ru/app/fivegame/id6468938069");
-    }, 2000);
+    if (iOS()) {
+        var sp = location.href.split("/");
+        sp.shift();
+        sp.shift();
+        sp.shift();
+        var deeplink = "ru-5gm://domain/"+sp.join("/");
+        window.location.replace(deeplink);
+        setTimeout(function () {
+            window.location.replace("https://apps.apple.com/ru/app/fivegame/id6468938069");
+        }, 2000);
+    } else {
+        window.location.replace("/");
+    }
+    function iOS() {
+      return [
+        'iPad Simulator',
+        'iPhone Simulator',
+        'iPod Simulator',
+        'iPad',
+        'iPhone',
+        'iPod'
+      ].includes(navigator.platform)
+      // iPad on iOS 13 detection
+      || (navigator.userAgent.includes("Mac") && "ontouchend" in document)
+    }
 </script>
 </body>
 </html>
