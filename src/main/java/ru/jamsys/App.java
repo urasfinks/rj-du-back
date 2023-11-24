@@ -15,8 +15,8 @@ import ru.jamsys.pool.PostgreSQL;
 import java.util.List;
 import java.util.Map;
 
-@PropertySource("project/watch-ready/application-local-without-ssl.properties")
-//@PropertySource("project/watch-ready/application-docker.properties")
+//@PropertySource("project/watch-ready/application-local-without-ssl.properties")
+@PropertySource("project/watch-ready/application-docker.properties")
 
 //@PropertySource("project/5gm/application-docker.properties")
 //@PropertySource("project/5gm/application-local.properties")
