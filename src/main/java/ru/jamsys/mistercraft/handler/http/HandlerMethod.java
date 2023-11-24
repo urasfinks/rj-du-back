@@ -12,6 +12,7 @@ public enum HandlerMethod {
     GEN_CODE_UUID(new GenCodeUuid()),
     GET_CODE_UUID(new GetCodeUuid()),
     COMMENT(new Comment()),
+    APP_COMMENT(new AppComment()),
     GET_CODE(new AuthGetCode());
 
     final HttpHandler httpHandler;

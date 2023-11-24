@@ -1,50 +1,32 @@
 package ru.jamsys.mistercraft;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.Getter;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.jamsys.*;
-import ru.jamsys.component.JsonSchema;
 import ru.jamsys.mistercraft.handler.http.HandlerMethod;
-import ru.jamsys.mistercraft.handler.http.HttpHandler;
 import ru.jamsys.mistercraft.jt.Data;
 import ru.jamsys.template.Template;
 
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @SuppressWarnings("unused")
 @RestController
-public class ControllerHttpRest {
+public class ControllerHttpRest extends JRetHandler {
 
-    @Getter
-    @Value("${deeplink.urlSchemes:url-schemes}")
-    private String urlSchemes;
+    Configuration configuration;
 
-    @Getter
-    @Value("${deeplink.urlIosAppStore:https://www.apple.com/app-store/}")
-    private String urlIosAppStore;
-
-
-    @Value("classpath:socket.html")
-    private Resource socketHtml;
-
-    @Value("classpath:deeplink.html")
-    private Resource deeplink;
-
-    @Value("classpath:.well-known/assetlinks.json")
-    private Resource assetLinks;
-
-    @Value("classpath:.well-known/apple-app-site-association.json")
-    private Resource appleAppSiteAssociation;
+    @Autowired
+    public void setConfiguration(Configuration configuration) {
+        this.configuration = configuration;
+    }
 
     @RequestMapping(value = "/GetCode", method = RequestMethod.POST)
     public ResponseEntity<?> getCode(@RequestBody String postBody) {
@@ -65,7 +47,7 @@ public class ControllerHttpRest {
     public ResponseEntity<?> socketTest() {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(Util.getResourceContent(socketHtml, "UTF-8"));
+                .body(Util.getResourceContent(configuration.getSocketHtml(), "UTF-8"));
     }
 
     @RequestMapping(value = "/Timeout", method = RequestMethod.GET)
@@ -127,6 +109,11 @@ public class ControllerHttpRest {
         return jRet.getResponseEntity();
     }
 
+    @RequestMapping(value = "/AppComment", method = RequestMethod.POST)
+    public ResponseEntity<?> appComment(@RequestBody String postBody, @RequestHeader("Authorization") String authHeader) {
+        return getResponseEntity(postBody, true, authHeader, "schema/http/Comment.json", HandlerMethod.APP_COMMENT.get());
+    }
+
     @RequestMapping(value = "/Upload", method = RequestMethod.POST)
     public ResponseEntity<?> upload(@RequestHeader(value = "Authorization", required = false) String authHeader, @RequestParam("name") String name, @RequestParam("key") String key, @RequestParam("file") MultipartFile file) {
         JsonHttpResponse jRet = new JsonHttpResponse();
@@ -170,17 +157,17 @@ public class ControllerHttpRest {
     //---> Mobile DeepLink
     @GetMapping(value = "/apple-app-site-association", produces = MediaType.APPLICATION_JSON_VALUE)
     public String addResourceHandlers() {
-        return Util.getResourceContent(appleAppSiteAssociation, "UTF-8");
+        return Util.getResourceContent(configuration.getAppleAppSiteAssociation(), "UTF-8");
     }
 
     @GetMapping(value = "/.well-known/apple-app-site-association", produces = MediaType.APPLICATION_JSON_VALUE)
     public String addResourceHandlers2() {
-        return Util.getResourceContent(appleAppSiteAssociation, "UTF-8");
+        return Util.getResourceContent(configuration.getAppleAppSiteAssociation(), "UTF-8");
     }
 
     @GetMapping(value = "/.well-known/assetlinks.json", produces = MediaType.APPLICATION_JSON_VALUE)
     public String addResourceHandlers3() {
-        return Util.getResourceContent(assetLinks, "UTF-8");
+        return Util.getResourceContent(configuration.getAssetLinks(), "UTF-8");
     }
     //<--- Mobile DeepLink
 
@@ -193,101 +180,9 @@ public class ControllerHttpRest {
     @RequestMapping(value = "/testDeeplink/**", method = RequestMethod.GET)
     public String testDeeplink() {
         HashMap<String, String> args = new HashMap<>();
-        args.put("urlSchemes", urlSchemes);
-        args.put("urlIosAppStore", urlIosAppStore);
-        return Template.template(Util.getResourceContent(deeplink, "UTF-8"), args);
-    }
-
-    public JsonHttpResponse getJsonHttpResponse(String postBody, boolean checkAuthHeader, String authHeader, String schemaValidation, HttpHandler httpHandler) {
-        JsonHttpResponse jRet = new JsonHttpResponse();
-        UserSessionInfo userSessionInfo = null;
-        if (checkAuthHeader) {
-            userSessionInfo = getDeviceUuid(authHeader);
-            if (!userSessionInfo.isValidRequest()) {
-                jRet.setUnauthorized();
-            }
-        }
-        if (jRet.isStatus()) {
-            if (schemaValidation != null) {
-                try {
-                    String schema = UtilFileResource.getAsString(schemaValidation);
-                    JsonSchema.Result validate = App.jsonSchema.validate(postBody, schema);
-                    if (!validate.isValidate()) {
-                        jRet.addException("Request: " + postBody + "\n Schema: " + schema);
-                        jRet.addException(validate.getError());
-                    }
-                } catch (Exception e) {
-                    jRet.addException(e);
-                }
-            }
-        }
-
-        if (jRet.isStatus()) {
-            WrapJsonToObject<Map<String, Object>> mapWrapJsonToObject = UtilJson.toMap(postBody);
-            if (mapWrapJsonToObject.getException() == null) {
-                jRet.addData("request", mapWrapJsonToObject.getObject());
-                try {
-                    httpHandler.handler(jRet, userSessionInfo);
-                } catch (Exception e) {
-                    jRet.addException(e);
-                }
-            } else {
-                jRet.addException(mapWrapJsonToObject.getException());
-            }
-        }
-
-        return jRet;
-    }
-
-    public JsonHttpResponse getJRet(String postBody, boolean checkAuthHeader, String authHeader, String schemaValidation, HttpHandler httpHandler, boolean debug) {
-        Util.logConsole("Request(" + httpHandler.toString() + "): " + postBody);
-        JsonHttpResponse jRet = getJsonHttpResponse(postBody, checkAuthHeader, authHeader, schemaValidation, httpHandler);
-        jRet.getData().remove("request");
-        if (debug) {
-            Util.logConsole("Response: " + jRet);
-        }
-        return jRet;
-    }
-
-    public ResponseEntity<?> getResponseEntity(String postBody, boolean checkAuthHeader, String authHeader, String schemaValidation, HttpHandler httpHandler) {
-        return getResponseEntity(postBody, checkAuthHeader, authHeader, schemaValidation, httpHandler, true);
-    }
-
-    public ResponseEntity<?> getResponseEntity(String postBody, boolean checkAuthHeader, String authHeader, String schemaValidation, HttpHandler httpHandler, boolean debug) {
-        return getJRet(postBody, checkAuthHeader, authHeader, schemaValidation, httpHandler, debug).getResponseEntity();
-    }
-
-    private UserSessionInfo getDeviceUuid(String valueHeaderAuthorization) {
-        UserSessionInfo userSessionInfo = new UserSessionInfo();
-        if (valueHeaderAuthorization != null && !"".equals(valueHeaderAuthorization) && valueHeaderAuthorization.startsWith("Basic ")) {
-            String[] valueExplode = valueHeaderAuthorization.split("Basic ");
-            if (valueExplode.length == 2) {
-                byte[] decoded = Base64.getDecoder().decode(valueExplode[1]);
-                String decodedStr = new String(decoded, StandardCharsets.UTF_8);
-                if (decodedStr.startsWith("v")) {
-                    String[] map = decodedStr.split(":");
-                    if (map.length == 2) {
-                        try {
-                            userSessionInfo.setVersion(Long.parseLong(map[0].substring(1)));
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        userSessionInfo.setDeviceUuid(map[1]);
-                    }
-                }
-            }
-        }
-        userSessionInfo.check();
-        return userSessionInfo;
-    }
-
-    Map<String, String> getPostData(HttpServletRequest request) {
-        Map<String, String> result = new LinkedHashMap<>();
-        List<String> list = Collections.list(request.getParameterNames());
-        for (String item : list) {
-            result.put(item, request.getParameter(item));
-        }
-        return result;
+        args.put("urlSchemes", configuration.getUrlSchemes());
+        args.put("urlIosAppStore", configuration.getUrlIosAppStore());
+        return Template.template(Util.getResourceContent(configuration.getDeeplink(), "UTF-8"), args);
     }
 
 }

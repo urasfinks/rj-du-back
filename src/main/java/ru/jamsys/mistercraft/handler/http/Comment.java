@@ -1,6 +1,7 @@
 package ru.jamsys.mistercraft.handler.http;
 
 import ru.jamsys.App;
+import ru.jamsys.Configuration;
 import ru.jamsys.JsonHttpResponse;
 import ru.jamsys.UtilJson;
 import ru.jamsys.component.ReCaptcha;
@@ -24,7 +25,8 @@ public class Comment implements HttpHandler {
         if (jRet.isStatus()) {
             Telegram telegram = App.context.getBean(Telegram.class);
             req.remove("g-recaptcha-response");
-            telegram.syncSend("290029195", UtilJson.toString(req, "{}"), jRet);
+            Configuration configuration = App.context.getBean(Configuration.class);
+            telegram.syncSend(configuration.getTelegramIdChat(), UtilJson.toString(req, "{}"), jRet);
         }
     }
 }

@@ -1,6 +1,7 @@
 package ru.jamsys;
 
 import jakarta.servlet.MultipartConfigElement;
+import lombok.Getter;
 import lombok.Setter;
 import org.apache.catalina.Context;
 import org.apache.catalina.connector.Connector;
@@ -11,6 +12,7 @@ import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactor
 import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.io.Resource;
 import org.springframework.util.unit.DataSize;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
@@ -24,6 +26,34 @@ public class Configuration implements WebSocketConfigurer {
     @Setter
     @Value("${server.ssl.enabled:false}")
     private Boolean serverSslEnabled;
+
+    @Getter
+    @Value("${telegram.idChat}")
+    public String telegramIdChat;
+
+    @Getter
+    @Value("${deeplink.urlSchemes:url-schemes}")
+    private String urlSchemes;
+
+    @Getter
+    @Value("${deeplink.urlIosAppStore:https://www.apple.com/app-store/}")
+    private String urlIosAppStore;
+
+    @Getter
+    @Value("classpath:socket.html")
+    private Resource socketHtml;
+
+    @Getter
+    @Value("classpath:deeplink.html")
+    private Resource deeplink;
+
+    @Getter
+    @Value("classpath:.well-known/assetlinks.json")
+    private Resource assetLinks;
+
+    @Getter
+    @Value("classpath:.well-known/apple-app-site-association.json")
+    private Resource appleAppSiteAssociation;
 
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(new ControllerWebSocket(), "/socket/*");
