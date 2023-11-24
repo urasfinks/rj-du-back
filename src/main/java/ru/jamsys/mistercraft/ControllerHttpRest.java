@@ -2,6 +2,7 @@ package ru.jamsys.mistercraft;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import ru.jamsys.component.JsonSchema;
 import ru.jamsys.mistercraft.handler.http.HandlerMethod;
 import ru.jamsys.mistercraft.handler.http.HttpHandler;
 import ru.jamsys.mistercraft.jt.Data;
+import ru.jamsys.template.Template;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
@@ -22,6 +24,15 @@ import java.util.*;
 @SuppressWarnings("unused")
 @RestController
 public class ControllerHttpRest {
+
+    @Getter
+    @Value("${deeplink.urlSchemes:url-schemes}")
+    private String urlSchemes;
+
+    @Getter
+    @Value("${deeplink.urlIosAppStore:https://www.apple.com/app-store/}")
+    private String urlIosAppStore;
+
 
     @Value("classpath:socket.html")
     private Resource socketHtml;
@@ -176,14 +187,15 @@ public class ControllerHttpRest {
     @RequestMapping(value = "/deeplink/**", method = RequestMethod.GET)
     //public void deeplink(HttpServletResponse httpServletResponse) {
     public String deeplink() {
-        //httpServletResponse.setHeader("Location", "/");
-        //httpServletResponse.setStatus(302);
-        return Util.getResourceContent(deeplink, "UTF-8");
+        return testDeeplink();
     }
 
     @RequestMapping(value = "/testDeeplink/**", method = RequestMethod.GET)
     public String testDeeplink() {
-        return Util.getResourceContent(deeplink, "UTF-8");
+        HashMap<String, String> args = new HashMap<>();
+        args.put("urlSchemes", urlSchemes);
+        args.put("urlIosAppStore", urlIosAppStore);
+        return Template.template(Util.getResourceContent(deeplink, "UTF-8"), args);
     }
 
     public JsonHttpResponse getJsonHttpResponse(String postBody, boolean checkAuthHeader, String authHeader, String schemaValidation, HttpHandler httpHandler) {
