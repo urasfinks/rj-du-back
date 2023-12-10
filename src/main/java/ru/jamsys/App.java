@@ -7,6 +7,7 @@ import org.springframework.context.annotation.PropertySource;
 import ru.jamsys.component.JdbcTemplate;
 import ru.jamsys.component.JsonSchema;
 import ru.jamsys.component.Security;
+import ru.jamsys.component.Telegram;
 import ru.jamsys.jdbc.template.TemplateEnum;
 import ru.jamsys.mistercraft.EMail;
 import ru.jamsys.mistercraft.socket.RequestMessageReader;
@@ -34,16 +35,47 @@ public class App {
     public static JsonSchema jsonSchema;
 
     public static void main(String[] args) throws Exception {
+        ExitProcessOnUncaughtException.register();
         context = SpringApplication.run(App.class, args);
         initSecurity();
+        systemEvent("Start");
         initPostgreSQL();
         eMail = App.context.getBean(EMail.class);
         schemaSocketResponse = UtilFileResource.getAsString("schema/socket/ProtocolResponse.json");
         jsonSchema = App.context.getBean(JsonSchema.class);
         App.context.getBean(RequestMessageReader.class).init();
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> systemEvent("Shutdown")));
+        //addOutOfMemory();
 
         //AudioInsert.parse();
+    }
 
+    public static void addOutOfMemory() {
+        try {
+            new Thread(() -> {
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                String[] array = new String[100000 * 100000];
+            }).start();
+        } catch (OutOfMemoryError oom) {
+            System.out.println("OutOfMemory Error appeared");
+        } catch (Throwable th) {
+            System.out.println("OutOfMemory Error appeared");
+        }
+    }
+
+    public static void systemEvent(String event) {
+        Configuration configuration = context.getBean(Configuration.class);
+        String text = "Project: " + configuration.getProject() + "; " + event;
+        //Отправлять будет только в ПРОМ, а пром это false
+        if (configuration.getDebug().equals("false")) {
+            Telegram telegram = context.getBean(Telegram.class);
+            telegram.syncSend(configuration.getTelegramIdChat(), text, null);
+        }
+        System.out.println(text);
     }
 
     public static List<Map<String, Object>> query(TemplateEnum templateEnum, Map<String, Object> arguments) throws Exception {

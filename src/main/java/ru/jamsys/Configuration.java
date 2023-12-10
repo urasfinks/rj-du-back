@@ -32,6 +32,14 @@ public class Configuration implements WebSocketConfigurer {
     public String telegramIdChat;
 
     @Getter
+    @Value("${project}")
+    public String project;
+
+    @Getter
+    @Value("${debug}")
+    public String debug;
+
+    @Getter
     @Value("${deeplink.urlSchemes:url-schemes}")
     private String urlSchemes;
 
