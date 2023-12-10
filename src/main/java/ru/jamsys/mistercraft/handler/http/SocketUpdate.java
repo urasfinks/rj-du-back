@@ -144,7 +144,11 @@ public class SocketUpdate implements HttpHandler {
             wrapRequestObject.put("request", requestObject);
 
             requestMessage.setBody(UtilJson.toStringPretty(wrapRequestObject, "{}"));
-            broker.add(RequestMessage.class, requestMessage);
+            try {
+                broker.add(RequestMessage.class, requestMessage);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             threadBalancerFactory.getThreadBalancer(ControllerWebSocket.nameSocketRequestReader).wakeUp();
         }
         try { //Освобождаем блокировку
