@@ -67,7 +67,8 @@ public enum Data implements TemplateEnum {
                 revision_data as revision,
                 trunc(extract(epoch from date_update_data)) as date_update,
                 value_data as value,
-                key_data as key
+                key_data as key,
+                meta_data as meta
             FROM data WHERE type_data = ${IN.type_data::VARCHAR}
             AND id_user = 1
             AND revision_data > ${IN.revision_data::NUMBER}
@@ -84,7 +85,8 @@ public enum Data implements TemplateEnum {
                 revision_data as revision,
                 trunc(extract(epoch from date_update_data)) as date_update,
                 value_data as value,
-                key_data as key
+                key_data as key,
+                meta_data as meta
             FROM data WHERE type_data = ${IN.type_data::VARCHAR}
             AND id_user = ${IN.id_user::NUMBER}
             AND revision_data > ${IN.revision_data::NUMBER}
@@ -101,7 +103,8 @@ public enum Data implements TemplateEnum {
                 revision_data as revision,
                 trunc(extract(epoch from date_update_data)) as date_update,
                 value_data as value,
-                key_data as key
+                key_data as key,
+                meta_data as meta
             FROM data WHERE type_data = ${IN.type_data::VARCHAR}
             AND ( uuid_device_data = ${IN.uuid_device::VARCHAR} OR id_user = ${IN.id_user::NUMBER} )
             AND revision_data > ${IN.revision_data::NUMBER}
@@ -123,6 +126,7 @@ public enum Data implements TemplateEnum {
                 ${IN.is_remove_data::NUMBER}::integer,
                 ${IN.id_user::NUMBER}::bigint,
                 ${IN.key_data::VARCHAR},
+                ${IN.meta_data::VARCHAR},
                 ${IN.uuid_device::VARCHAR},
                 ${OUT.new_id_revision::VARCHAR}
             );
@@ -135,6 +139,7 @@ public enum Data implements TemplateEnum {
                 parent_uuid_data,
                 id_user,
                 key_data,
+                meta_data,
                 uuid_device_data
             ) VALUES (
                 ${IN.uuid_data::VARCHAR},
@@ -143,6 +148,7 @@ public enum Data implements TemplateEnum {
                 ${IN.parent_uuid_data::VARCHAR},
                 ${IN.id_user::NUMBER},
                 ${IN.key_data::VARCHAR},
+                ${IN.meta_data::VARCHAR},
                 ${IN.uuid_device_data::VARCHAR}
             );
             """, StatementType.SELECT_WITH_AUTO_COMMIT),
