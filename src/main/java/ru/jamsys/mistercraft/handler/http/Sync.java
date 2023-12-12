@@ -264,9 +264,14 @@ public class Sync implements HttpHandler {
             List<Map<String, Object>> list = input.get(type);
             for (Map<String, Object> item : list) {
                 if (item.containsKey("value")) {
-                    int length = ((String) item.get("value")).length();
-                    item.put("valueSizeByte", length);
-                    limitByte -= length;
+                    Object value = item.get("value");
+                    if (value instanceof String) {
+                        int length = ((String) value).length();
+                        item.put("valueSizeByte", length);
+                        limitByte -= length;
+                    } else {
+                        item.put("valueSizeByte", 0);
+                    }
                 }
                 cloneObjects.add(item);
                 countItem++;
