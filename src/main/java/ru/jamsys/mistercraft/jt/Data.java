@@ -38,9 +38,40 @@ public enum Data implements TemplateEnum {
             SELECT
                 type_data AS key,
                 max(revision_data) AS max
-            FROM data WHERE (type_data IN ('%s', '%s', '%s', '%s', '%s', '%s') AND id_user = 1 )
-            OR ( type_data IN ('%s', '%s') AND id_user = ${IN.id_user::NUMBER})
-            OR ( type_data = '%s' AND (uuid_device_data = ${IN.uuid_device::VARCHAR} OR id_user = ${IN.id_user::NUMBER}))
+            FROM data WHERE
+            (
+                ( type_data IN ('%s', '%s', '%s', '%s', '%s', '%s') AND id_user = 1 )
+                OR ( type_data IN ('%s', '%s') AND id_user = ${IN.id_user::NUMBER})
+                OR ( type_data = '%s' AND (uuid_device_data = ${IN.uuid_device::VARCHAR} OR id_user = ${IN.id_user::NUMBER}))
+            )
+            AND lazy_sync_data IS NULL
+            GROUP BY type_data;
+            """.formatted(
+
+            DataType.template.name(),
+            DataType.systemData.name(),
+            DataType.js.name(),
+            DataType.any.name(),
+            DataType.json.name(),
+            DataType.blob.name(),
+
+            DataType.userDataRSync.name(),
+            DataType.blobRSync.name(),
+
+            DataType.socket.name()
+
+    ), StatementType.SELECT_WITH_AUTO_COMMIT),
+
+    SELECT_MAX_REVISION_BY_TYPE_LAZY("""
+            SELECT
+                type_data AS key,
+                max(revision_data) AS max
+            FROM data WHERE (
+                (type_data IN ('%s', '%s', '%s', '%s', '%s', '%s') AND id_user = 1 )
+                OR ( type_data IN ('%s', '%s') AND id_user = ${IN.id_user::NUMBER})
+                OR ( type_data = '%s' AND (uuid_device_data = ${IN.uuid_device::VARCHAR} OR id_user = ${IN.id_user::NUMBER}))
+            )
+            AND lazy_sync_data IN (${IN.lazy::IN_ENUM_VARCHAR})
             GROUP BY type_data;
             """.formatted(
 
@@ -72,6 +103,26 @@ public enum Data implements TemplateEnum {
             FROM data WHERE type_data = ${IN.type_data::VARCHAR}
             AND id_user = 1
             AND revision_data > ${IN.revision_data::NUMBER}
+            AND lazy_sync_data IS NULL
+            ORDER BY revision_data ASC
+            LIMIT 1000;
+            """, StatementType.SELECT_WITH_AUTO_COMMIT),
+
+    SELECT_SYSTEM_DATA_RANGE_LAZY("""
+            SELECT
+                uuid_data as uuid,
+                parent_uuid_data as parent_uuid,
+                trunc(extract(epoch from date_add_data)) as date_add,
+                is_remove_data as is_remove,
+                revision_data as revision,
+                trunc(extract(epoch from date_update_data)) as date_update,
+                value_data as value,
+                key_data as key,
+                meta_data as meta
+            FROM data WHERE type_data = ${IN.type_data::VARCHAR}
+            AND id_user = 1
+            AND revision_data > ${IN.revision_data::NUMBER}
+            AND lazy_sync_data IN (${IN.lazy::IN_ENUM_VARCHAR})
             ORDER BY revision_data ASC
             LIMIT 1000;
             """, StatementType.SELECT_WITH_AUTO_COMMIT),

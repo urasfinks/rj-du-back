@@ -38,7 +38,15 @@ public class Sync implements HttpHandler {
             @SuppressWarnings("unchecked")
             Map<String, Long> rqMaxRevisionByType = (Map<String, Long>) parsedJson.get("maxRevisionByType");
             boolean authJustNow = parsedJson.containsKey("authJustNow") && (boolean) parsedJson.get("authJustNow");
-            Map<String, Long> dbMaxRevisionByType = getMaxRevisionByType(userSessionInfo);
+            List<String> lazyList = new ArrayList<>();
+            try {
+                if (parsedJson.containsKey("lazy") && parsedJson.get("lazy") instanceof List) {
+                    lazyList = (List<String>) parsedJson.get("lazy");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            Map<String, Long> dbMaxRevisionByType = getMaxRevisionByType(userSessionInfo, lazyList);
 
             for (DataType dataType : DataType.values()) {
                 long rqRevision = ((Number) rqMaxRevisionByType.getOrDefault(dataType.toString(), 0L)).longValue();
@@ -52,10 +60,14 @@ public class Sync implements HttpHandler {
                     Map<String, Object> arguments = App.jdbcTemplate.createArguments();
                     arguments.put("type_data", dataType.toString());
                     arguments.put("revision_data", rqRevision);
+                    if (!lazyList.isEmpty()) {
+                        arguments.put("lazy", lazyList);
+                    }
                     userSessionInfo.appendAuthJdbcTemplateArguments(arguments);
                     List<Map<String, Object>> exec = switch (dataType) {
-                        case js, any, systemData, template, json, blob ->
-                                App.jdbcTemplate.execute(App.postgresqlPoolName, Data.SELECT_SYSTEM_DATA_RANGE, arguments);
+                        case js, any, systemData, template, json, blob -> lazyList.isEmpty()
+                                ? App.jdbcTemplate.execute(App.postgresqlPoolName, Data.SELECT_SYSTEM_DATA_RANGE, arguments)
+                                : App.jdbcTemplate.execute(App.postgresqlPoolName, Data.SELECT_SYSTEM_DATA_RANGE_LAZY, arguments);
                         case userDataRSync, blobRSync ->
                                 App.jdbcTemplate.execute(App.postgresqlPoolName, Data.SELECT_USER_DATA_RANGE, arguments);
                         case socket ->
@@ -118,11 +130,17 @@ public class Sync implements HttpHandler {
     }
 
     //#2
-    private static Map<String, Long> getMaxRevisionByType(UserSessionInfo userSessionInfo) throws Exception {
+    private static Map<String, Long> getMaxRevisionByType(UserSessionInfo userSessionInfo, List<String> lazyList) throws Exception {
         Map<String, Long> dbMapRevision = new HashMap<>();
         Map<String, Object> arguments = App.jdbcTemplate.createArguments();
         userSessionInfo.appendAuthJdbcTemplateArguments(arguments);
-        List<Map<String, Object>> exec = App.jdbcTemplate.execute(App.postgresqlPoolName, Data.SELECT_MAX_REVISION_BY_TYPE, arguments);
+        List<Map<String, Object>> exec;
+        if (lazyList.isEmpty()) {
+            exec = App.jdbcTemplate.execute(App.postgresqlPoolName, Data.SELECT_MAX_REVISION_BY_TYPE, arguments);
+        } else {
+            arguments.put("lazy", lazyList);
+            exec = App.jdbcTemplate.execute(App.postgresqlPoolName, Data.SELECT_MAX_REVISION_BY_TYPE_LAZY, arguments);
+        }
         for (Map<String, Object> row : exec) {
             dbMapRevision.put((String) row.get("key"), (Long) row.get("max"));
         }
