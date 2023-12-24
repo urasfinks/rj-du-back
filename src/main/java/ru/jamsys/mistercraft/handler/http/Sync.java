@@ -28,24 +28,16 @@ public class Sync implements HttpHandler {
 
             // Для начала удалим, всё что уже всё на устройстве)
             //Да, это всё равно пойдёт ревизией обратно, но уже немного подрезанное (зануление value_data)
-            if (parsedJson.containsKey("removed")) {
-                @SuppressWarnings("unchecked")
-                List<String> removed = (List<String>) parsedJson.get("removed");
-                for (String uuid : removed) {
-                    remove(uuid, userSessionInfo);
-                }
+            List<String> listRemoveUuid = getUncheckedList(parsedJson, "removed", String.class);
+            for (String uuid : listRemoveUuid) {
+                remove(uuid, userSessionInfo);
             }
+
             @SuppressWarnings("unchecked")
             Map<String, Long> rqMaxRevisionByType = (Map<String, Long>) parsedJson.get("maxRevisionByType");
             boolean authJustNow = parsedJson.containsKey("authJustNow") && (boolean) parsedJson.get("authJustNow");
-            List<String> lazyList = new ArrayList<>();
-            try {
-                if (parsedJson.containsKey("lazy") && parsedJson.get("lazy") instanceof List) {
-                    lazyList = (List<String>) parsedJson.get("lazy");
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            List<String> lazyList = getUncheckedList(parsedJson, "lazy", String.class);// new ArrayList<>();
+
             Map<String, Long> dbMaxRevisionByType = getMaxRevisionByType(userSessionInfo, lazyList);
 
             for (DataType dataType : DataType.values()) {
@@ -119,6 +111,20 @@ public class Sync implements HttpHandler {
         } catch (Exception e) {
             jRet.addException(e);
         }
+    }
+
+    private static <T> List<T> getUncheckedList(Map<String, Object> parsedJson, String key, Class<T> listType) {
+        List<T> result = new ArrayList<>();
+        if (parsedJson.containsKey(key) && parsedJson.get(key) instanceof List) {
+            @SuppressWarnings("unchecked")
+            List<Object> data = (List<Object>) parsedJson.get(key);
+            if (data != null && !data.isEmpty() && listType.equals(data.iterator().next().getClass())) {
+                @SuppressWarnings("unchecked")//It's OK, we know List<T> contains the expected type.
+                List<T> foo = (List<T>) data;
+                result.addAll(foo);
+            }
+        }
+        return result;
     }
 
     //#1
