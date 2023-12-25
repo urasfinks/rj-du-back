@@ -84,7 +84,7 @@ public class Sync implements HttpHandler {
                         }
                     }
                     result.put(dataType.toString(), exec);
-                } else if (dbRevision < rqRevision) { //Рассинхрон версий
+                } else if (dbRevision < rqRevision && lazyList.isEmpty()) { //Рассинхрон версий
                     needUpgrade.put(dataType.toString(), dbRevision);
                 }
             }

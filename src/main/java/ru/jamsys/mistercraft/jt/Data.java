@@ -118,7 +118,8 @@ public enum Data implements TemplateEnum {
                 trunc(extract(epoch from date_update_data)) as date_update,
                 value_data as value,
                 key_data as key,
-                meta_data as meta
+                meta_data as meta,
+                lazy_sync_data as lazy_sync
             FROM data WHERE type_data = ${IN.type_data::VARCHAR}
             AND id_user = 1
             AND revision_data > ${IN.revision_data::NUMBER}
