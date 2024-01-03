@@ -1,6 +1,8 @@
 function run(data) {
     console.log(data);
     $("#runTeam").text(map(data.runTeam, ["blue", "СИНИХ", "red", "КРАСНЫХ"]));
+    $("#runTeam").removeClass("bg-red");
+    $("#runTeam").removeClass("bg-blue");
     $("#runTeam").addClass("bg-" + data.runTeam);
     curTime = data.session;
     renderSession();
@@ -46,7 +48,7 @@ function getGridWord(socketData) {
     });
     var counter = 0;
     var column = [];
-    var matrix = {col: 4, row: 7};
+    var matrix = {col: 4, row: 6};
     var colorCard = {
         "red": "#e64331",
         "blue": "#4695ef",
