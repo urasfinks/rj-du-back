@@ -214,6 +214,7 @@ public class Sync implements HttpHandler {
                     resultData.put("uuid", dataInserted.get("uuid_data"));
                     resultData.put("revision", dataInserted.get("revision_data"));
                     resultData.put("parent_uuid", dataInserted.get("parent_uuid_data"));
+                    resultData.put("sync_revision", true);
                     find = true;
                     break;
                 }
@@ -225,6 +226,7 @@ public class Sync implements HttpHandler {
                 appendMap.put("uuid", dataInserted.get("uuid_data")); //Только номер ревизии заполняем, что бы не передавать повторно информацию
                 appendMap.put("revision", dataInserted.get("revision_data")); //Только номер ревизии заполняем, что бы не передавать повторно информацию
                 appendMap.put("parent_uuid", dataInserted.get("parent_uuid_data"));
+                appendMap.put("sync_revision", true);
                 listResultData.add(appendMap);
             }
         }
