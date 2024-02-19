@@ -143,7 +143,7 @@ public class ControllerHttpRest extends JRetHandler {
                     arguments.put("parent_uuid_data", null);
                     arguments.put("date_add_data", new BigDecimal(System.currentTimeMillis() / 1000));
                     arguments.put("is_remove_data", 0);
-                    arguments.put("id_user", 1);
+                    arguments.put("id_user", 2);
                     arguments.put("key_data", key);
                     arguments.put("uuid_device", null);
                     arguments.put("new_id_revision", new BigDecimal(0));
