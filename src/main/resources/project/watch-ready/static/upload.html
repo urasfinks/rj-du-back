@@ -1,16 +1,129 @@
 <html>
+<head>
+    <meta charset="UTF-8">
+    <style type="text/css" media="screen">
+        body {
+            margin: 20px 60px;
+            font-family: "Roboto Light";
+        }
+
+        .drop-container {
+            position: relative;
+            display: flex;
+            gap: 10px;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px dashed #555;
+            color: #444;
+            cursor: pointer;
+            transition: background .2s ease-in-out, border .2s ease-in-out;
+        }
+
+        .drop-container:hover,
+        .drop-container.drag-active {
+            background: #eee;
+            border-color: #111;
+        }
+
+        .drop-container:hover .drop-title,
+        .drop-container.drag-active .drop-title {
+            color: #222;
+        }
+
+        .drop-title {
+            color: #444;
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            transition: color .2s ease-in-out;
+        }
+
+        input[type=file] {
+            width: 350px;
+            max-width: 100%;
+            color: #444;
+            padding: 5px;
+            background: #fff;
+            border-radius: 10px;
+            border: 1px solid #555;
+        }
+
+        input[type=file]::file-selector-button {
+            margin-right: 20px;
+            border: none;
+            background: #084cdf;
+            padding: 10px 20px;
+            border-radius: 10px;
+            color: #fff;
+            cursor: pointer;
+            transition: background .2s ease-in-out;
+        }
+
+        input[type=file]::file-selector-button:hover {
+            background: #0d45a5;
+        }
+
+        .tx {
+            width: 500px;
+        }
+
+        .tx td {
+            padding: 5px;
+        }
+
+        .extraInput {
+            width: 100%;
+            border: 2px dashed #555;
+            padding: 5px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+
 <body>
 <form method="POST" enctype="multipart/form-data" action="/Upload">
-    File to upload: <input type="file" name="file" id="upload" onchange="getName()">
-    <br/>
-    Name: <input type="text" name="name" id="name">
-    <br/>
-    Key: <input type="text" name="key" value="poster" id="key">
-    <br/>
-    <input type="submit" value="Upload">
+    <table class="tx">
+        <tr>
+            <td colspan="2">
+                <label for="upload" class="drop-container" id="dropcontainer">
+                    <span class="drop-title">Перетащите файл</span>
+                    или
+                    <input type="file" id="upload" name="file" required onchange="getName()">
+                </label>
+            </td>
+        </tr>
+        <tr>
+            <td>Uuid:</td>
+            <td><input type="text" name="name" id="name" class="extraInput" maxlength="255"></td>
+        </tr>
+        <tr>
+            <td>Key:</td>
+            <td><input type="text" name="key" value="" id="key" class="extraInput" maxlength="255"
+                       onchange="keyChange(this.value);" onkeyup="keyChange(this.value)"></td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <input type="submit" value="Загрузить">
+            </td>
+        </tr>
+    </table>
 </form>
 <script type="text/javascript">
-    function getName(){
+    function keyChange(value) {
+        localStorage.setItem("key", value);
+    }
+
+    var lastKey = localStorage.getItem("key");
+    if (lastKey !== undefined) {
+        document.getElementById("key").value = lastKey;
+    }
+
+    function getName() {
         var fullPath = document.getElementById('upload').value;
         if (fullPath) {
             var startIndex = (fullPath.indexOf('\\') >= 0 ? fullPath.lastIndexOf('\\') : fullPath.lastIndexOf('/'));
@@ -18,9 +131,38 @@
             if (filename.indexOf('\\') === 0 || filename.indexOf('/') === 0) {
                 filename = filename.substring(1);
             }
+            filename = JSON.stringify(filename).replace(" ", "_").replace(/[^0-9a-zA-Z\\._]/gi, "");
+            if (filename.length > 255) {
+                filename = filename.substring(filename.length - 255);
+            }
             document.getElementById('name').value = filename;
         }
     }
+
+    var dropContainer = document.getElementById("dropcontainer");
+    var fileInput = document.getElementById("upload");
+
+    dropContainer.addEventListener("dragover", (e) => {
+        // prevent default to allow drop
+        e.preventDefault();
+    }, false);
+
+    dropContainer.addEventListener("dragenter", () => {
+        dropContainer.classList.add("drag-active");
+        getName();
+    });
+
+    dropContainer.addEventListener("dragleave", () => {
+        dropContainer.classList.remove("drag-active");
+        getName();
+    });
+
+    dropContainer.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dropContainer.classList.remove("drag-active");
+        fileInput.files = e.dataTransfer.files;
+        getName();
+    });
 </script>
 </body>
 </html>
