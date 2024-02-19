@@ -8,7 +8,7 @@ function team(socketData) {
     var protocol = location.protocol.toLowerCase();
     document.getElementById("qrcode").innerHTML = "";
     var qrcode = new QRCode(document.getElementById("qrcode"), {
-        text: protocol + "//" + location.host.toString() + "/deeplink/v10/ConnectSecretConnections/socketUuid/" + uuid,
+        text: protocol + "//" + location.host.toString() + "/deeplink/v10/SecretConnections/socketUuid/" + uuid,
         width: 600,
         height: 600,
         colorDark: "#222",
