@@ -13,6 +13,8 @@ import ru.jamsys.mistercraft.jt.Data;
 import ru.jamsys.template.Template;
 
 import java.math.BigDecimal;
+import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -183,6 +185,32 @@ public class ControllerHttpRest extends JRetHandler {
         args.put("urlSchemes", configuration.getUrlSchemes());
         args.put("urlIosAppStore", configuration.getUrlIosAppStore());
         return Template.template(Util.getResourceContent(configuration.getDeeplink(), "UTF-8"), args);
+    }
+
+    @RequestMapping(value = "/blob/{uuid}", method = RequestMethod.GET, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public ResponseEntity<byte[]> blob(@PathVariable String uuid) {
+        try {
+            Map<String, Object> arguments = App.jdbcTemplate.createArguments();
+            arguments.put("uuid_data", uuid);
+            List<Map<String, Object>> exec = App.jdbcTemplate.execute(App.postgresqlPoolName, Data.SELECT_SYSTEM_STATIC, arguments);
+            if (!exec.isEmpty()) {
+                Map<String, Object> row = exec.get(0);
+                byte[] valueData;
+                Object typeData = row.get("type_data");
+                if (typeData.equals("blob") || typeData.equals("blobRSync")) {
+                    valueData = UtilBase64.base64DecodeResultBytes((String) row.get("value_data"));
+                } else {
+                    valueData = ((String) row.get("value_data")).getBytes(StandardCharsets.UTF_8);
+                }
+                return ResponseEntity
+                        .ok()
+                        .contentType(MediaType.valueOf(URLConnection.guessContentTypeFromName(uuid)))
+                        .body(valueData);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 }

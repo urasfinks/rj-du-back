@@ -168,6 +168,10 @@ public enum Data implements TemplateEnum {
             SELECT * FROM data WHERE uuid_data = ${IN.uuid_data::VARCHAR}
             """, StatementType.SELECT_WITH_AUTO_COMMIT),
 
+    SELECT_SYSTEM_STATIC("""
+            SELECT * FROM data WHERE uuid_data = ${IN.uuid_data::VARCHAR} and id_user = 2
+            """, StatementType.SELECT_WITH_AUTO_COMMIT),
+
     INSERT("""
             CALL add_data(
             	${IN.uuid_data::VARCHAR},
