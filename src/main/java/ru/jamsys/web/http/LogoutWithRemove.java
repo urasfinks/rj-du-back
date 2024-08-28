@@ -36,7 +36,6 @@ public class LogoutWithRemove implements PromiseGenerator, HttpHandler {
     @Override
     public Promise generate() {
         return servicePromise.get(index, 1000L)
-                .extension(PromiseExtension::thenSelectUuidDevice)
                 .extension(PromiseExtension::thenSelectIdUser)
                 .thenWithResource("db", JdbcResource.class, "default", (_, promise, jdbcResource) -> {
                     Map<String, Object> arg = new HashMapBuilder<String, Object>()
