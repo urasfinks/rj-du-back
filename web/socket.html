@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<script type="text/javascript">
+    var ws = undefined;
+    window.connect = function() {
+        ws = new WebSocket('/socket/fb88cbf8-a959-4eb1-aafd-73c981c4c2e5');
+        ws.onmessage = function(data){
+            console.log(data);
+        }
+    }
+    window.send = function() {
+        ws.send(document.getElementById("msg").value);
+    }
+    window.disconnect = function() {
+        if (ws != null) {
+            ws.close();
+        }
+        setConnected(false);
+        console.log("Disconnected");
+    }
+    window.connect();
+
+</script>
+<table>
+    <tr>
+        <td>
+            <button onclick="window.connect()">connect</button>
+            <button onclick="window.disconnect()">disconnect</button>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <textarea id="msg" style="width:300px;height:300px;">{
+    "uri": "/subscribe",
+    "data": "test"
+}</textarea><br>
+            <button onclick="window.send()">send</button>
+        </td>
+    </tr>
+</table>
+
+
+<div id="greetings"></div>
+</body>
+</html>
