@@ -43,16 +43,10 @@ public class SignIn implements PromiseGenerator, HttpHandler {
     @Override
     public Promise generate() {
         return servicePromise.get(index, 1000L)
+                .extension(PromiseExtension::thenSelectUuidDevice)
                 .then("init", (_, promise) -> {
                     //{"mail":"urasfinks@yandex.ru", "code": 123456}
                     HttpAsyncResponse input = promise.getRepositoryMap("HttpAsyncResponse", HttpAsyncResponse.class);
-                    input.getHttpRequestReader().basicAuthHandler((user, password) -> {
-                        if (!user.startsWith("v")) {
-                            throw new RuntimeException("basic version is not defined");
-                        }
-                        promise.setMapRepository("device_uuid", password);
-                    });
-
                     String data = input.getHttpRequestReader().getData();
                     JsonSchema.validate(data, UtilFileResource.getAsString("schema/http/SignIn.json"));
                     Map<String, Object> map = UtilJson.getMapOrThrow(data);
@@ -70,7 +64,7 @@ public class SignIn implements PromiseGenerator, HttpHandler {
                     Map<String, Object> arg = new HashMapBuilder<String, Object>()
                             .append("mail", promise.getRepositoryMap("mail", String.class))
                             .append("code", promise.getRepositoryMap("code", Integer.class))
-                            .append("uuid_device", promise.getRepositoryMap("device_uuid", String.class));
+                            .append("uuid_device", promise.getRepositoryMap("uuid_device", String.class));
 
                     List<Map<String, Object>> user = isAppleReviewAppStore
                             ? jdbcResource.execute(new JdbcRequest(User.GET_BY_CODE_APPLE_REVIEW).addArg(arg))
@@ -91,7 +85,7 @@ public class SignIn implements PromiseGenerator, HttpHandler {
                     // при разлогинивание, когда происходит перезапись uuid устройства
                     jdbcResource.execute(new JdbcRequest(Data.UPDATE_ID_USER_BEFORE_SIGN_IN).addArg(arg));
                 })
-                .extension(PromiseExtension::addHandler);
+                .extension(PromiseExtension::addTerminal);
     }
 
 }

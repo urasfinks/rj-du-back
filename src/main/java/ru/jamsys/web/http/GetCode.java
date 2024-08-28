@@ -80,7 +80,7 @@ public class GetCode implements PromiseGenerator, HttpHandler {
                             mail
                     ));
                 })
-                .extension(PromiseExtension::addHandler);
+                .extension(PromiseExtension::addTerminal);
     }
 
 }
