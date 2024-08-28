@@ -57,10 +57,8 @@ public class SignIn implements PromiseGenerator, HttpHandler {
                 .thenWithResource("db", JdbcResource.class, "default", (_, promise, jdbcResource) -> {
                     Integer code = promise.getRepositoryMap("code", Integer.class);
                     String mail = promise.getRepositoryMap("mail", String.class);
-                    boolean isAppleReviewAppStore = false;
-                    if (mail.equals("admin@admin.ru") && code == 214365) {//Apple Review App Store
-                        isAppleReviewAppStore = true;
-                    }
+                    boolean isAppleReviewAppStore = mail.equals("admin@admin.ru") && code == 214365;
+                    //Apple Review App Store
                     Map<String, Object> arg = new HashMapBuilder<String, Object>()
                             .append("mail", promise.getRepositoryMap("mail", String.class))
                             .append("code", promise.getRepositoryMap("code", Integer.class))
