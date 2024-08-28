@@ -30,8 +30,11 @@ build/
 !**/src/test/**/build/
 
 ### VS Code ###
-.vscode/
-/src/main/resources/project/5gm/static/apk/
+/target/
 /security
 /security/
 /security/*
+/src/main/java/ru/jamsys/core/SecurityKey.java
+/log/
+/LogManager/
+/.idea/
