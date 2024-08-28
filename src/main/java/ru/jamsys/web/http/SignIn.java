@@ -48,7 +48,7 @@ public class SignIn implements PromiseGenerator, HttpHandler {
                     //{"mail":"urasfinks@yandex.ru", "code": 123456}
                     HttpAsyncResponse input = promise.getRepositoryMap("HttpAsyncResponse", HttpAsyncResponse.class);
                     String data = input.getHttpRequestReader().getData();
-                    JsonSchema.validate(data, UtilFileResource.getAsString("schema/http/SignIn.json"));
+                    JsonSchema.validate(data, UtilFileResource.getAsString("schema/http/SignIn.json"), "SignIn.json");
                     Map<String, Object> map = UtilJson.getMapOrThrow(data);
                     promise.setMapRepository("mail", map.get("mail"));
                     Integer code = (Integer) map.get("code");

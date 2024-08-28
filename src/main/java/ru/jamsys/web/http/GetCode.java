@@ -49,7 +49,7 @@ public class GetCode implements PromiseGenerator, HttpHandler {
                     //{"mail":"urasfinks@yandex.ru"}
                     HttpAsyncResponse input = promise.getRepositoryMap("HttpAsyncResponse", HttpAsyncResponse.class);
                     String data = input.getHttpRequestReader().getData();
-                    JsonSchema.validate(data, UtilFileResource.getAsString("schema/http/GetCode.json"));
+                    JsonSchema.validate(data, UtilFileResource.getAsString("schema/http/GetCode.json"), "GetCode.json");
                     Map<String, Object> map = UtilJson.getMapOrThrow(data);
                     promise.setMapRepository("mail", map.get("mail"));
                     promise.setMapRepository("code", Util.random(100000, 999999));

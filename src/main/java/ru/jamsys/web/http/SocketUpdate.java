@@ -50,7 +50,7 @@ public class SocketUpdate implements PromiseGenerator, HttpHandler {
                 .then("init", (_, promise) -> {
                     HttpAsyncResponse input = promise.getRepositoryMap("HttpAsyncResponse", HttpAsyncResponse.class);
                     String data = input.getHttpRequestReader().getData();
-                    JsonSchema.validate(data, UtilFileResource.getAsString("schema/http/UpdateSocketData.json"));
+                    JsonSchema.validate(data, UtilFileResource.getAsString("schema/http/UpdateSocketData.json"), "UpdateSocketData.json");
                     Map<String, Object> map = UtilJson.getMapOrThrow(data);
                     promise.setMapRepository("uuid_data", map.get("uuid_data"));
                     promise.setMapRepository("data", map.get("data"));
