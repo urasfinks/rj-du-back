@@ -61,8 +61,10 @@ public class SocketExtend implements PromiseGenerator, HttpHandler {
                             throw new RuntimeException("Action " + method + " does not exist");
                         }
                     }
-                    System.out.println(requestData);
+                    promise.setMapRepository("uuid_data", map.get("uuid_data"));
+                    promise.setMapRepository("data", requestData);
                 })
+                .extension(SocketUpdate::dbUpdate)
                 .extension(PromiseExtension::addTerminal);
     }
 

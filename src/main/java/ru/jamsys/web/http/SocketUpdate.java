@@ -5,6 +5,7 @@ import lombok.Setter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import ru.jamsys.PromiseExtension;
+import ru.jamsys.core.App;
 import ru.jamsys.core.component.ServicePromise;
 import ru.jamsys.core.component.web.socket.WebSocket;
 import ru.jamsys.core.extension.builder.HashMapBuilder;
@@ -36,11 +37,8 @@ public class SocketUpdate implements PromiseGenerator, HttpHandler {
 
     private final ServicePromise servicePromise;
 
-    private final WebSocket webSocket;
-
-    public SocketUpdate(ServicePromise servicePromise, WebSocket webSocket) {
+    public SocketUpdate(ServicePromise servicePromise) {
         this.servicePromise = servicePromise;
-        this.webSocket = webSocket;
     }
 
     @Override
@@ -55,49 +53,55 @@ public class SocketUpdate implements PromiseGenerator, HttpHandler {
                     promise.setMapRepository("uuid_data", map.get("uuid_data"));
                     promise.setMapRepository("data", map.get("data"));
                 })
-                .thenWithResource("db", JdbcResource.class, "default", (_, promise, jdbcResource) -> {
-                    Map<String, Object> arg = new HashMapBuilder<String, Object>()
-                            .append("id_user", promise.getRepositoryMap("id_user", Integer.class))
-                            .append("uuid_device", promise.getRepositoryMap("uuid_device", String.class))
-                            .append("uuid_data", promise.getRepositoryMap("uuid_data", String.class));
+                .extension(SocketUpdate::dbUpdate)
+                .extension(PromiseExtension::addTerminal);
+    }
 
-                    List<Map<String, Object>> permission = jdbcResource.execute(new JdbcRequest(Data.CHECK_PERMISSION_SOCKET_DATA).addArg(arg));
-                    if (permission.isEmpty()) {
-                        throw new RuntimeException("Permission denied");
-                    }
+    public static void dbUpdate(Promise promiseSource) {
+        promiseSource.thenWithResource("DbUpdate", JdbcResource.class, "default", (_, promise, jdbcResource) -> {
+            Map<String, Object> arg = new HashMapBuilder<String, Object>()
+                    .append("id_user", promise.getRepositoryMap("id_user", Integer.class))
+                    .append("uuid_device", promise.getRepositoryMap("uuid_device", String.class))
+                    .append("uuid_data", promise.getRepositoryMap("uuid_data", String.class));
 
-                    // С этого момента мы начинаем работать без коммитов, поэтому в try, что бы в последствии завершить коммит
-                    try {
-                        //Получаем главную запись с данными для последующего обновления
-                        List<Map<String, Object>> primarySocketData = jdbcResource.execute(new JdbcRequest(Data.GET_PRIMARY_SOCKET_DATA).addArg(arg));
-                        if (primarySocketData.isEmpty()) {
-                            throw new RuntimeException("Primary socket data not found");
-                        }
-                        String dbValue = (String) primarySocketData.getFirst().get("value_data");
-                        //Проверяем, что данные в БД не пустые
-                        if (dbValue == null || dbValue.trim().isEmpty()) {
-                            throw new RuntimeException("Socket data empty");
-                        }
-                        Map<String, Object> dbValueMap = UtilJson.getMapOrThrow(dbValue);
-                        dbValueMap.putAll(promise.getRepositoryMap("data", Map.class));
+            List<Map<String, Object>> permission = jdbcResource.execute(new JdbcRequest(Data.CHECK_PERMISSION_SOCKET_DATA).addArg(arg));
+            if (permission.isEmpty()) {
+                throw new RuntimeException("Permission denied");
+            }
 
-                        //Если любой ключ равен null - удаляем ключ
-                        removeNullValue(dbValueMap);
+            // С этого момента мы начинаем работать без коммитов, поэтому в try, что бы в последствии завершить коммит
+            try {
+                //Получаем главную запись с данными для последующего обновления
+                List<Map<String, Object>> primarySocketData = jdbcResource.execute(new JdbcRequest(Data.GET_PRIMARY_SOCKET_DATA).addArg(arg));
+                if (primarySocketData.isEmpty()) {
+                    throw new RuntimeException("Primary socket data not found");
+                }
+                String dbValue = (String) primarySocketData.getFirst().get("value_data");
+                //Проверяем, что данные в БД не пустые
+                if (dbValue == null || dbValue.trim().isEmpty()) {
+                    throw new RuntimeException("Socket data empty");
+                }
+                Map<String, Object> dbValueMap = UtilJson.getMapOrThrow(dbValue);
+                dbValueMap.putAll(promise.getRepositoryMap("data", Map.class));
 
-                        //Обновляем главные сокетные данные
-                        jdbcResource.execute(new JdbcRequest(Data.UPDATE_PRIMARY_SOCKET_DATA).addArg(
-                                new HashMapBuilder<String, Object>()
-                                        .append("value_data", UtilJson.toStringPretty(dbValueMap, "{}"))
-                                        .append("id_data", primarySocketData.getFirst().get("id_data"))
-                        ));
+                //Если любой ключ равен null - удаляем ключ
+                removeNullValue(dbValueMap);
 
-                        //Обновляем ревизии дочерних сокетных данных
-                        jdbcResource.execute(new JdbcRequest(Data.UPDATE_SECONDARY_SOCKET_DATA).addArg(
-                                new HashMapBuilder<String, Object>()
-                                        .append("uuid_data", promise.getRepositoryMap("uuid_data", String.class))
-                        ));
-                        //Закинем на обработку данные для рассылки по сокетам
-                        webSocket.notify(
+                //Обновляем главные сокетные данные
+                jdbcResource.execute(new JdbcRequest(Data.UPDATE_PRIMARY_SOCKET_DATA).addArg(
+                        new HashMapBuilder<String, Object>()
+                                .append("value_data", UtilJson.toStringPretty(dbValueMap, "{}"))
+                                .append("id_data", primarySocketData.getFirst().get("id_data"))
+                ));
+
+                //Обновляем ревизии дочерних сокетных данных
+                jdbcResource.execute(new JdbcRequest(Data.UPDATE_SECONDARY_SOCKET_DATA).addArg(
+                        new HashMapBuilder<String, Object>()
+                                .append("uuid_data", promise.getRepositoryMap("uuid_data", String.class))
+                ));
+                //Закинем на обработку данные для рассылки по сокетам
+                App.get(WebSocket.class)
+                        .notify(
                                 promise.getRepositoryMap("uuid_data", String.class),
                                 UtilJson.toStringPretty(
                                         new HashMapBuilder<String, Object>()
@@ -106,13 +110,12 @@ public class SocketUpdate implements PromiseGenerator, HttpHandler {
                                         "{}"
                                 )
                         );
-                    } catch (Throwable th) {
-                        jdbcResource.execute(new JdbcRequest(Data.UNLOCK));
-                        throw new ForwardException(th);
-                    }
-                    jdbcResource.execute(new JdbcRequest(Data.UNLOCK));
-                })
-                .extension(PromiseExtension::addTerminal);
+            } catch (Throwable th) {
+                jdbcResource.execute(new JdbcRequest(Data.UNLOCK));
+                throw new ForwardException(th);
+            }
+            jdbcResource.execute(new JdbcRequest(Data.UNLOCK));
+        });
     }
 
     public static void removeNullValue(Map<?, ?> references) {
