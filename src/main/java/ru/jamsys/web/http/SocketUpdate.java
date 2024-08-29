@@ -10,7 +10,7 @@ import ru.jamsys.core.component.ServicePromise;
 import ru.jamsys.core.component.web.socket.WebSocket;
 import ru.jamsys.core.extension.builder.HashMapBuilder;
 import ru.jamsys.core.extension.exception.ForwardException;
-import ru.jamsys.core.extension.http.HttpAsyncResponse;
+import ru.jamsys.core.extension.http.ServletHandler;
 import ru.jamsys.core.flat.util.JsonSchema;
 import ru.jamsys.core.flat.util.UtilFileResource;
 import ru.jamsys.core.flat.util.UtilJson;
@@ -25,7 +25,13 @@ import java.util.List;
 import java.util.Map;
 
 /*
- * Генерация кода для авторизации. Если нет пользователя -> insert. Отправляем код на указанную почту.
+ * Обновление сокетных данных
+ * Сокетные данные это просто json данные в таблице, обновление это замещение данных по корневым ключам
+ * Нельзя обновить какие-то данные внутри структуры, только через полное изменение корневого ключа
+ * Ньюанс: у каждой персоны свой json, то есть своя уникальная запись с своим uuid_data
+ * На свой собственный uuid_data фронт подписывается на прослушку через сокеты
+ * Реально данные хранятся у владельца, а все остальные просто через id_parent ссылаются на запись владельца
+ * Обновление происходит записи владельца, а всем наследникам меняется номер ревизии
  * */
 @Component
 @RequestMapping
@@ -46,12 +52,12 @@ public class SocketUpdate implements PromiseGenerator, HttpHandler {
         return servicePromise.get(index, 1000L)
                 .extension(PromiseExtension::thenSelectIdUser)
                 .then("init", (_, promise) -> {
-                    HttpAsyncResponse input = promise.getRepositoryMap("HttpAsyncResponse", HttpAsyncResponse.class);
-                    String data = input.getHttpRequestReader().getData();
+                    ServletHandler input = promise.getRepositoryMap(ServletHandler.class);
+                    String data = input.getRequestReader().getData();
                     JsonSchema.validate(data, UtilFileResource.getAsString("schema/http/UpdateSocketData.json"), "UpdateSocketData.json");
                     Map<String, Object> map = UtilJson.getMapOrThrow(data);
-                    promise.setMapRepository("uuid_data", map.get("uuid_data"));
-                    promise.setMapRepository("data", map.get("data"));
+                    promise.setRepositoryMap("uuid_data", map.get("uuid_data"));
+                    promise.setRepositoryMap("data", map.get("data"));
                 })
                 .extension(SocketUpdate::dbUpdate)
                 .extension(PromiseExtension::addTerminal);

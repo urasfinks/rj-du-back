@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import ru.jamsys.PromiseExtension;
 import ru.jamsys.core.component.ServicePromise;
 import ru.jamsys.core.extension.builder.HashMapBuilder;
-import ru.jamsys.core.extension.http.HttpAsyncResponse;
+import ru.jamsys.core.extension.http.ServletHandler;
 import ru.jamsys.core.flat.template.twix.TemplateTwix;
 import ru.jamsys.core.flat.util.JsonSchema;
 import ru.jamsys.core.flat.util.Util;
@@ -47,12 +47,12 @@ public class GetCode implements PromiseGenerator, HttpHandler {
         return servicePromise.get(index, 1000L)
                 .then("init", (_, promise) -> {
                     //{"mail":"urasfinks@yandex.ru"}
-                    HttpAsyncResponse input = promise.getRepositoryMap("HttpAsyncResponse", HttpAsyncResponse.class);
-                    String data = input.getHttpRequestReader().getData();
+                    ServletHandler servletHandler = promise.getRepositoryMap(ServletHandler.class);
+                    String data = servletHandler.getRequestReader().getData();
                     JsonSchema.validate(data, UtilFileResource.getAsString("schema/http/GetCode.json"), "GetCode.json");
                     Map<String, Object> map = UtilJson.getMapOrThrow(data);
-                    promise.setMapRepository("mail", map.get("mail"));
-                    promise.setMapRepository("code", Util.random(100000, 999999));
+                    promise.setRepositoryMap("mail", map.get("mail"));
+                    promise.setRepositoryMap("code", Util.random(100000, 999999));
                 })
                 .thenWithResource("db", JdbcResource.class, "default", (_, promise, jdbcResource) -> {
                     Map<String, Object> arg = new HashMapBuilder<String, Object>()

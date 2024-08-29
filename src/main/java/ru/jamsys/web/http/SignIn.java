@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import ru.jamsys.PromiseExtension;
 import ru.jamsys.core.component.ServicePromise;
 import ru.jamsys.core.extension.builder.HashMapBuilder;
-import ru.jamsys.core.extension.http.HttpAsyncResponse;
+import ru.jamsys.core.extension.http.ServletHandler;
 import ru.jamsys.core.flat.util.JsonSchema;
 import ru.jamsys.core.flat.util.UtilFileResource;
 import ru.jamsys.core.flat.util.UtilJson;
@@ -46,13 +46,13 @@ public class SignIn implements PromiseGenerator, HttpHandler {
                 .extension(PromiseExtension::thenSelectUuidDevice)
                 .then("init", (_, promise) -> {
                     //{"mail":"urasfinks@yandex.ru", "code": 123456}
-                    HttpAsyncResponse input = promise.getRepositoryMap("HttpAsyncResponse", HttpAsyncResponse.class);
-                    String data = input.getHttpRequestReader().getData();
+                    ServletHandler servletHandler = promise.getRepositoryMap(ServletHandler.class);
+                    String data = servletHandler.getRequestReader().getData();
                     JsonSchema.validate(data, UtilFileResource.getAsString("schema/http/SignIn.json"), "SignIn.json");
                     Map<String, Object> map = UtilJson.getMapOrThrow(data);
-                    promise.setMapRepository("mail", map.get("mail"));
+                    promise.setRepositoryMap("mail", map.get("mail"));
                     Integer code = (Integer) map.get("code");
-                    promise.setMapRepository("code", code);
+                    promise.setRepositoryMap("code", code);
                 })
                 .thenWithResource("db", JdbcResource.class, "default", (_, promise, jdbcResource) -> {
                     Integer code = promise.getRepositoryMap("code", Integer.class);

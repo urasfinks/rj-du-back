@@ -2,7 +2,7 @@ package ru.jamsys;
 
 import ru.jamsys.core.App;
 import ru.jamsys.core.extension.builder.HashMapBuilder;
-import ru.jamsys.core.extension.http.HttpAsyncResponse;
+import ru.jamsys.core.extension.http.ServletHandler;
 import ru.jamsys.core.promise.Promise;
 import ru.jamsys.core.resource.jdbc.JdbcRequest;
 import ru.jamsys.core.resource.jdbc.JdbcResource;
@@ -15,12 +15,12 @@ public class PromiseExtension {
 
     public static void thenSelectUuidDevice(Promise promiseSource) {
         promiseSource.then("SelectUuidDevice", (_, promise) -> {
-            HttpAsyncResponse input = promise.getRepositoryMap("HttpAsyncResponse", HttpAsyncResponse.class);
-            input.getHttpRequestReader().basicAuthHandler((user, password) -> {
+            ServletHandler servletHandler = promise.getRepositoryMap(ServletHandler.class);
+            servletHandler.getRequestReader().basicAuthHandler((user, password) -> {
                 if (!user.startsWith("v")) {
                     throw new RuntimeException("basic version is not defined");
                 }
-                promise.setMapRepository("uuid_device", password);
+                promise.setRepositoryMap("uuid_device", password);
             });
         });
     }
@@ -36,23 +36,23 @@ public class PromiseExtension {
                     if (exec.isEmpty()) {
                         throw new RuntimeException("Device undefined");
                     }
-                    promise.setMapRepository("id_user", exec.getFirst().get("id_user"));
+                    promise.setRepositoryMap("id_user", exec.getFirst().get("id_user"));
                 });
     }
 
     public static void addTerminal(Promise promiseSource) {
         promiseSource.onComplete((_, promise) -> {
-                    HttpAsyncResponse input = promise.getRepositoryMap("HttpAsyncResponse", HttpAsyncResponse.class);
+                    ServletHandler servletHandler = promise.getRepositoryMap(ServletHandler.class);
                     Map<String, Object> output = promise.getRepositoryMap("output", Map.class, new HashMapBuilder<String, Object>());
                     output.put("status", true);
-                    input.setBodyFromMap(output);
-                    input.complete();
+                    servletHandler.setResponseBodyFromMap(output);
+                    servletHandler.responseComplete();
                 })
                 .onError((_, promise) -> {
                     App.error(promise.getException());
-                    HttpAsyncResponse input = promise.getRepositoryMap("HttpAsyncResponse", HttpAsyncResponse.class);
-                    input.setError(promise.getException().getMessage());
-                    input.complete();
+                    ServletHandler servletHandler = promise.getRepositoryMap(ServletHandler.class);
+                    servletHandler.setResponseError(promise.getException().getMessage());
+                    servletHandler.responseComplete();
                 });
     }
 

@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import ru.jamsys.PromiseExtension;
 import ru.jamsys.core.component.ServicePromise;
-import ru.jamsys.core.extension.http.HttpAsyncResponse;
+import ru.jamsys.core.extension.http.ServletHandler;
 import ru.jamsys.core.flat.util.JsonSchema;
 import ru.jamsys.core.flat.util.UtilFileResource;
 import ru.jamsys.core.flat.util.UtilJson;
@@ -20,7 +20,9 @@ import java.util.List;
 import java.util.Map;
 
 /*
- * Генерация кода для авторизации. Если нет пользователя -> insert. Отправляем код на указанную почту.
+ * Механизм расширения сокетных данных, для начала выполняется генерация по обработчикам (action)
+ * Потом вызывается SocketUpdate
+ * Прикол в том, что фронт не отдаёт новую структуру, а лишь говорить как надо её модернизировать
  * */
 @Component
 @RequestMapping
@@ -41,8 +43,8 @@ public class SocketExtend implements PromiseGenerator, HttpHandler {
         return servicePromise.get(index, 1000L)
                 .extension(PromiseExtension::thenSelectIdUser)
                 .then("init", (_, promise) -> {
-                    HttpAsyncResponse input = promise.getRepositoryMap("HttpAsyncResponse", HttpAsyncResponse.class);
-                    String data = input.getHttpRequestReader().getData();
+                    ServletHandler input = promise.getRepositoryMap(ServletHandler.class);
+                    String data = input.getRequestReader().getData();
                     JsonSchema.validate(data, UtilFileResource.getAsString("schema/http/InsertSocketData.json"), "InsertSocketData.json");
                     Map<String, Object> map = UtilJson.getMapOrThrow(data);
                     HashMap<String, Object> requestData = new HashMap<>();
@@ -61,8 +63,8 @@ public class SocketExtend implements PromiseGenerator, HttpHandler {
                             throw new RuntimeException("Action " + method + " does not exist");
                         }
                     }
-                    promise.setMapRepository("uuid_data", map.get("uuid_data"));
-                    promise.setMapRepository("data", requestData);
+                    promise.setRepositoryMap("uuid_data", map.get("uuid_data"));
+                    promise.setRepositoryMap("data", requestData);
                 })
                 .extension(SocketUpdate::dbUpdate)
                 .extension(PromiseExtension::addTerminal);
