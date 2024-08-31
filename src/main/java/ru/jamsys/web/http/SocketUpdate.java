@@ -52,7 +52,7 @@ public class SocketUpdate implements PromiseGenerator, HttpHandler {
         return servicePromise.get(index, 1000L)
                 .extension(PromiseExtension::thenSelectIdUser)
                 .then("init", (_, promise) -> {
-                    ServletHandler input = promise.getRepositoryMap(ServletHandler.class);
+                    ServletHandler input = promise.getRepositoryMapClass(ServletHandler.class);
                     String data = input.getRequestReader().getData();
                     JsonSchema.validate(data, UtilFileResource.getAsString("schema/http/UpdateSocketData.json"), "UpdateSocketData.json");
                     Map<String, Object> map = UtilJson.getMapOrThrow(data);
@@ -94,17 +94,15 @@ public class SocketUpdate implements PromiseGenerator, HttpHandler {
                 removeNullValue(dbValueMap);
 
                 //Обновляем главные сокетные данные
-                jdbcResource.execute(new JdbcRequest(Data.UPDATE_PRIMARY_SOCKET_DATA).addArg(
-                        new HashMapBuilder<String, Object>()
-                                .append("value_data", UtilJson.toStringPretty(dbValueMap, "{}"))
-                                .append("id_data", primarySocketData.getFirst().get("id_data"))
-                ));
+                jdbcResource.execute(new JdbcRequest(Data.UPDATE_PRIMARY_SOCKET_DATA)
+                        .addArg("value_data", UtilJson.toStringPretty(dbValueMap, "{}"))
+                        .addArg("id_data", primarySocketData.getFirst().get("id_data"))
+                );
 
                 //Обновляем ревизии дочерних сокетных данных
-                jdbcResource.execute(new JdbcRequest(Data.UPDATE_SECONDARY_SOCKET_DATA).addArg(
-                        new HashMapBuilder<String, Object>()
-                                .append("uuid_data", promise.getRepositoryMap("uuid_data", String.class))
-                ));
+                jdbcResource.execute(new JdbcRequest(Data.UPDATE_SECONDARY_SOCKET_DATA)
+                        .addArg("uuid_data", promise.getRepositoryMap("uuid_data", String.class))
+                );
                 //Закинем на обработку данные для рассылки по сокетам
                 App.get(WebSocket.class)
                         .notify(

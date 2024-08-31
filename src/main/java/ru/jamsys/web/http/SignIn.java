@@ -46,7 +46,7 @@ public class SignIn implements PromiseGenerator, HttpHandler {
                 .extension(PromiseExtension::thenSelectUuidDevice)
                 .then("init", (_, promise) -> {
                     //{"mail":"urasfinks@yandex.ru", "code": 123456}
-                    ServletHandler servletHandler = promise.getRepositoryMap(ServletHandler.class);
+                    ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
                     String data = servletHandler.getRequestReader().getData();
                     JsonSchema.validate(data, UtilFileResource.getAsString("schema/http/SignIn.json"), "SignIn.json");
                     Map<String, Object> map = UtilJson.getMapOrThrow(data);

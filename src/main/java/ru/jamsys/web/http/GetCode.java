@@ -47,7 +47,7 @@ public class GetCode implements PromiseGenerator, HttpHandler {
         return servicePromise.get(index, 1000L)
                 .then("init", (_, promise) -> {
                     //{"mail":"urasfinks@yandex.ru"}
-                    ServletHandler servletHandler = promise.getRepositoryMap(ServletHandler.class);
+                    ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
                     String data = servletHandler.getRequestReader().getData();
                     JsonSchema.validate(data, UtilFileResource.getAsString("schema/http/GetCode.json"), "GetCode.json");
                     Map<String, Object> map = UtilJson.getMapOrThrow(data);
@@ -59,7 +59,8 @@ public class GetCode implements PromiseGenerator, HttpHandler {
                             .append("mail", promise.getRepositoryMap("mail", String.class))
                             .append("code", promise.getRepositoryMap("code", Integer.class));
 
-                    List<Map<String, Object>> user = jdbcResource.execute(new JdbcRequest(User.GET_BY_MAIL).addArg(arg));
+                    List<Map<String, Object>> user = jdbcResource.execute(
+                            new JdbcRequest(User.GET_BY_MAIL).addArg(arg));
                     if (user.isEmpty()) {
                         jdbcResource.execute(new JdbcRequest(User.INSERT).addArg(arg));
                     } else {

@@ -43,7 +43,7 @@ public class SocketExtend implements PromiseGenerator, HttpHandler {
         return servicePromise.get(index, 1000L)
                 .extension(PromiseExtension::thenSelectIdUser)
                 .then("init", (_, promise) -> {
-                    ServletHandler input = promise.getRepositoryMap(ServletHandler.class);
+                    ServletHandler input = promise.getRepositoryMapClass(ServletHandler.class);
                     String data = input.getRequestReader().getData();
                     JsonSchema.validate(data, UtilFileResource.getAsString("schema/http/InsertSocketData.json"), "InsertSocketData.json");
                     Map<String, Object> map = UtilJson.getMapOrThrow(data);

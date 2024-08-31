@@ -15,7 +15,7 @@ public class PromiseExtension {
 
     public static void thenSelectUuidDevice(Promise promiseSource) {
         promiseSource.then("SelectUuidDevice", (_, promise) -> {
-            ServletHandler servletHandler = promise.getRepositoryMap(ServletHandler.class);
+            ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
             servletHandler.getRequestReader().basicAuthHandler((user, password) -> {
                 if (!user.startsWith("v")) {
                     throw new RuntimeException("basic version is not defined");
@@ -29,10 +29,11 @@ public class PromiseExtension {
         promiseSource
                 .extension(PromiseExtension::thenSelectUuidDevice)
                 .thenWithResource("SelectIdUser", JdbcResource.class, "default", (_, promise, jdbcResource) -> {
-                    Map<String, Object> arg = new HashMapBuilder<String, Object>()
-                            .append("id_user", promise.getRepositoryMap("id_user", Integer.class))
-                            .append("uuid_device", promise.getRepositoryMap("uuid_device", String.class));
-                    List<Map<String, Object>> exec = jdbcResource.execute(new JdbcRequest(Device.SELECT_BY_UUID).addArg(arg));
+                    List<Map<String, Object>> exec = jdbcResource.execute(
+                            new JdbcRequest(Device.SELECT_BY_UUID)
+                                    .addArg("id_user", promise.getRepositoryMap("id_user", Integer.class))
+                                    .addArg("uuid_device", promise.getRepositoryMap("uuid_device", String.class))
+                    );
                     if (exec.isEmpty()) {
                         throw new RuntimeException("Device undefined");
                     }
@@ -42,7 +43,7 @@ public class PromiseExtension {
 
     public static void addTerminal(Promise promiseSource) {
         promiseSource.onComplete((_, promise) -> {
-                    ServletHandler servletHandler = promise.getRepositoryMap(ServletHandler.class);
+                    ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
                     Map<String, Object> output = promise.getRepositoryMap("output", Map.class, new HashMapBuilder<String, Object>());
                     output.put("status", true);
                     servletHandler.setResponseBodyFromMap(output);
@@ -50,7 +51,7 @@ public class PromiseExtension {
                 })
                 .onError((_, promise) -> {
                     App.error(promise.getException());
-                    ServletHandler servletHandler = promise.getRepositoryMap(ServletHandler.class);
+                    ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
                     servletHandler.setResponseError(promise.getException().getMessage());
                     servletHandler.responseComplete();
                 });
