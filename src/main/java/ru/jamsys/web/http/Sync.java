@@ -60,7 +60,7 @@ public class Sync implements PromiseGenerator, HttpHandler {
                 .thenWithResource("remove", JdbcResource.class, "default", (_, promise, jdbcResource) -> {
                     // Для начала удалим данные которые были удалены на фронте
                     // Да, это всё равно пойдёт ревизией обратно, но уже немного подрезанное (зануление value_data)
-                    List<String> removed = getUncheckedList(promise, "removed", String.class);
+                    List<String> removed = getUncheckedList(promise, "removed");
                     Map<String, Object> prepare = new HashMapBuilder<String, Object>()
                             .append("id_user", promise.getRepositoryMap("id_user", Integer.class))
                             .append("uuid_device", promise.getRepositoryMap("uuid_device", String.class));
@@ -74,7 +74,7 @@ public class Sync implements PromiseGenerator, HttpHandler {
                     // Но иногда фронт явно говорит - мне нужно синхронизировать ленивые данные
                     // К ленивым данным относились музыкальные нарезки к урокам, пока на фронте явно мы не зайдём в урок
                     // файлы с сервера не синхронизируются с фронтом
-                    List<String> lazyList = getUncheckedList(promise, "lazy", String.class);
+                    List<String> lazyList = getUncheckedList(promise, "lazy");
                     promise.setRepositoryMap("lazyList", lazyList);
 
                     Map<String, Long> dbRevisionMap = new HashMap<>();
@@ -192,17 +192,18 @@ public class Sync implements PromiseGenerator, HttpHandler {
                         updateSocketParentData(result.get(DataType.socket.name()), jdbcResource);
                     }
                 })
+                .then("sizeControl", (_, promise) -> sizeControl(promise))
                 .extension(PromiseExtension::addTerminal);
     }
 
-    private static <T> List<T> getUncheckedList(Promise promise, String key, Class<T> listType) {
+    private static <T> List<T> getUncheckedList(Promise promise, String key) {
         @SuppressWarnings("unchecked")
         Map<String, Object> parsedJson = promise.getRepositoryMap("parsedJson", Map.class);
         List<T> result = new ArrayList<>();
         if (parsedJson.containsKey(key) && parsedJson.get(key) instanceof List) {
             @SuppressWarnings("unchecked")
             List<Object> data = (List<Object>) parsedJson.get(key);
-            if (data != null && !data.isEmpty() && listType.equals(data.getFirst().getClass())) {
+            if (data != null && !data.isEmpty() && String.class.equals(data.getFirst().getClass())) {
                 @SuppressWarnings("unchecked")//It's OK, we know List<T> contains the expected type.
                 List<T> foo = (List<T>) data;
                 result.addAll(foo);
@@ -339,22 +340,25 @@ public class Sync implements PromiseGenerator, HttpHandler {
     }
 
     //#6
-    public static Map<String, List<Map<String, Object>>> sizeControl(Promise promise, Map<String, List<Map<String, Object>>> input) {
+    public static void sizeControl(Promise promise) {
         @SuppressWarnings("unchecked")
         Map<String, Object> responseBody = promise.getRepositoryMap("responseBody", Map.class);
 
-        Map<String, List<Map<String, Object>>> result = new HashMap<>();
+        @SuppressWarnings("unchecked")
+        Map<String, List<Map<String, Object>>> result = promise.getRepositoryMap("result", Map.class);
+
+        Map<String, List<Map<String, Object>>> upgrade = new HashMap<>();
         int limitByte = 100 * 1024;
         int countItem = 0;
         responseBody.put("limitByte", limitByte);
 
-        for (String type : input.keySet()) {
+        for (String type : result.keySet()) {
             if (limitByte <= 0) {
                 break;
             }
             List<Map<String, Object>> cloneObjects = new ArrayList<>();
-            result.put(type, cloneObjects);
-            List<Map<String, Object>> list = input.get(type);
+            upgrade.put(type, cloneObjects);
+            List<Map<String, Object>> list = result.get(type);
             for (Map<String, Object> item : list) {
                 if (item.containsKey("value")) {
                     Object value = item.get("value");
@@ -375,7 +379,7 @@ public class Sync implements PromiseGenerator, HttpHandler {
         }
         responseBody.put("limitByteOffset", limitByte);
         responseBody.put("countItem", countItem);
-        return result;
+        responseBody.put("upgrade", upgrade);
     }
 
 }
