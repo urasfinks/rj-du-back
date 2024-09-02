@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
-import ru.jamsys.CodeManager;
+import ru.jamsys.ManagerCodeLink;
 import ru.jamsys.CodeManagerItem;
 import ru.jamsys.PromiseExtension;
 import ru.jamsys.core.App;
@@ -69,7 +69,7 @@ public class CodeGen implements PromiseGenerator, HttpHandler {
                     if (execute.isEmpty()) {
                         throw new RuntimeException("Permission denied");
                     }
-                    CodeManagerItem add = App.get(CodeManager.class).add(uuidData);
+                    CodeManagerItem add = App.get(ManagerCodeLink.class).add(uuidData);
                     ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
                     servletHandler.setResponseBodyFromMap(new HashMapBuilder<String, Object>()
                             .append("code", add.getCode())

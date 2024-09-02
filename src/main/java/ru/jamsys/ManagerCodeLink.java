@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 // Так же решает задачу проверки произвольного получения данных по uuidData, если тут числится - значит данные были открыты
 
 @Component
-public class CodeManager {
+public class ManagerCodeLink {
 
     private final Broker<CodeManagerItem> broker;
 
@@ -28,7 +28,7 @@ public class CodeManager {
 
     private final ConcurrentLinkedDeque<Integer> queueShuffleCode = new ConcurrentLinkedDeque<>();
 
-    public CodeManager(ApplicationContext applicationContext, ManagerBroker managerBroker) {
+    public ManagerCodeLink(ApplicationContext applicationContext, ManagerBroker managerBroker) {
         List<Integer> codes = new ArrayList<>();
         int start = 100000;
         int end = 999999;
@@ -39,7 +39,7 @@ public class CodeManager {
         queueShuffleCode.addAll(codes);
 
         this.broker = managerBroker.initAndGet(
-                UniqueClassNameImpl.getClassNameStatic(CodeManager.class, null, applicationContext),
+                UniqueClassNameImpl.getClassNameStatic(ManagerCodeLink.class, null, applicationContext),
                 CodeManagerItem.class,
                 this::onDrop
         );

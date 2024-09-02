@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
-import ru.jamsys.CodeManager;
+import ru.jamsys.ManagerCodeLink;
 import ru.jamsys.CodeManagerItem;
 import ru.jamsys.PromiseExtension;
 import ru.jamsys.core.App;
@@ -56,7 +56,7 @@ public class PublicData implements PromiseGenerator, HttpHandler {
                     if (uuidData == null || uuidData.trim().isEmpty()) {
                         throw new RuntimeException("uuid is empty");
                     }
-                    CodeManagerItem byUuidData = App.get(CodeManager.class).getByUuidData(uuidData);
+                    CodeManagerItem byUuidData = App.get(ManagerCodeLink.class).getByUuidData(uuidData);
                     if (byUuidData == null) { //Если данные не зарегистрированы в CodeManager - значит они не публичные
                         throw new RuntimeException("Data not found in CodeManager");
                     }
