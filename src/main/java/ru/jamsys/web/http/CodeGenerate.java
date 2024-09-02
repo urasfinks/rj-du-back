@@ -7,9 +7,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import ru.jamsys.ManagerCodeLink;
 import ru.jamsys.ManagerCodeLinkItem;
 import ru.jamsys.PromiseExtension;
+import ru.jamsys.ResponseObject;
 import ru.jamsys.core.App;
 import ru.jamsys.core.component.ServicePromise;
-import ru.jamsys.core.extension.builder.HashMapBuilder;
 import ru.jamsys.core.extension.http.ServletHandler;
 import ru.jamsys.core.flat.util.JsonSchema;
 import ru.jamsys.core.flat.util.UtilFileResource;
@@ -44,6 +44,7 @@ public class CodeGenerate implements PromiseGenerator, HttpHandler {
     @Override
     public Promise generate() {
         return servicePromise.get(index, 1000L)
+                .extension(PromiseExtension::addResponseObject)
                 .extension(PromiseExtension::thenSelectIdUser)
                 .then("init", (_, promise) -> {
                     //{"uuid":"uudData"}
@@ -77,11 +78,10 @@ public class CodeGenerate implements PromiseGenerator, HttpHandler {
                     promise.setRepositoryMap("code", add.getCode());
                 })
                 .then("finish", (_, promise) -> {
-                    ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
-                    servletHandler.setResponseBodyFromMap(new HashMapBuilder<String, Object>()
-                            .append("code", promise.getRepositoryMap("code", String.class))
-                            .append("uuid", promise.getRepositoryMap("uuidData", String.class))
-                    );
+                    promise.getRepositoryMapClass(ResponseObject.class)
+                            .append("code", promise.getRepositoryMap("code", Integer.class))
+                            .append("uuid", promise.getRepositoryMap("uuidData", String.class));
+
                 })
                 .extension(PromiseExtension::addTerminal);
     }

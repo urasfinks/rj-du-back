@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import ru.jamsys.ManagerCodeLink;
 import ru.jamsys.ManagerCodeLinkItem;
 import ru.jamsys.PromiseExtension;
+import ru.jamsys.ResponseObject;
 import ru.jamsys.core.App;
 import ru.jamsys.core.component.ServicePromise;
 import ru.jamsys.core.extension.builder.HashMapBuilder;
@@ -44,6 +45,7 @@ public class CodeUuid implements PromiseGenerator, HttpHandler {
     @Override
     public Promise generate() {
         return servicePromise.get(index, 1000L)
+                .extension(PromiseExtension::addResponseObject)
                 .extension(PromiseExtension::thenSelectIdUser)
                 .then("init", (_, promise) -> {
                     //{"uuid":"uudData"}
@@ -60,10 +62,9 @@ public class CodeUuid implements PromiseGenerator, HttpHandler {
                     if (find == null) {
                         throw new Exception("Code not found in " + ManagerCodeLink.class.getName());
                     }
-                    servletHandler.setResponseBodyFromMap(new HashMapBuilder<String, Object>()
+                    promise.getRepositoryMapClass(ResponseObject.class)
                             .append("code", find.getCode())
-                            .append("uuid", find.getUuidData())
-                    );
+                            .append("uuid", find.getUuidData());
                 })
                 .thenWithResource("db", JdbcResource.class, "default", (_, promise, jdbcResource) -> {
                     String uuidData = promise.getRepositoryMap("uuidData", String.class);
@@ -81,11 +82,9 @@ public class CodeUuid implements PromiseGenerator, HttpHandler {
                 .then("addLink", (_, promise) -> {
                     String uuidData = promise.getRepositoryMap("uuidData", String.class);
                     ManagerCodeLinkItem add = App.get(ManagerCodeLink.class).add(uuidData);
-                    ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
-                    servletHandler.setResponseBodyFromMap(new HashMapBuilder<String, Object>()
+                    promise.getRepositoryMapClass(ResponseObject.class)
                             .append("code", add.getCode())
-                            .append("uuid", add.getUuidData())
-                    );
+                            .append("uuid", add.getUuidData());
                 })
                 .extension(PromiseExtension::addTerminal);
     }

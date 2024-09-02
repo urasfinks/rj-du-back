@@ -25,6 +25,9 @@ public class PromiseExtension {
         });
     }
 
+    public static void addResponseObject(Promise promiseSource) {
+        promiseSource.setRepositoryMapClass(ResponseObject.class, new ResponseObject());
+    }
     public static void thenSelectIdUser(Promise promiseSource) {
         promiseSource
                 .extension(PromiseExtension::thenSelectUuidDevice)
@@ -44,7 +47,8 @@ public class PromiseExtension {
     public static void addTerminal(Promise promiseSource) {
         promiseSource.onComplete((_, promise) -> {
                     ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
-                    Map<String, Object> output = promise.getRepositoryMap("output", Map.class, new HashMapBuilder<String, Object>());
+                    ResponseObject repositoryMapClass = promise.getRepositoryMapClass(ResponseObject.class);
+                    Map<String, Object> output = repositoryMapClass == null ? new HashMapBuilder<>() : repositoryMapClass;
                     output.put("status", true);
                     servletHandler.setResponseBodyFromMap(output);
                     servletHandler.responseComplete();
