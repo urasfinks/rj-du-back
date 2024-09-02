@@ -20,11 +20,11 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 @Component
 public class ManagerCodeLink {
 
-    private final Broker<CodeManagerItem> broker;
+    private final Broker<ManagerCodeLinkItem> broker;
 
-    private final Map<Integer, CodeManagerItem> codeMap = new HashMap<>(); // 12356: dataUuid
+    private final Map<Integer, ManagerCodeLinkItem> codeMap = new HashMap<>(); // 12356: dataUuid
 
-    private final Map<String, CodeManagerItem> uuidMap = new HashMap<>(); // dataUuid: 12356
+    private final Map<String, ManagerCodeLinkItem> uuidMap = new HashMap<>(); // dataUuid: 12356
 
     private final ConcurrentLinkedDeque<Integer> queueShuffleCode = new ConcurrentLinkedDeque<>();
 
@@ -40,12 +40,12 @@ public class ManagerCodeLink {
 
         this.broker = managerBroker.initAndGet(
                 UniqueClassNameImpl.getClassNameStatic(ManagerCodeLink.class, null, applicationContext),
-                CodeManagerItem.class,
+                ManagerCodeLinkItem.class,
                 this::onDrop
         );
     }
 
-    public CodeManagerItem add(String uuidData) {
+    public ManagerCodeLinkItem add(String uuidData) {
         if (queueShuffleCode.isEmpty()) {
             throw new RuntimeException("QueueShuffleCode is empty");
         }
@@ -53,26 +53,26 @@ public class ManagerCodeLink {
         if (code == null) {
             throw new RuntimeException("QueueShuffleCode return null value");
         }
-        CodeManagerItem codeManagerItem = new CodeManagerItem(uuidData, code);
-        codeMap.put(code, codeManagerItem);
-        uuidMap.put(uuidData, codeManagerItem);
+        ManagerCodeLinkItem managerCodeLinkItem = new ManagerCodeLinkItem(uuidData, code);
+        codeMap.put(code, managerCodeLinkItem);
+        uuidMap.put(uuidData, managerCodeLinkItem);
 
-        broker.add(codeManagerItem, 60 * 60 * 1000L); // 1 час
-        return codeManagerItem;
+        broker.add(managerCodeLinkItem, 60 * 60 * 1000L); // 1 час
+        return managerCodeLinkItem;
     }
 
-    public CodeManagerItem getByCode(Integer code) {
+    public ManagerCodeLinkItem getByCode(Integer code) {
         return codeMap.get(code);
     }
 
-    public CodeManagerItem getByUuidData(String uuidData) {
+    public ManagerCodeLinkItem getByUuidData(String uuidData) {
         return uuidMap.get(uuidData);
     }
 
-    private void onDrop(CodeManagerItem codeManagerItem) {
-        codeMap.remove(codeManagerItem.getCode());
-        uuidMap.remove(codeManagerItem.getUuidData());
-        queueShuffleCode.addLast(codeManagerItem.getCode());
+    private void onDrop(ManagerCodeLinkItem managerCodeLinkItem) {
+        codeMap.remove(managerCodeLinkItem.getCode());
+        uuidMap.remove(managerCodeLinkItem.getUuidData());
+        queueShuffleCode.addLast(managerCodeLinkItem.getCode());
     }
 
 }

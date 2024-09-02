@@ -5,10 +5,11 @@ import lombok.Setter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import ru.jamsys.ManagerCodeLink;
-import ru.jamsys.CodeManagerItem;
+import ru.jamsys.ManagerCodeLinkItem;
 import ru.jamsys.PromiseExtension;
 import ru.jamsys.core.App;
 import ru.jamsys.core.component.ServicePromise;
+import ru.jamsys.core.extension.builder.HashMapBuilder;
 import ru.jamsys.core.extension.http.ServletHandler;
 import ru.jamsys.core.flat.util.JsonSchema;
 import ru.jamsys.core.flat.util.UtilFileResource;
@@ -24,13 +25,11 @@ import java.util.List;
 import java.util.Map;
 
 /*
- * Получение данных в свободном доступе по uuid_data в течении срока обслуживания CodeManager
- * Прикол в том, что данные должны быть в CodeManager - это значит, что их реально создали для общего пользования
- * Там данные создаются через генерацию кода для подключения
+ * Генерация кода для авторизации. Если нет пользователя -> insert. Отправляем код на указанную почту.
  * */
 @Component
 @RequestMapping
-public class PublicData implements PromiseGenerator, HttpHandler {
+public class CodeGenerate implements PromiseGenerator, HttpHandler {
 
     @Getter
     @Setter
@@ -38,38 +37,51 @@ public class PublicData implements PromiseGenerator, HttpHandler {
 
     private final ServicePromise servicePromise;
 
-    public PublicData(ServicePromise servicePromise) {
+    public CodeGenerate(ServicePromise servicePromise) {
         this.servicePromise = servicePromise;
     }
 
     @Override
     public Promise generate() {
         return servicePromise.get(index, 1000L)
+                .extension(PromiseExtension::thenSelectIdUser)
                 .then("init", (_, promise) -> {
                     //{"uuid":"uudData"}
                     ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
                     String data = servletHandler.getRequestReader().getData();
                     JsonSchema.validate(data, UtilFileResource.getAsString("schema/http/Data.json"), "Data.json");
                     Map<String, Object> parsedJson = UtilJson.getMapOrThrow(data);
-
                     String uuidData = (String) parsedJson.get("uuid");
                     if (uuidData == null || uuidData.trim().isEmpty()) {
                         throw new RuntimeException("uuid is empty");
                     }
-                    CodeManagerItem byUuidData = App.get(ManagerCodeLink.class).getByUuidData(uuidData);
-                    if (byUuidData == null) { //Если данные не зарегистрированы в CodeManager - значит они не публичные
-                        throw new RuntimeException("Data not found in CodeManager");
-                    }
                     promise.setRepositoryMap("uuidData", uuidData);
+                    ManagerCodeLinkItem find = App.get(ManagerCodeLink.class).getByUuidData(uuidData);
+                    if (find != null) {
+                        promise.setRepositoryMap("code", find.getCode());
+                        promise.goTo("finish");
+                    }
                 })
                 .thenWithResource("db", JdbcResource.class, "default", (_, promise, jdbcResource) -> {
                     String uuidData = promise.getRepositoryMap("uuidData", String.class);
                     List<Map<String, Object>> execute = jdbcResource.execute(
-                            new JdbcRequest(Data.SELECT).addArg("uuid_data", uuidData)
+                            new JdbcRequest(Data.CHECK_PERMISSION_SOCKET_DATA)
+                                    .addArg("id_user", promise.getRepositoryMap("id_user", Integer.class))
+                                    .addArg("uuid_device", promise.getRepositoryMap("uuid_device", String.class))
+                                    .addArg("uuid_data", uuidData)
                     );
                     if (execute.isEmpty()) {
-                        throw new RuntimeException("Data not found in DB");
+                        throw new RuntimeException("Permission denied");
                     }
+                    ManagerCodeLinkItem add = App.get(ManagerCodeLink.class).add(uuidData);
+                    promise.setRepositoryMap("code", add.getCode());
+                })
+                .then("finish", (_, promise) -> {
+                    ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
+                    servletHandler.setResponseBodyFromMap(new HashMapBuilder<String, Object>()
+                            .append("code", promise.getRepositoryMap("code", String.class))
+                            .append("uuid", promise.getRepositoryMap("uuidData", String.class))
+                    );
                 })
                 .extension(PromiseExtension::addTerminal);
     }

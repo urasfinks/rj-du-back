@@ -5,7 +5,7 @@ import lombok.Setter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import ru.jamsys.ManagerCodeLink;
-import ru.jamsys.CodeManagerItem;
+import ru.jamsys.ManagerCodeLinkItem;
 import ru.jamsys.PromiseExtension;
 import ru.jamsys.core.App;
 import ru.jamsys.core.component.ServicePromise;
@@ -25,11 +25,11 @@ import java.util.List;
 import java.util.Map;
 
 /*
- * Генерация кода для авторизации. Если нет пользователя -> insert. Отправляем код на указанную почту.
+ * Получить uuid по коду
  * */
 @Component
 @RequestMapping
-public class CodeGen implements PromiseGenerator, HttpHandler {
+public class CodeUuid implements PromiseGenerator, HttpHandler {
 
     @Getter
     @Setter
@@ -37,7 +37,7 @@ public class CodeGen implements PromiseGenerator, HttpHandler {
 
     private final ServicePromise servicePromise;
 
-    public CodeGen(ServicePromise servicePromise) {
+    public CodeUuid(ServicePromise servicePromise) {
         this.servicePromise = servicePromise;
     }
 
@@ -49,14 +49,21 @@ public class CodeGen implements PromiseGenerator, HttpHandler {
                     //{"uuid":"uudData"}
                     ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
                     String data = servletHandler.getRequestReader().getData();
-                    JsonSchema.validate(data, UtilFileResource.getAsString("schema/http/Data.json"), "Data.json");
+                    JsonSchema.validate(data, UtilFileResource.getAsString("schema/http/UuidByCode.json"), "UuidByCode.json");
                     Map<String, Object> parsedJson = UtilJson.getMapOrThrow(data);
 
-                    String uuidData = (String) parsedJson.get("uuid");
-                    if (uuidData == null || uuidData.trim().isEmpty()) {
-                        throw new RuntimeException("uuid is empty");
+                    Integer code = (Integer) parsedJson.get("code");
+                    if (code == null) {
+                        throw new RuntimeException("Code is empty");
                     }
-                    promise.setRepositoryMap("uuidData", uuidData);
+                    ManagerCodeLinkItem find = App.get(ManagerCodeLink.class).getByCode(code);
+                    if (find == null) {
+                        throw new Exception("Code not found in " + ManagerCodeLink.class.getName());
+                    }
+                    servletHandler.setResponseBodyFromMap(new HashMapBuilder<String, Object>()
+                            .append("code", find.getCode())
+                            .append("uuid", find.getUuidData())
+                    );
                 })
                 .thenWithResource("db", JdbcResource.class, "default", (_, promise, jdbcResource) -> {
                     String uuidData = promise.getRepositoryMap("uuidData", String.class);
@@ -69,7 +76,11 @@ public class CodeGen implements PromiseGenerator, HttpHandler {
                     if (execute.isEmpty()) {
                         throw new RuntimeException("Permission denied");
                     }
-                    CodeManagerItem add = App.get(ManagerCodeLink.class).add(uuidData);
+
+                })
+                .then("addLink", (_, promise) -> {
+                    String uuidData = promise.getRepositoryMap("uuidData", String.class);
+                    ManagerCodeLinkItem add = App.get(ManagerCodeLink.class).add(uuidData);
                     ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
                     servletHandler.setResponseBodyFromMap(new HashMapBuilder<String, Object>()
                             .append("code", add.getCode())

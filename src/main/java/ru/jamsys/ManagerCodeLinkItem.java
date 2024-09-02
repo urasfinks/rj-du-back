@@ -3,12 +3,12 @@ package ru.jamsys;
 import lombok.Getter;
 
 @Getter
-public class CodeManagerItem {
+public class ManagerCodeLinkItem {
 
     String uuidData;
     Integer code;
 
-    public CodeManagerItem(String uuidData, Integer code) {
+    public ManagerCodeLinkItem(String uuidData, Integer code) {
         this.uuidData = uuidData;
         this.code = code;
     }
