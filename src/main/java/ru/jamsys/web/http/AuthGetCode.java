@@ -30,7 +30,7 @@ import java.util.Map;
  * */
 @Component
 @RequestMapping
-public class GetCode implements PromiseGenerator, HttpHandler {
+public class AuthGetCode implements PromiseGenerator, HttpHandler {
 
     @Getter
     @Setter
@@ -38,7 +38,7 @@ public class GetCode implements PromiseGenerator, HttpHandler {
 
     private final ServicePromise servicePromise;
 
-    public GetCode(ServicePromise servicePromise) {
+    public AuthGetCode(ServicePromise servicePromise) {
         this.servicePromise = servicePromise;
     }
 
@@ -49,7 +49,7 @@ public class GetCode implements PromiseGenerator, HttpHandler {
                     //{"mail":"urasfinks@yandex.ru"}
                     ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
                     String data = servletHandler.getRequestReader().getData();
-                    JsonSchema.validate(data, UtilFileResource.getAsString("schema/http/GetCode.json"), "GetCode.json");
+                    JsonSchema.validate(data, UtilFileResource.getAsString("schema/http/AuthGetCode.json"), "AuthGetCode.json");
                     Map<String, Object> map = UtilJson.getMapOrThrow(data);
                     promise.setRepositoryMap("mail", map.get("mail"));
                     promise.setRepositoryMap("code", Util.random(100000, 999999));
