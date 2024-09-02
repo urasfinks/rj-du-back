@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import ru.jamsys.ManagerCodeLink;
 import ru.jamsys.ManagerCodeLinkItem;
 import ru.jamsys.PromiseExtension;
+import ru.jamsys.ResponseObject;
 import ru.jamsys.core.App;
 import ru.jamsys.core.component.ServicePromise;
 import ru.jamsys.core.extension.http.ServletHandler;
@@ -45,6 +46,7 @@ public class CodeData implements PromiseGenerator, HttpHandler {
     @Override
     public Promise generate() {
         return servicePromise.get(index, 1000L)
+                .extension(PromiseExtension::addResponseObject)
                 .then("init", (_, promise) -> {
                     //{"uuid":"uudData"}
                     ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
@@ -70,6 +72,8 @@ public class CodeData implements PromiseGenerator, HttpHandler {
                     if (execute.isEmpty()) {
                         throw new RuntimeException("Data not found in DB");
                     }
+                    promise.getRepositoryMapClass(ResponseObject.class)
+                            .append("data", execute.getFirst().get("value_data"));
                 })
                 .extension(PromiseExtension::addTerminal);
     }

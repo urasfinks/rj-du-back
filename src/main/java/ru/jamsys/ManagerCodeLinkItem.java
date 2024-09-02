@@ -1,8 +1,10 @@
 package ru.jamsys;
 
 import lombok.Getter;
+import lombok.ToString;
 
 @Getter
+@ToString
 public class ManagerCodeLinkItem {
 
     String uuidData;

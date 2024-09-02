@@ -26,8 +26,11 @@ public class PromiseExtension {
     }
 
     public static void addResponseObject(Promise promiseSource) {
-        promiseSource.setRepositoryMapClass(ResponseObject.class, new ResponseObject());
+        ResponseObject responseObject = new ResponseObject();
+        responseObject.append("status", false);
+        promiseSource.setRepositoryMapClass(ResponseObject.class, responseObject);
     }
+
     public static void thenSelectIdUser(Promise promiseSource) {
         promiseSource
                 .extension(PromiseExtension::thenSelectUuidDevice)
