@@ -66,7 +66,8 @@ public class AuthGetCode implements PromiseGenerator, HttpHandler {
                     } else {
                         jdbcResource.execute(new JdbcRequest(User.SET_CODE).addArg(arg));
                     }
-                }).thenWithResource("email", EmailNotificationResource.class, (_, promise, emailNotificationResource) -> {
+                })
+                .thenWithResource("email", EmailNotificationResource.class, (_, promise, emailNotificationResource) -> {
                     Integer code = promise.getRepositoryMap("code", Integer.class);
                     String mail = promise.getRepositoryMap("mail", String.class);
                     emailNotificationResource.execute(new EmailNotificationRequest(
