@@ -4,11 +4,9 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
-import ru.jamsys.promise.PromiseExtension;
 import ru.jamsys.core.component.ServicePromise;
 import ru.jamsys.core.extension.builder.HashMapBuilder;
 import ru.jamsys.core.extension.http.ServletHandler;
-import ru.jamsys.core.flat.template.twix.TemplateTwix;
 import ru.jamsys.core.flat.util.JsonSchema;
 import ru.jamsys.core.flat.util.Util;
 import ru.jamsys.core.flat.util.UtilFileResource;
@@ -17,11 +15,13 @@ import ru.jamsys.core.promise.Promise;
 import ru.jamsys.core.promise.PromiseGenerator;
 import ru.jamsys.core.resource.jdbc.JdbcRequest;
 import ru.jamsys.core.resource.jdbc.JdbcResource;
-import ru.jamsys.core.resource.notification.email.EmailNotificationRequest;
 import ru.jamsys.core.resource.notification.email.EmailNotificationResource;
+import ru.jamsys.core.resource.notification.email.EmailTemplateNotificationRequest;
 import ru.jamsys.core.web.http.HttpHandler;
 import ru.jamsys.jt.User;
+import ru.jamsys.promise.PromiseExtension;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -44,7 +44,7 @@ public class AuthGetCode implements PromiseGenerator, HttpHandler {
 
     @Override
     public Promise generate() {
-        return servicePromise.get(index, 1000L)
+        return servicePromise.get(index, 7_000L)
                 .then("init", (_, promise) -> {
                     //{"mail":"urasfinks@yandex.ru"}
                     ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
@@ -70,15 +70,15 @@ public class AuthGetCode implements PromiseGenerator, HttpHandler {
                 .thenWithResource("email", EmailNotificationResource.class, (_, promise, emailNotificationResource) -> {
                     Integer code = promise.getRepositoryMap("code", Integer.class);
                     String mail = promise.getRepositoryMap("mail", String.class);
-                    emailNotificationResource.execute(new EmailNotificationRequest(
+                    HashMap<String, String> data = new HashMapBuilder<String, String>()
+                            .append("code", code + "")
+                            .append("support", emailNotificationResource.getProperty().getSupport());
+                    emailNotificationResource.execute(new EmailTemplateNotificationRequest(
                             "Ваш код: *****",
                             "Ваш код: " + code,
-                            TemplateTwix.template(
-                                    Util.getWebContent("email.html"),
-                                    new HashMapBuilder<String, String>()
-                                            .append("code", code + "")
-                                            .append("support", emailNotificationResource.getSupport())
-                            ),
+                            emailNotificationResource.getProperty().getTemplateClassLoader(),
+                            emailNotificationResource.getProperty().getTemplatePath(),
+                            data,
                             mail
                     ));
                 })

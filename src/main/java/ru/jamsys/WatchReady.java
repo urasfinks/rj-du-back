@@ -12,8 +12,6 @@ public class WatchReady {
                 .add("spring.config.location", "classpath:application.properties,classpath:/properties/watch-ready/application.properties")
                 .runCore();
 
-        System.out.println("APP NAME: " + App.applicationName);
-
     }
 
 }
