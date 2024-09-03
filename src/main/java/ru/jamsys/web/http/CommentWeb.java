@@ -22,7 +22,7 @@ import ru.jamsys.promise.repository.ParsedJson;
 import java.util.Map;
 
 /*
- * Обработка комментария с Web
+ * Обработка комментария с Web. Тут будет проверка на ReCaptcha.
  * */
 @Component
 @RequestMapping
