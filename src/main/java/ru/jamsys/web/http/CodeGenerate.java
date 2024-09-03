@@ -77,12 +77,9 @@ public class CodeGenerate implements PromiseGenerator, HttpHandler {
                     ManagerCodeLinkItem add = App.get(ManagerCodeLink.class).add(uuidData);
                     promise.setRepositoryMap("code", add.getCode());
                 })
-                .then("finish", (_, promise) -> {
-                    promise.getRepositoryMapClass(ResponseObject.class)
-                            .append("code", promise.getRepositoryMap("code", Integer.class))
-                            .append("uuid", promise.getRepositoryMap("uuidData", String.class));
-
-                })
+                .then("finish", (_, promise) -> promise.getRepositoryMapClass(ResponseObject.class)
+                        .append("code", promise.getRepositoryMap("code", Integer.class))
+                        .append("uuid", promise.getRepositoryMap("uuidData", String.class)))
                 .extension(PromiseExtension::addTerminal);
     }
 
