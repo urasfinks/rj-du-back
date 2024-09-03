@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
-import ru.jamsys.promise.PromiseExtension;
 import ru.jamsys.core.App;
 import ru.jamsys.core.component.ServicePromise;
 import ru.jamsys.core.component.web.socket.WebSocket;
@@ -20,6 +19,8 @@ import ru.jamsys.core.resource.jdbc.JdbcRequest;
 import ru.jamsys.core.resource.jdbc.JdbcResource;
 import ru.jamsys.core.web.http.HttpHandler;
 import ru.jamsys.jt.Data;
+import ru.jamsys.promise.PromiseExtension;
+import ru.jamsys.promise.repository.AuthRepository;
 
 import java.util.List;
 import java.util.Map;
@@ -50,7 +51,7 @@ public class SocketUpdate implements PromiseGenerator, HttpHandler {
     @Override
     public Promise generate() {
         return servicePromise.get(index, 1000L)
-                .extension(PromiseExtension::thenSelectIdUser)
+                .extension(PromiseExtension::thenSelectIdUserIfExist)
                 .then("init", (_, promise) -> {
                     ServletHandler input = promise.getRepositoryMapClass(ServletHandler.class);
                     String data = input.getRequestReader().getData();
@@ -65,12 +66,12 @@ public class SocketUpdate implements PromiseGenerator, HttpHandler {
 
     public static void dbUpdate(Promise promiseSource) {
         promiseSource.thenWithResource("DbUpdate", JdbcResource.class, "default", (_, promise, jdbcResource) -> {
-            Map<String, Object> arg = new HashMapBuilder<String, Object>()
-                    .append("id_user", promise.getRepositoryMap("id_user", Integer.class))
-                    .append("uuid_device", promise.getRepositoryMap("uuid_device", String.class))
+            Map<String, Object> arg = promise.getRepositoryMapClass(AuthRepository.class).get()
                     .append("uuid_data", promise.getRepositoryMap("uuid_data", String.class));
 
-            List<Map<String, Object>> permission = jdbcResource.execute(new JdbcRequest(Data.CHECK_PERMISSION_SOCKET_DATA).addArg(arg));
+            List<Map<String, Object>> permission = jdbcResource.execute(
+                    new JdbcRequest(Data.CHECK_PERMISSION_SOCKET_DATA).addArg(arg)
+            );
             if (permission.isEmpty()) {
                 throw new RuntimeException("Permission denied");
             }
@@ -78,7 +79,9 @@ public class SocketUpdate implements PromiseGenerator, HttpHandler {
             // С этого момента мы начинаем работать без коммитов, поэтому в try, что бы в последствии завершить коммит
             try {
                 //Получаем главную запись с данными для последующего обновления
-                List<Map<String, Object>> primarySocketData = jdbcResource.execute(new JdbcRequest(Data.GET_PRIMARY_SOCKET_DATA).addArg(arg));
+                List<Map<String, Object>> primarySocketData = jdbcResource.execute(
+                        new JdbcRequest(Data.GET_PRIMARY_SOCKET_DATA).addArg(arg)
+                );
                 if (primarySocketData.isEmpty()) {
                     throw new RuntimeException("Primary socket data not found");
                 }

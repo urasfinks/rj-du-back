@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import ru.jamsys.promise.PromiseExtension;
 import ru.jamsys.core.component.ServicePromise;
-import ru.jamsys.core.extension.builder.HashMapBuilder;
 import ru.jamsys.core.extension.http.ServletHandler;
 import ru.jamsys.core.flat.util.JsonSchema;
 import ru.jamsys.core.flat.util.UtilFileResource;
@@ -19,6 +18,7 @@ import ru.jamsys.core.web.http.HttpHandler;
 import ru.jamsys.jt.Data;
 import ru.jamsys.jt.Device;
 import ru.jamsys.jt.User;
+import ru.jamsys.promise.repository.AuthRepository;
 
 import java.util.List;
 import java.util.Map;
@@ -43,7 +43,7 @@ public class SignIn implements PromiseGenerator, HttpHandler {
     @Override
     public Promise generate() {
         return servicePromise.get(index, 1000L)
-                .extension(PromiseExtension::thenSelectUuidDevice)
+                .extension(PromiseExtension::thenSelectUuidDeviceRequire)
                 .then("init", (_, promise) -> {
                     //{"mail":"urasfinks@yandex.ru", "code": 123456}
                     ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
@@ -59,10 +59,9 @@ public class SignIn implements PromiseGenerator, HttpHandler {
                     String mail = promise.getRepositoryMap("mail", String.class);
                     boolean isAppleReviewAppStore = mail.equals("admin@admin.ru") && code == 214365;
                     //Apple Review App Store
-                    Map<String, Object> arg = new HashMapBuilder<String, Object>()
+                    Map<String, Object> arg = promise.getRepositoryMapClass(AuthRepository.class).get()
                             .append("mail", promise.getRepositoryMap("mail", String.class))
-                            .append("code", promise.getRepositoryMap("code", Integer.class))
-                            .append("uuid_device", promise.getRepositoryMap("uuid_device", String.class));
+                            .append("code", promise.getRepositoryMap("code", Integer.class));
 
                     List<Map<String, Object>> user = isAppleReviewAppStore
                             ? jdbcResource.execute(new JdbcRequest(User.GET_BY_CODE_APPLE_REVIEW).addArg(arg))

@@ -17,7 +17,7 @@ import ru.jamsys.core.resource.notification.telegram.TelegramNotificationRequest
 import ru.jamsys.core.resource.notification.telegram.TelegramNotificationResource;
 import ru.jamsys.core.web.http.HttpHandler;
 import ru.jamsys.promise.PromiseExtension;
-import ru.jamsys.promise.repository.ParsedJson;
+import ru.jamsys.promise.repository.ParsedJsonRepository;
 
 import java.util.Map;
 
@@ -41,7 +41,7 @@ public class CommentWeb implements PromiseGenerator, HttpHandler {
     @Override
     public Promise generate() {
         return servicePromise.get(index, 30000L)
-                .extension(PromiseExtension::addParsedJson)
+                .extension(PromiseExtension::addParsedJsonRepository)
                 .then("init", (_, promise) -> {
                     //{
                     //    "name": "Юрий",
@@ -54,36 +54,37 @@ public class CommentWeb implements PromiseGenerator, HttpHandler {
                     String data = servletHandler.getRequestReader().getData();
                     JsonSchema.validate(
                             data,
-                            UtilFileResource.getAsString("schema/http/Comment.json"),
-                            "Comment.json"
+                            UtilFileResource.getAsString("schema/http/CommentWeb.json"),
+                            "CommentWeb.json"
                     );
-                    Map<String, Object> parsedJson = UtilJson.getMapOrThrow(data);
-                    if (!parsedJson.containsKey("g-recaptcha-response")) {
-                        throw new RuntimeException("recaptcha is empty");
-                    }
-                    promise.getRepositoryMapClass(ParsedJson.class).putAll(parsedJson);
+                    promise.getRepositoryMapClass(ParsedJsonRepository.class).putAll(UtilJson.getMapOrThrow(data));
                 })
                 .thenWithResource("recaptcha", ReCaptchaResource.class, (_, promise, reCaptchaResource) -> {
-                    ParsedJson parsedJson = promise.getRepositoryMapClass(ParsedJson.class);
-                    HttpResponse httpResponse = reCaptchaResource.execute((String) parsedJson.get("g-recaptcha-response"));
+                    ParsedJsonRepository parsedJsonRepository = promise.getRepositoryMapClass(ParsedJsonRepository.class);
+                    HttpResponse httpResponse = reCaptchaResource.execute((String) parsedJsonRepository.get("g-recaptcha-response"));
                     if (!httpResponse.isStatus()) {
                         throw new RuntimeException(httpResponse.getDescription());
                     }
                 })
-                .appendWithResource("http", TelegramNotificationResource.class, (_, promise, telegramNotificationResource) -> {
-                    ParsedJson parsedJson = promise.getRepositoryMapClass(ParsedJson.class);
-                    parsedJson.remove("g-recaptcha-response");
+                .extension(CommentWeb::thenSendToTelegram)
+                .extension(PromiseExtension::addTerminal);
+    }
+
+    public static void thenSendToTelegram(Promise promiseResource) {
+        promiseResource
+                .thenWithResource("http", TelegramNotificationResource.class, (_, promise, telegramNotificationResource) -> {
+                    ParsedJsonRepository parsedJsonRepository = promise.getRepositoryMapClass(ParsedJsonRepository.class);
+                    parsedJsonRepository.remove("g-recaptcha-response");
                     HttpResponse httpResponse = telegramNotificationResource.execute(
                             new TelegramNotificationRequest(
-                                    (String) parsedJson.remove("subject"),
-                                    UtilJson.toStringPretty(parsedJson, "{}")
+                                    (String) parsedJsonRepository.remove("subject"),
+                                    UtilJson.toStringPretty(parsedJsonRepository, "{}")
                             )
                     );
                     if (!httpResponse.isStatus()) {
                         throw new RuntimeException(httpResponse.getDescription());
                     }
-                })
-                .extension(PromiseExtension::addTerminal);
+                });
     }
 
 }

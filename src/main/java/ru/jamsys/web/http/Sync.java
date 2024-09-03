@@ -5,9 +5,7 @@ import lombok.Setter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import ru.jamsys.DataType;
-import ru.jamsys.promise.PromiseExtension;
 import ru.jamsys.core.component.ServicePromise;
-import ru.jamsys.core.extension.builder.HashMapBuilder;
 import ru.jamsys.core.extension.http.ServletHandler;
 import ru.jamsys.core.flat.util.Util;
 import ru.jamsys.core.flat.util.UtilJson;
@@ -18,6 +16,8 @@ import ru.jamsys.core.resource.jdbc.JdbcResource;
 import ru.jamsys.core.web.http.HttpHandler;
 import ru.jamsys.jt.Data;
 import ru.jamsys.jt.DataByParent;
+import ru.jamsys.promise.PromiseExtension;
+import ru.jamsys.promise.repository.AuthRepository;
 
 import java.util.*;
 
@@ -41,32 +41,25 @@ public class Sync implements PromiseGenerator, HttpHandler {
     @Override
     public Promise generate() {
         return servicePromise.get(index, 1000L)
-                .extension(PromiseExtension::thenSelectIdUser)
+                .extension(PromiseExtension::thenSelectIdUserIfExist)
                 .then("init", (_, promise) -> {
                     ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
                     String data = servletHandler.getRequestReader().getData();
                     //TODO: было бы не плохо валидировать входящий трафик
 
                     promise.setRepositoryMap("parsedJson", UtilJson.getMapOrThrow(data));
-                    promise.setRepositoryMap(
-                            "authMap",
-                            new HashMapBuilder<String, Object>()
-                                    .append("id_user", promise.getRepositoryMap("id_user", Integer.class))
-                                    .append("uuid_device", promise.getRepositoryMap("uuid_device", String.class))
-                    );
                     promise.setRepositoryMap("result", new HashMap<String, Object>());
                     promise.setRepositoryMap("responseBody", new LinkedHashMap<String, Object>());
                 })
                 .thenWithResource("remove", JdbcResource.class, "default", (_, promise, jdbcResource) -> {
+                    AuthRepository authRepository = promise.getRepositoryMapClass(AuthRepository.class);
                     // Для начала удалим данные которые были удалены на фронте
                     // Да, это всё равно пойдёт ревизией обратно, но уже немного подрезанное (зануление value_data)
                     List<String> removed = getUncheckedList(promise, "removed");
-                    Map<String, Object> prepare = new HashMapBuilder<String, Object>()
-                            .append("id_user", promise.getRepositoryMap("id_user", Integer.class))
-                            .append("uuid_device", promise.getRepositoryMap("uuid_device", String.class));
                     for (String uuidData : removed) {
                         jdbcResource.execute(new JdbcRequest(Data.REMOVE)
-                                .addArg(new HashMapBuilder<>(prepare).append("uuid_data", uuidData)));
+                                .addArg(authRepository.get())
+                                .addArg("uuid_data", uuidData));
                     }
                 })
                 .thenWithResource("getMaxRevisionByType", JdbcResource.class, "default", (_, promise, jdbcResource) -> {
@@ -81,9 +74,9 @@ public class Sync implements PromiseGenerator, HttpHandler {
                     List<Map<String, Object>> exec =
                             lazyList.isEmpty()
                                     ? jdbcResource.execute(new JdbcRequest(Data.SELECT_MAX_REVISION_BY_TYPE)
-                                    .addArg(promise.getRepositoryMap("authMap", Map.class)))
+                                    .addArg(promise.getRepositoryMapClass(AuthRepository.class).get()))
                                     : jdbcResource.execute(new JdbcRequest(Data.SELECT_MAX_REVISION_BY_TYPE_LAZY)
-                                    .addArg(promise.getRepositoryMap("authMap", Map.class))
+                                    .addArg(promise.getRepositoryMapClass(AuthRepository.class).get())
                                     .addArg("lazy", lazyList));
 
                     for (Map<String, Object> row : exec) {
@@ -123,7 +116,7 @@ public class Sync implements PromiseGenerator, HttpHandler {
                         }
                         long dbRevision = dbMaxRevisionByType.getOrDefault(dataType.toString(), 0L);
                         if (dbRevision > rqRevision) {
-                            Map<String, Object> arguments = new HashMap<String, Object>(promise.getRepositoryMap("authMap", Map.class));
+                            Map<String, Object> arguments = promise.getRepositoryMapClass(AuthRepository.class).get();
                             arguments.put("type_data", dataType.toString());
                             arguments.put("revision_data", rqRevision);
                             if (!lazyList.isEmpty()) {
@@ -234,9 +227,8 @@ public class Sync implements PromiseGenerator, HttpHandler {
         List<Map<String, Object>> listDataToInsert = (List<Map<String, Object>>) parsedJson.get(dataTypeName);
         if (listDataToInsert != null) {
             for (Map<String, Object> dataToInsert : listDataToInsert) {
-                Map<String, Object> arguments = new HashMap<>();
+                Map<String, Object> arguments = promise.getRepositoryMapClass(AuthRepository.class).get();
                 arguments.putAll(dataToInsert);
-                arguments.putAll(promise.getRepositoryMap("authMap", Map.class));
                 List<Map<String, Object>> exec = jdbcResource.execute(new JdbcRequest(Data.INSERT).addArg(arguments));
 
                 if (!exec.isEmpty() && exec.getFirst().containsKey("new_id_revision")) {

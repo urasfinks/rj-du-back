@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import ru.jamsys.ManagerCodeLink;
 import ru.jamsys.ManagerCodeLinkItem;
 import ru.jamsys.promise.PromiseExtension;
-import ru.jamsys.promise.repository.ResponseObject;
+import ru.jamsys.promise.repository.ResponseRepository;
 import ru.jamsys.core.App;
 import ru.jamsys.core.component.ServicePromise;
 import ru.jamsys.core.extension.http.ServletHandler;
@@ -40,7 +40,7 @@ public class CodeUuid implements PromiseGenerator, HttpHandler {
     @Override
     public Promise generate() {
         return servicePromise.get(index, 1000L)
-                .extension(PromiseExtension::addResponseObject)
+                .extension(PromiseExtension::addResponseRepository)
                 .then("init", (_, promise) -> {
                     //{"code": 267936}
                     ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
@@ -53,7 +53,7 @@ public class CodeUuid implements PromiseGenerator, HttpHandler {
                     if (find == null) {
                         throw new Exception("Code not found in " + ManagerCodeLink.class.getName());
                     }
-                    promise.getRepositoryMapClass(ResponseObject.class)
+                    promise.getRepositoryMapClass(ResponseRepository.class)
                             .append("code", find.getCode())
                             .append("uuid", find.getUuidData());
                 })

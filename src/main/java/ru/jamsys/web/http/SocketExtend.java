@@ -41,7 +41,7 @@ public class SocketExtend implements PromiseGenerator, HttpHandler {
     @Override
     public Promise generate() {
         return servicePromise.get(index, 1000L)
-                .extension(PromiseExtension::thenSelectIdUser)
+                .extension(PromiseExtension::thenSelectIdUserIfExist)
                 .then("init", (_, promise) -> {
                     ServletHandler input = promise.getRepositoryMapClass(ServletHandler.class);
                     String data = input.getRequestReader().getData();

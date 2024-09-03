@@ -7,7 +7,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import ru.jamsys.ManagerCodeLink;
 import ru.jamsys.ManagerCodeLinkItem;
 import ru.jamsys.promise.PromiseExtension;
-import ru.jamsys.promise.repository.ResponseObject;
+import ru.jamsys.promise.repository.AuthRepository;
+import ru.jamsys.promise.repository.ResponseRepository;
 import ru.jamsys.core.App;
 import ru.jamsys.core.component.ServicePromise;
 import ru.jamsys.core.extension.http.ServletHandler;
@@ -44,8 +45,8 @@ public class CodeGenerate implements PromiseGenerator, HttpHandler {
     @Override
     public Promise generate() {
         return servicePromise.get(index, 1000L)
-                .extension(PromiseExtension::addResponseObject)
-                .extension(PromiseExtension::thenSelectIdUser)
+                .extension(PromiseExtension::addResponseRepository)
+                .extension(PromiseExtension::thenSelectIdUserRequire)
                 .then("init", (_, promise) -> {
                     //{"uuid":"uudData"}
                     ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
@@ -65,10 +66,10 @@ public class CodeGenerate implements PromiseGenerator, HttpHandler {
                 })
                 .thenWithResource("db", JdbcResource.class, "default", (_, promise, jdbcResource) -> {
                     String uuidData = promise.getRepositoryMap("uuidData", String.class);
+                    AuthRepository authRepository = promise.getRepositoryMapClass(AuthRepository.class);
                     List<Map<String, Object>> execute = jdbcResource.execute(
                             new JdbcRequest(Data.CHECK_PERMISSION_SOCKET_DATA)
-                                    .addArg("id_user", promise.getRepositoryMap("id_user", Integer.class))
-                                    .addArg("uuid_device", promise.getRepositoryMap("uuid_device", String.class))
+                                    .addArg(authRepository.get())
                                     .addArg("uuid_data", uuidData)
                     );
                     if (execute.isEmpty()) {
@@ -77,7 +78,7 @@ public class CodeGenerate implements PromiseGenerator, HttpHandler {
                     ManagerCodeLinkItem add = App.get(ManagerCodeLink.class).add(uuidData);
                     promise.setRepositoryMap("code", add.getCode());
                 })
-                .then("finish", (_, promise) -> promise.getRepositoryMapClass(ResponseObject.class)
+                .then("finish", (_, promise) -> promise.getRepositoryMapClass(ResponseRepository.class)
                         .append("code", promise.getRepositoryMap("code", Integer.class))
                         .append("uuid", promise.getRepositoryMap("uuidData", String.class)))
                 .extension(PromiseExtension::addTerminal);
