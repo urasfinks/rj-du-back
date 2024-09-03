@@ -19,8 +19,6 @@ import ru.jamsys.core.web.http.HttpHandler;
 import ru.jamsys.promise.PromiseExtension;
 import ru.jamsys.promise.repository.ParsedJsonRepository;
 
-import java.util.Map;
-
 /*
  * Обработка комментария с Web. Тут будет проверка на ReCaptcha.
  * */
