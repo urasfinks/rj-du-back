@@ -1,12 +1,15 @@
-package ru.jamsys;
+package ru.jamsys.promise;
 
 import ru.jamsys.core.App;
 import ru.jamsys.core.extension.builder.HashMapBuilder;
+import ru.jamsys.core.extension.exception.JsonSchemaException;
 import ru.jamsys.core.extension.http.ServletHandler;
 import ru.jamsys.core.promise.Promise;
 import ru.jamsys.core.resource.jdbc.JdbcRequest;
 import ru.jamsys.core.resource.jdbc.JdbcResource;
 import ru.jamsys.jt.Device;
+import ru.jamsys.promise.repository.ParsedJson;
+import ru.jamsys.promise.repository.ResponseObject;
 
 import java.util.List;
 import java.util.Map;
@@ -29,6 +32,10 @@ public class PromiseExtension {
         ResponseObject responseObject = new ResponseObject();
         responseObject.append("status", false);
         promiseSource.setRepositoryMapClass(ResponseObject.class, responseObject);
+    }
+
+    public static void addParsedJson(Promise promiseSource) {
+        promiseSource.setRepositoryMapClass(ParsedJson.class, new ParsedJson());
     }
 
     public static void thenSelectIdUser(Promise promiseSource) {
@@ -59,7 +66,13 @@ public class PromiseExtension {
                 .onError((_, promise) -> {
                     App.error(promise.getException());
                     ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
-                    servletHandler.setResponseError(promise.getException().getMessage());
+                    Throwable exception = promise.getException();
+                    if (exception instanceof JsonSchemaException) {
+                        servletHandler.setResponseError(((JsonSchemaException) exception).getResponseError());
+                    } else {
+                        servletHandler.setResponseError(promise.getException().getMessage());
+                    }
+
                     servletHandler.responseComplete();
                 });
     }

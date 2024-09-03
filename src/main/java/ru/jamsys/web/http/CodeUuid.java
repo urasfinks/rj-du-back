@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import ru.jamsys.ManagerCodeLink;
 import ru.jamsys.ManagerCodeLinkItem;
-import ru.jamsys.PromiseExtension;
-import ru.jamsys.ResponseObject;
+import ru.jamsys.promise.PromiseExtension;
+import ru.jamsys.promise.repository.ResponseObject;
 import ru.jamsys.core.App;
 import ru.jamsys.core.component.ServicePromise;
 import ru.jamsys.core.extension.http.ServletHandler;
@@ -16,12 +16,8 @@ import ru.jamsys.core.flat.util.UtilFileResource;
 import ru.jamsys.core.flat.util.UtilJson;
 import ru.jamsys.core.promise.Promise;
 import ru.jamsys.core.promise.PromiseGenerator;
-import ru.jamsys.core.resource.jdbc.JdbcRequest;
-import ru.jamsys.core.resource.jdbc.JdbcResource;
 import ru.jamsys.core.web.http.HttpHandler;
-import ru.jamsys.jt.Data;
 
-import java.util.List;
 import java.util.Map;
 
 /*
