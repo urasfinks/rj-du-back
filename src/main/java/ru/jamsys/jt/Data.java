@@ -170,8 +170,15 @@ public enum Data implements JdbcRequestRepository {
             """, StatementType.SELECT_WITH_AUTO_COMMIT),
 
     SELECT_SYSTEM_STATIC("""
-            SELECT * FROM data WHERE uuid_data = ${IN.uuid_data::VARCHAR} and id_user = 2
-            """, StatementType.SELECT_WITH_AUTO_COMMIT),
+            SELECT * FROM data
+            WHERE
+                uuid_data = ${IN.uuid_data::VARCHAR}
+                and type_data IN ('%s', '%s')
+                and id_user = 1
+            """.formatted(
+            DataType.blob.name(),
+            DataType.blobRSync.name()
+    ), StatementType.SELECT_WITH_AUTO_COMMIT),
 
     INSERT("""
             CALL add_data(

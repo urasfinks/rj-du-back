@@ -73,7 +73,8 @@ public class PromiseExtension {
     }
 
     public static void addTerminal(Promise promiseSource) {
-        promiseSource.onComplete((_, promise) -> {
+        promiseSource
+                .onComplete((_, promise) -> {
                     ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
                     ResponseRepository repositoryMapClass = promise.getRepositoryMapClass(ResponseRepository.class);
                     Map<String, Object> output = repositoryMapClass == null ? new HashMapBuilder<>() : repositoryMapClass;
@@ -81,18 +82,24 @@ public class PromiseExtension {
                     servletHandler.setResponseBodyFromMap(output);
                     servletHandler.responseComplete();
                 })
-                .onError((_, promise) -> {
-                    App.error(promise.getException());
-                    ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
-                    Throwable exception = promise.getException();
-                    if (exception instanceof JsonSchemaException) {
-                        servletHandler.setResponseError(((JsonSchemaException) exception).getResponseError());
-                    } else {
-                        servletHandler.setResponseError(promise.getException().getMessage());
-                    }
+                .extension(PromiseExtension::addErrorHandler);
+    }
 
-                    servletHandler.responseComplete();
-                });
+    public static void addErrorHandler(Promise promiseSource) {
+        promiseSource.onError((_, promise) -> errorHandler(promise));
+    }
+
+    public static void errorHandler(Promise promise) {
+        App.error(promise.getException());
+        ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
+        servletHandler.setResponseContentType("application/json");
+        Throwable exception = promise.getException();
+        if (exception instanceof JsonSchemaException) {
+            servletHandler.setResponseError(((JsonSchemaException) exception).getResponseError());
+        } else {
+            servletHandler.setResponseError(promise.getException().getMessage());
+        }
+        servletHandler.responseComplete();
     }
 
 }
