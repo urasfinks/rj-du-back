@@ -59,6 +59,7 @@ public class Blob implements PromiseGenerator, HttpHandler {
                                     .addArg(parsedJsonRepository)
                             //.setDebug(true)
                     );
+                    System.out.println(execute);
                     if (execute.isEmpty()) {
                         throw new RuntimeException("Data not found");
                     }
@@ -78,7 +79,8 @@ public class Blob implements PromiseGenerator, HttpHandler {
                         servletHandler.setResponseContentType(contentType);
                         UtilBase64.base64Decode(
                                 new ByteArrayInputStream(((String) parsedJsonRepository.get("blob")).getBytes()),
-                                servletHandler.getResponseOutputStream()
+                                servletHandler.getResponseOutputStream(),
+                                true
                         );
                         servletHandler.getServletResponse().complete(null);
                     } catch (Throwable th) {
