@@ -74,11 +74,10 @@ public class BlobUpload implements PromiseGenerator, HttpHandler {
                             .append("uuid_device", authRepository.getUuidDevice())
                             .append("new_id_revision", new BigDecimal(0));
                 })
-                .thenWithResource("db", JdbcResource.class, "default", (_, promise, jdbcResource) -> {
-                    jdbcResource.execute(new JdbcRequest(Data.INSERT)
-                            .addArg(promise.getRepositoryMapClass(ParsedJsonRepository.class))
-                    );
-                })
+                .thenWithResource("db", JdbcResource.class, "default", (_, promise, jdbcResource)
+                        -> jdbcResource.execute(new JdbcRequest(Data.INSERT)
+                        .addArg(promise.getRepositoryMapClass(ParsedJsonRepository.class))
+                ))
                 .extension(PromiseExtension::addTerminal);
     }
 
