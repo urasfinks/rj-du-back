@@ -33,8 +33,12 @@ function ajax(url, formData, callback) {
         }
     };
 
-    xmlhttp.open("GET", url, true);
-    xmlhttp.send(formData);
+    xmlhttp.open(formData != undefined ? "POST" : "GET", url, true);
+    if (formData != undefined) {
+        xmlhttp.send(formData);
+    } else {
+        xmlhttp.send();
+    }
 }
 
 window.fileSelected = function (obj) {
@@ -52,8 +56,7 @@ window.sendFiles = function (files) {
         var fd = new FormData();
         fd.append("file", file);
         fd.append("uuid", getName(file.name));
-        //console.log(file);
-        //console.log(getName(file.name));
+        console.log(fd);
         ajax("/BlobUpload", fd, function (data) {
             console.log(data);
             window.sendFiles(files);
