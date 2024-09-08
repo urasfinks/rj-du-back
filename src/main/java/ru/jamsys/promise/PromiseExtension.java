@@ -1,5 +1,6 @@
 package ru.jamsys.promise;
 
+import ru.jamsys.AuthException;
 import ru.jamsys.core.App;
 import ru.jamsys.core.extension.builder.HashMapBuilder;
 import ru.jamsys.core.extension.exception.JsonSchemaException;
@@ -38,7 +39,7 @@ public class PromiseExtension {
                     ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
                     servletHandler.getRequestReader().basicAuthHandler((user, password) -> {
                         if (!user.startsWith("v")) {
-                            throw new RuntimeException("basic version is not defined");
+                            throw new AuthException("basic version is not defined");
                         }
                         promise.getRepositoryMapClass(AuthRepository.class).setUuidDevice(password);
                     });
@@ -74,6 +75,12 @@ public class PromiseExtension {
 
     public static void addTerminal(Promise promiseSource) {
         promiseSource
+                .extension(PromiseExtension::addCompleteHandler)
+                .extension(PromiseExtension::addErrorHandler);
+    }
+
+    public static void addCompleteHandler(Promise promiseSource) {
+        promiseSource
                 .onComplete((_, promise) -> {
                     ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
                     ResponseRepository repositoryMapClass = promise.getRepositoryMapClass(ResponseRepository.class);
@@ -81,8 +88,7 @@ public class PromiseExtension {
                     output.put("status", true);
                     servletHandler.setResponseBodyFromMap(output);
                     servletHandler.responseComplete();
-                })
-                .extension(PromiseExtension::addErrorHandler);
+                });
     }
 
     public static void addErrorHandler(Promise promiseSource) {
@@ -96,6 +102,10 @@ public class PromiseExtension {
         Throwable exception = promise.getException();
         if (exception instanceof JsonSchemaException) {
             servletHandler.setResponseError(((JsonSchemaException) exception).getResponseError());
+        } else if (exception instanceof AuthException) {
+            servletHandler.setResponseUnauthorized();
+            servletHandler.getCompletableFuture().complete(null);
+            return;
         } else {
             servletHandler.setResponseError(promise.getException().getMessage());
         }

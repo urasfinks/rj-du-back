@@ -47,7 +47,6 @@ public class BlobUpload implements PromiseGenerator, HttpHandler {
                 .then("init", (_, promise) -> {
                     ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
                     Map<String, String> map = servletHandler.getRequestReader().getMap();
-                    System.out.println(map);
                     if (!map.containsKey("uuid")) {
                         throw new RuntimeException("Uuid is empty");
                     }
