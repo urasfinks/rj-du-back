@@ -1,0 +1,59 @@
+html, body {
+    background-color: #f5f5f5;
+    font-family: Arial;
+}
+
+* {
+    font-size: 14px;
+}
+
+#uploader {
+    margin: auto;
+    width: 700px;
+}
+
+#template {
+    display: none;
+}
+
+.border-radius {
+    -webkit-border-radius: 16px;
+    -moz-border-radius: 16px;
+    border-radius: 16px;
+}
+
+#files {
+    display: none;
+}
+
+.block input {
+    width: 100%;
+}
+
+.block table td {
+    padding: 0px 16px 0px 0px;
+}
+
+.block table {
+    width: 100%;
+}
+
+.block {
+    background: #fff;
+    padding: 16px 0px 16px 16px;
+    margin-top: 16px;
+}
+
+.select-files {
+    background: transparent;
+    border: 1px dashed #ccc;
+}
+
+.load-to-server {
+    text-align: right;
+    padding-right: 16px;
+}
+
+#btn-load-to-server {
+    display: none;
+}

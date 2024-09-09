@@ -1,8 +1,8 @@
 package ru.jamsys.promise;
 
-import ru.jamsys.AuthException;
 import ru.jamsys.core.App;
 import ru.jamsys.core.extension.builder.HashMapBuilder;
+import ru.jamsys.core.extension.exception.AuthException;
 import ru.jamsys.core.extension.exception.JsonSchemaException;
 import ru.jamsys.core.extension.http.ServletHandler;
 import ru.jamsys.core.promise.Promise;
@@ -53,7 +53,7 @@ public class PromiseExtension {
                 .then("CheckIdUser", (_, promise) -> {
                     AuthRepository authRepository = promise.getRepositoryMapClass(AuthRepository.class);
                     if (authRepository.getIdUser() == null) {
-                        throw new RuntimeException("User device undefined");
+                        throw new AuthException("User device undefined");
                     }
                 });
     }

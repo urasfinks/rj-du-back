@@ -3,14 +3,58 @@
     <meta charset="UTF-8">
     <link rel="shortcut icon" href="/favicon.ico">
     <link href="/css/loader.css" rel="stylesheet"/>
-    <link href="/css/main.css" rel="stylesheet"/>
+    <link href="/css/mu.css" rel="stylesheet"/>
     <script type="text/javascript" src="/js/on-ready.js"></script>
     <script type="text/javascript" src="/js/mu.js"></script>
 </head>
 <body>
 <div id="error"></div>
-<form name="uploader" id="uploader" action="/" method="POST" enctype="multipart/form-data">
+<div id="template">
+    <div class="block border-radius">
+        <table>
+            <tr>
+                <td width="1%" class="file-index"></td>
+                <td width="29%">
+                    <input type="text" class="key">
+                </td>
+                <td width="69%">
+                    <input type="text" class="name">
+                </td>
+                <td width="1%">
+                    <button class="idx" onclick="window.removeSelectedFile(this.idx)">х</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<div id="uploader">
     <input type="file" id="files" multiple="true" onchange="window.fileSelected(this);"/>
-</form>
+    <div class="block border-radius select-files">
+        <table>
+            <tr>
+                <td width="1%" class="file-index"></td>
+                <td width="29%">
+                    <input type="text" id="key" placeholder="key" onchange="keyChange(this.value);" onkeyup="keyChange(this.value)">
+                </td>
+                <td width="69%">
+                    <button>
+                        <label for="files">Выбрать файлы</label>
+                    </button>
+                </td>
+                <td width="1%">
+                    <button onclick="window.selectedFiles=[];window.reloadSelectedFiles();">х</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="selected-files">
+
+    </div>
+    <br>
+    <div class="load-to-server">
+        <button id="btn-load-to-server" onclick="window.sendFiles();">Загрузить на сервер</button>
+    </div>
+</div>
 </body>
 </html>
