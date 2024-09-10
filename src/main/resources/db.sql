@@ -18,6 +18,11 @@ CREATE TABLE IF NOT EXISTS public."user"
     CONSTRAINT user_pkey PRIMARY KEY (id_user)
 );
 
+CREATE UNIQUE INDEX IF NOT EXISTS user_idx01
+    ON public."user" USING btree
+    (mail_user COLLATE pg_catalog."default" ASC NULLS LAST)
+    TABLESPACE pg_default;
+
 -- Table: public.device
 
 -- DROP TABLE IF EXISTS public.device;
