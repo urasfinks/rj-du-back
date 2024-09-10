@@ -1,7 +1,6 @@
 package ru.jamsys.promise;
 
 import ru.jamsys.core.App;
-import ru.jamsys.core.extension.builder.HashMapBuilder;
 import ru.jamsys.core.extension.exception.AuthException;
 import ru.jamsys.core.extension.exception.JsonSchemaException;
 import ru.jamsys.core.extension.http.ServletHandler;
@@ -84,9 +83,8 @@ public class PromiseExtension {
                 .onComplete((_, promise) -> {
                     ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
                     ResponseRepository repositoryMapClass = promise.getRepositoryMapClass(ResponseRepository.class);
-                    Map<String, Object> output = repositoryMapClass == null ? new HashMapBuilder<>() : repositoryMapClass;
-                    output.put("status", true);
-                    servletHandler.setResponseBodyFromMap(output);
+                    repositoryMapClass.put("status", true);
+                    servletHandler.setResponseBodyFromMap(repositoryMapClass);
                     servletHandler.responseComplete();
                 });
     }

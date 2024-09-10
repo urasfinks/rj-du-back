@@ -18,8 +18,12 @@ import ru.jamsys.jt.Data;
 import ru.jamsys.jt.DataByParent;
 import ru.jamsys.promise.PromiseExtension;
 import ru.jamsys.promise.repository.AuthRepository;
+import ru.jamsys.promise.repository.ResponseRepository;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /*
  * Синхронизация данных на фронте
@@ -42,14 +46,15 @@ public class Sync implements PromiseGenerator, HttpHandler {
     public Promise generate() {
         return servicePromise.get(index, 1000L)
                 .extension(PromiseExtension::thenSelectIdUserIfExist)
+                .extension(PromiseExtension::addResponseRepository)
                 .then("init", (_, promise) -> {
+
                     ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
                     String data = servletHandler.getRequestReader().getData();
-                    //TODO: было бы не плохо валидировать входящий трафик
 
                     promise.setRepositoryMap("parsedJson", UtilJson.getMapOrThrow(data));
                     promise.setRepositoryMap("result", new HashMap<String, Object>());
-                    promise.setRepositoryMap("responseBody", new LinkedHashMap<String, Object>());
+
                 })
                 .thenWithResource("remove", JdbcResource.class, "default", (_, promise, jdbcResource) -> {
                     AuthRepository authRepository = promise.getRepositoryMapClass(AuthRepository.class);
@@ -154,13 +159,11 @@ public class Sync implements PromiseGenerator, HttpHandler {
                             needUpgrade.put(dataType.toString(), dbRevision);
                         }
                     }
+                    promise.getRepositoryMapClass(ResponseRepository.class)
+                            .append("totalByte", totalByte)
+                            .append("totalCountItem", totalCounterItem)
+                            .append("serverNeedUpgrade", needUpgrade);
 
-                    @SuppressWarnings("unchecked")
-                    Map<String, Object> responseBody = promise.getRepositoryMap("responseBody", Map.class);
-
-                    responseBody.put("totalByte", totalByte);
-                    responseBody.put("totalCountItem", totalCounterItem);
-                    responseBody.put("serverNeedUpgrade", needUpgrade);
                 })
                 .thenWithResource("updateUserDataRSync", JdbcResource.class, "default", (_, promise, jdbcResource) -> {
                     //userDataRSync может прийти пустым, так как просто человечек не залогинен
@@ -333,8 +336,8 @@ public class Sync implements PromiseGenerator, HttpHandler {
 
     //#6
     public static void sizeControl(Promise promise) {
-        @SuppressWarnings("unchecked")
-        Map<String, Object> responseBody = promise.getRepositoryMap("responseBody", Map.class);
+
+        ResponseRepository responseRepository = promise.getRepositoryMapClass(ResponseRepository.class);
 
         @SuppressWarnings("unchecked")
         Map<String, List<Map<String, Object>>> result = promise.getRepositoryMap("result", Map.class);
@@ -342,7 +345,7 @@ public class Sync implements PromiseGenerator, HttpHandler {
         Map<String, List<Map<String, Object>>> upgrade = new HashMap<>();
         int limitByte = 100 * 1024;
         int countItem = 0;
-        responseBody.put("limitByte", limitByte);
+        responseRepository.append("limitByte", limitByte);
 
         for (String type : result.keySet()) {
             if (limitByte <= 0) {
@@ -369,9 +372,10 @@ public class Sync implements PromiseGenerator, HttpHandler {
                 }
             }
         }
-        responseBody.put("limitByteOffset", limitByte);
-        responseBody.put("countItem", countItem);
-        responseBody.put("upgrade", upgrade);
+        responseRepository.
+                append("limitByteOffset", limitByte)
+                .append("countItem", countItem)
+                .append("upgrade", upgrade);
     }
 
 }
