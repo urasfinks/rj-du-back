@@ -22,8 +22,8 @@ import java.util.Map;
  * Получение статических больших данных (binary large object) из БД
  * */
 @Component
-@RequestMapping("/Auth/**")
-public class Auth implements PromiseGenerator, HttpHandler {
+@RequestMapping("/AuthWeb/**")
+public class AuthWeb implements PromiseGenerator, HttpHandler {
 
     @Getter
     @Setter
@@ -33,7 +33,7 @@ public class Auth implements PromiseGenerator, HttpHandler {
 
     private final Map<String, String> staticFile = new HashMap<>();
 
-    public Auth(ServicePromise servicePromise, ServiceProperty serviceProperty) {
+    public AuthWeb(ServicePromise servicePromise, ServiceProperty serviceProperty) {
         this.servicePromise = servicePromise;
         String location = serviceProperty.get("run.args.web.resource.location");
         String absPath = new File(location).getAbsolutePath();
@@ -47,7 +47,7 @@ public class Auth implements PromiseGenerator, HttpHandler {
                 .extension(PromiseExtension::thenSelectIdUserRequire)
                 .then("init", (_, promise) -> {
                     ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
-                    String uri = servletHandler.getRequest().getRequestURI().substring(5);
+                    String uri = servletHandler.getRequest().getRequestURI().substring(8);
                     if (staticFile.containsKey(uri)) {
                         servletHandler.writeFileToOutput(new File(staticFile.get(uri)));
                     } else {
