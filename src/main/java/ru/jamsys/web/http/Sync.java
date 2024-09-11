@@ -156,6 +156,9 @@ public class Sync implements PromiseGenerator, HttpHandler {
                             }
                             result.put(dataType.toString(), exec);
                         } else if (dbRevision < rqRevision && lazyList.isEmpty()) { //Рассинхрон версий
+                            // На устройстве номер ревизии больше, чем в серверной БД
+                            // Возвращаем клиенту, последний номер ревизии в серверной БД
+                            // Для того, что бы клиент пометил у себя в локальной БД данные для следующей синхронизации
                             needUpgrade.put(dataType.toString(), dbRevision);
                         }
                     }
