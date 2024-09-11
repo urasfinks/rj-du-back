@@ -171,38 +171,40 @@ DECLARE
 	newRevisionData bigint;
 BEGIN
 	--p_new_revision_data := 0;
-	SELECT id_data, type_data INTO idData, typeData FROM "data" d WHERE d.uuid_data = p_uuid_data AND d.id_user = p_id_user;
-	IF idData > 0 THEN
-		--Обновляем только в случаи если пользователь является владельцем по учётке или устройству
-		IF typeData != 'socket' THEN --Сокетные данные надо обновлять через rest api
-			UPDATE "data" SET
-				value_data = p_value_data,
-				key_data = p_key_data,
-				meta_data = p_meta_data,
-				is_remove_data = 0 --Случай удаления пользователя, и повторная запись account/avatar
-			WHERE id_data = idData
-			AND (uuid_device_data = p_uuid_device_data OR id_user = p_id_user);
+	IF p_id_user IS NOT NULL THEN
+        SELECT id_data, type_data INTO idData, typeData FROM "data" d WHERE d.uuid_data = p_uuid_data AND d.id_user = p_id_user;
+        IF idData > 0 THEN
+            --Обновляем только в случаи если пользователь является владельцем по учётке или устройству
+            IF typeData != 'socket' THEN --Сокетные данные надо обновлять через rest api
+                UPDATE "data" SET
+                    value_data = p_value_data,
+                    key_data = p_key_data,
+                    meta_data = p_meta_data,
+                    is_remove_data = 0 --Случай удаления пользователя, и повторная запись account/avatar
+                WHERE id_data = idData
+                AND (uuid_device_data = p_uuid_device_data OR id_user = p_id_user);
 
-			SELECT revision_data INTO newRevisionData FROM "data"
-			WHERE id_data = idData
-			AND (uuid_device_data = p_uuid_device_data OR id_user = p_id_user);
-			p_new_revision_data := newRevisionData || '';
-		END IF;
-	ELSE
-		INSERT INTO "data" (uuid_data, value_data, type_data, parent_uuid_data, date_add_data, is_remove_data, id_user, key_data, meta_data, uuid_device_data)
-		VALUES (
-			p_uuid_data,
-			p_value_data,
-			p_type_data,
-			p_parent_uuid_data,
-			to_timestamp(p_date_add_data)::timestamp without time zone,
-			p_is_remove_data,
-			p_id_user,
-			p_key_data,
-			p_meta_data,
-			p_uuid_device_data
-		) RETURNING revision_data INTO newRevisionData;
-		p_new_revision_data := newRevisionData || '';
-	END IF;
+                SELECT revision_data INTO newRevisionData FROM "data"
+                WHERE id_data = idData
+                AND (uuid_device_data = p_uuid_device_data OR id_user = p_id_user);
+                p_new_revision_data := newRevisionData || '';
+            END IF;
+        ELSE
+            INSERT INTO "data" (uuid_data, value_data, type_data, parent_uuid_data, date_add_data, is_remove_data, id_user, key_data, meta_data, uuid_device_data)
+            VALUES (
+                p_uuid_data,
+                p_value_data,
+                p_type_data,
+                p_parent_uuid_data,
+                to_timestamp(p_date_add_data)::timestamp without time zone,
+                p_is_remove_data,
+                p_id_user,
+                p_key_data,
+                p_meta_data,
+                p_uuid_device_data
+            ) RETURNING revision_data INTO newRevisionData;
+            p_new_revision_data := newRevisionData || '';
+        END IF;
+    END IF;
 END;
 $BODY$;

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import ru.jamsys.DataType;
 import ru.jamsys.core.component.ServicePromise;
+import ru.jamsys.core.extension.exception.AuthException;
 import ru.jamsys.core.extension.http.ServletHandler;
 import ru.jamsys.core.flat.util.Util;
 import ru.jamsys.core.flat.util.UtilJson;
@@ -169,11 +170,13 @@ public class Sync implements PromiseGenerator, HttpHandler {
 
                 })
                 .thenWithResource("updateUserDataRSync", JdbcResource.class, "default", (_, promise, jdbcResource) -> {
-                    //userDataRSync может прийти пустым, так как просто человечек не залогинен
+                    // userDataRSync может прийти пустым, так как просто человечек не залогинен
+                    // А может получится так, что устройство считает себя залогиненным, но сервер переехал без восстановления БД
                     insertData(promise, DataType.userDataRSync.name(), jdbcResource);
                 })
                 .thenWithResource("updateBlobRSync", JdbcResource.class, "default", (_, promise, jdbcResource) -> {
                     //blobRSync может прийти пустым, так как просто человечек не залогинен
+                    // А может получится так, что устройство считает себя залогиненным, но сервер переехал без восстановления БД
                     insertData(promise, DataType.blobRSync.name(), jdbcResource);
                 })
                 .thenWithResource("updateSocket", JdbcResource.class, "default", (_, promise, jdbcResource)
@@ -227,15 +230,23 @@ public class Sync implements PromiseGenerator, HttpHandler {
         Map<String, Object> parsedJson = promise.getRepositoryMap("parsedJson", Map.class);
 
         @SuppressWarnings("unchecked")
-        Map<String, List<Map<String, Object>>> result = promise.getRepositoryMap("result", Map.class);
-
-        @SuppressWarnings("unchecked")
         List<Map<String, Object>> listDataToInsert = (List<Map<String, Object>>) parsedJson.get(dataTypeName);
-        if (listDataToInsert != null) {
+        if (listDataToInsert != null && !listDataToInsert.isEmpty()) {
+
+            // Устройство ничего не долно высылать на ставку, до тех пор пока не авторизауется
+            AuthRepository authRepository = promise.getRepositoryMapClass(AuthRepository.class);
+            if (authRepository.getIdUser() == null) {
+                // Была попытка вставить данные, как будто устройство авторизованно, но нет
+                throw new AuthException("idUser is null");
+            }
+
+            @SuppressWarnings("unchecked")
+            Map<String, List<Map<String, Object>>> result = promise.getRepositoryMap("result", Map.class);
+
             for (Map<String, Object> dataToInsert : listDataToInsert) {
                 Map<String, Object> arguments = promise.getRepositoryMapClass(AuthRepository.class).get();
                 arguments.putAll(dataToInsert);
-                List<Map<String, Object>> exec = jdbcResource.execute(new JdbcRequest(Data.INSERT).addArg(arguments));
+                List<Map<String, Object>> exec = jdbcResource.execute(new JdbcRequest(Data.INSERT).addArg(arguments).setDebug(true));
 
                 if (!exec.isEmpty() && exec.getFirst().containsKey("new_id_revision")) {
                     String newIdRevisionString = (String) exec.getFirst().get("new_id_revision");
