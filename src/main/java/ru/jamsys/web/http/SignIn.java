@@ -55,13 +55,13 @@ public class SignIn implements PromiseGenerator, HttpHandler {
                     promise.setRepositoryMap("code", code);
                 })
                 .thenWithResource("db", JdbcResource.class, "default", (_, promise, jdbcResource) -> {
-                    Integer code = promise.getRepositoryMap("code", Integer.class);
-                    String mail = promise.getRepositoryMap("mail", String.class);
+                    Integer code = promise.getRepositoryMap(Integer.class, "code");
+                    String mail = promise.getRepositoryMap(String.class, "mail");
                     boolean isAppleReviewAppStore = mail.equals("admin@admin.ru") && code == 214365;
                     //Apple Review App Store
                     Map<String, Object> arg = promise.getRepositoryMapClass(AuthRepository.class).get()
-                            .append("mail", promise.getRepositoryMap("mail", String.class))
-                            .append("code", promise.getRepositoryMap("code", Integer.class));
+                            .append("mail", promise.getRepositoryMap(String.class, "mail"))
+                            .append("code", promise.getRepositoryMap(Integer.class, "code"));
 
                     List<Map<String, Object>> user = isAppleReviewAppStore
                             ? jdbcResource.execute(new JdbcRequest(User.GET_BY_CODE_APPLE_REVIEW).addArg(arg))

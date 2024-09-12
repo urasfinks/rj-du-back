@@ -65,7 +65,7 @@ public class CodeData implements PromiseGenerator, HttpHandler {
                     promise.setRepositoryMap("uuidData", uuidData);
                 })
                 .thenWithResource("db", JdbcResource.class, "default", (_, promise, jdbcResource) -> {
-                    String uuidData = promise.getRepositoryMap("uuidData", String.class);
+                    String uuidData = promise.getRepositoryMap(String.class, "uuidData");
                     List<Map<String, Object>> execute = jdbcResource.execute(
                             new JdbcRequest(Data.SELECT).addArg("uuid_data", uuidData)
                     );

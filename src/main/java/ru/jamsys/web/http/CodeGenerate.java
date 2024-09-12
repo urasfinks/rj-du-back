@@ -65,7 +65,7 @@ public class CodeGenerate implements PromiseGenerator, HttpHandler {
                     }
                 })
                 .thenWithResource("db", JdbcResource.class, "default", (_, promise, jdbcResource) -> {
-                    String uuidData = promise.getRepositoryMap("uuidData", String.class);
+                    String uuidData = promise.getRepositoryMap(String.class, "uuidData");
                     AuthRepository authRepository = promise.getRepositoryMapClass(AuthRepository.class);
                     List<Map<String, Object>> execute = jdbcResource.execute(
                             new JdbcRequest(Data.CHECK_PERMISSION_SOCKET_DATA)
@@ -79,8 +79,8 @@ public class CodeGenerate implements PromiseGenerator, HttpHandler {
                     promise.setRepositoryMap("code", add.getCode());
                 })
                 .then("finish", (_, promise) -> promise.getRepositoryMapClass(ResponseRepository.class)
-                        .append("code", promise.getRepositoryMap("code", Integer.class))
-                        .append("uuid", promise.getRepositoryMap("uuidData", String.class)))
+                        .append("code", promise.getRepositoryMap(Integer.class, "code"))
+                        .append("uuid", promise.getRepositoryMap(String.class, "uuidData")))
                 .extension(PromiseExtension::addTerminal);
     }
 

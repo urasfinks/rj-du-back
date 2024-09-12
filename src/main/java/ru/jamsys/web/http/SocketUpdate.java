@@ -67,7 +67,7 @@ public class SocketUpdate implements PromiseGenerator, HttpHandler {
     public static void dbUpdate(Promise promiseSource) {
         promiseSource.thenWithResource("DbUpdate", JdbcResource.class, "default", (_, promise, jdbcResource) -> {
             Map<String, Object> arg = promise.getRepositoryMapClass(AuthRepository.class).get()
-                    .append("uuid_data", promise.getRepositoryMap("uuid_data", String.class));
+                    .append("uuid_data", promise.getRepositoryMap(String.class, "uuid_data"));
 
             List<Map<String, Object>> permission = jdbcResource.execute(
                     new JdbcRequest(Data.CHECK_PERMISSION_SOCKET_DATA).addArg(arg)
@@ -91,7 +91,7 @@ public class SocketUpdate implements PromiseGenerator, HttpHandler {
                     throw new RuntimeException("Socket data empty");
                 }
                 Map<String, Object> dbValueMap = UtilJson.getMapOrThrow(dbValue);
-                dbValueMap.putAll(promise.getRepositoryMap("data", Map.class));
+                dbValueMap.putAll(promise.getRepositoryMap(Map.class, "data"));
 
                 //Если любой ключ равен null - удаляем ключ
                 removeNullValue(dbValueMap);
@@ -104,16 +104,16 @@ public class SocketUpdate implements PromiseGenerator, HttpHandler {
 
                 //Обновляем ревизии дочерних сокетных данных
                 jdbcResource.execute(new JdbcRequest(Data.UPDATE_SECONDARY_SOCKET_DATA)
-                        .addArg("uuid_data", promise.getRepositoryMap("uuid_data", String.class))
+                        .addArg("uuid_data", promise.getRepositoryMap(String.class, "uuid_data"))
                 );
                 //Закинем на обработку данные для рассылки по сокетам
                 App.get(WebSocket.class)
                         .notify(
-                                promise.getRepositoryMap("uuid_data", String.class),
+                                promise.getRepositoryMap(String.class, "uuid_data"),
                                 UtilJson.toStringPretty(
                                         new HashMapBuilder<String, Object>()
                                                 .append("handler", "SYNC")
-                                                .append("uuid_data", promise.getRepositoryMap("uuid_data", String.class)),
+                                                .append("uuid_data", promise.getRepositoryMap(String.class, "uuid_data")),
                                         "{}"
                                 )
                         );

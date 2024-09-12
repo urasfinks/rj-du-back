@@ -93,7 +93,7 @@ public class Sync implements PromiseGenerator, HttpHandler {
                 .thenWithResource("selectDataResponse", JdbcResource.class, "default", (_, promise, jdbcResource) -> {
 
                     @SuppressWarnings("unchecked")
-                    Map<String, List<Map<String, Object>>> result = promise.getRepositoryMap("result", Map.class);
+                    Map<String, List<Map<String, Object>>> result = promise.getRepositoryMap(Map.class, "result");
 
                     Map<String, Long> needUpgrade = new HashMap<>(); // Это контроль сколько данных на фронте устарело и их надо обновить
                     int totalCounterItem = 0; // Контроль сколько данных будем высылать
@@ -101,17 +101,17 @@ public class Sync implements PromiseGenerator, HttpHandler {
 
 
                     @SuppressWarnings("unchecked")
-                    Map<String, Object> parsedJson = promise.getRepositoryMap("parsedJson", Map.class);
+                    Map<String, Object> parsedJson = promise.getRepositoryMap(Map.class, "parsedJson");
 
                     // Последние ревизии на фронте
                     @SuppressWarnings("unchecked")
-                    Map<String, Long> rqMaxRevisionByType = (Map<String, Long>) promise.getRepositoryMap("parsedJson", Map.class).get("maxRevisionByType");
+                    Map<String, Long> rqMaxRevisionByType = (Map<String, Long>) promise.getRepositoryMap(Map.class, "parsedJson").get("maxRevisionByType");
 
                     // Это первая синхронизация после авторизации фронта. Может быть такое, что данные были накопления данных
                     // перед авторизацией
                     boolean authJustNow = parsedJson.containsKey("authJustNow") && (boolean) parsedJson.get("authJustNow");
-                    List<String> lazyList = promise.getRepositoryMap("lazyList", List.class);
-                    Map<String, Long> dbMaxRevisionByType = promise.getRepositoryMap("dbRevisionMap", Map.class);
+                    List<String> lazyList = promise.getRepositoryMap(List.class, "lazyList");
+                    Map<String, Long> dbMaxRevisionByType = promise.getRepositoryMap(Map.class, "dbRevisionMap");
 
                     for (DataType dataType : DataType.values()) {
                         long rqRevision = ((Number) rqMaxRevisionByType.getOrDefault(dataType.toString(), 0L)).longValue();
@@ -188,7 +188,7 @@ public class Sync implements PromiseGenerator, HttpHandler {
                     // ** перечитывал 100 раз) ничего не понятно что это блин такое)))
 
                     @SuppressWarnings("unchecked")
-                    Map<String, List<Map<String, Object>>> result = promise.getRepositoryMap("result", Map.class);
+                    Map<String, List<Map<String, Object>>> result = promise.getRepositoryMap(Map.class, "result");
 
                     if (result.containsKey(DataType.socket.name())) {
                         updateSocketParentData(result.get(DataType.socket.name()), jdbcResource);
@@ -200,7 +200,7 @@ public class Sync implements PromiseGenerator, HttpHandler {
 
     private static <T> List<T> getUncheckedList(Promise promise, String key) {
         @SuppressWarnings("unchecked")
-        Map<String, Object> parsedJson = promise.getRepositoryMap("parsedJson", Map.class);
+        Map<String, Object> parsedJson = promise.getRepositoryMap(Map.class, "parsedJson");
         List<T> result = new ArrayList<>();
         if (parsedJson.containsKey(key) && parsedJson.get(key) instanceof List) {
             @SuppressWarnings("unchecked")
@@ -227,7 +227,7 @@ public class Sync implements PromiseGenerator, HttpHandler {
         // Когда происходят инсерты, нам на устройство надо вернуть новое установленное значение ревизии
 
         @SuppressWarnings("unchecked")
-        Map<String, Object> parsedJson = promise.getRepositoryMap("parsedJson", Map.class);
+        Map<String, Object> parsedJson = promise.getRepositoryMap(Map.class, "parsedJson");
 
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> listDataToInsert = (List<Map<String, Object>>) parsedJson.get(dataTypeName);
@@ -241,7 +241,7 @@ public class Sync implements PromiseGenerator, HttpHandler {
             }
 
             @SuppressWarnings("unchecked")
-            Map<String, List<Map<String, Object>>> result = promise.getRepositoryMap("result", Map.class);
+            Map<String, List<Map<String, Object>>> result = promise.getRepositoryMap(Map.class, "result");
 
             for (Map<String, Object> dataToInsert : listDataToInsert) {
                 Map<String, Object> arguments = promise.getRepositoryMapClass(AuthRepository.class).get();
@@ -354,7 +354,7 @@ public class Sync implements PromiseGenerator, HttpHandler {
         ResponseRepository responseRepository = promise.getRepositoryMapClass(ResponseRepository.class);
 
         @SuppressWarnings("unchecked")
-        Map<String, List<Map<String, Object>>> result = promise.getRepositoryMap("result", Map.class);
+        Map<String, List<Map<String, Object>>> result = promise.getRepositoryMap(Map.class, "result");
 
         Map<String, List<Map<String, Object>>> upgrade = new HashMap<>();
         int limitByte = 100 * 1024;

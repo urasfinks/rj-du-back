@@ -45,6 +45,7 @@ public class AuthGetCode implements PromiseGenerator, HttpHandler {
     @Override
     public Promise generate() {
         return servicePromise.get(index, 7_000L)
+                //.setDebug(true)
                 .then("init", (_, promise) -> {
                     //{"mail":"urasfinks@yandex.ru"}
                     ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
@@ -56,8 +57,8 @@ public class AuthGetCode implements PromiseGenerator, HttpHandler {
                 })
                 .thenWithResource("db", JdbcResource.class, "default", (_, promise, jdbcResource) -> {
                     Map<String, Object> arg = new HashMapBuilder<String, Object>()
-                            .append("mail", promise.getRepositoryMap("mail", String.class))
-                            .append("code", promise.getRepositoryMap("code", Integer.class));
+                            .append("mail", promise.getRepositoryMap(String.class, "mail"))
+                            .append("code", promise.getRepositoryMap(Integer.class, "code"));
 
                     List<Map<String, Object>> user = jdbcResource.execute(
                             new JdbcRequest(User.GET_BY_MAIL).addArg(arg));
@@ -68,8 +69,8 @@ public class AuthGetCode implements PromiseGenerator, HttpHandler {
                     }
                 })
                 .thenWithResource("email", EmailNotificationResource.class, (_, promise, emailNotificationResource) -> {
-                    Integer code = promise.getRepositoryMap("code", Integer.class);
-                    String mail = promise.getRepositoryMap("mail", String.class);
+                    Integer code = promise.getRepositoryMap(Integer.class, "code");
+                    String mail = promise.getRepositoryMap(String.class, "mail");
                     HashMap<String, String> data = new HashMapBuilder<String, String>()
                             .append("code", code + "")
                             .append("support", emailNotificationResource.getProperty().getSupport());
