@@ -2,6 +2,7 @@ package ru.jamsys.jt;
 
 
 import ru.jamsys.DataType;
+import ru.jamsys.core.App;
 import ru.jamsys.core.flat.template.jdbc.JdbcRequestRepository;
 import ru.jamsys.core.flat.template.jdbc.JdbcTemplate;
 import ru.jamsys.core.flat.template.jdbc.StatementType;
@@ -286,8 +287,8 @@ public enum Data implements JdbcRequestRepository {
     Data(String sql, StatementType statementType) {
         try {
             template = new JdbcTemplate(sql, statementType);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Throwable th) {
+            App.error(th);
         }
     }
 
