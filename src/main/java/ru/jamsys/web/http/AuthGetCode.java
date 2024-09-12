@@ -45,7 +45,6 @@ public class AuthGetCode implements PromiseGenerator, HttpHandler {
     @Override
     public Promise generate() {
         return servicePromise.get(index, 7_000L)
-                //.setDebug(true)
                 .then("init", (_, promise) -> {
                     //{"mail":"urasfinks@yandex.ru"}
                     ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);

@@ -14,6 +14,7 @@ import ru.jamsys.promise.repository.ResponseRepository;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class PromiseExtension {
 
@@ -82,7 +83,10 @@ public class PromiseExtension {
         promiseSource
                 .onComplete((_, promise) -> {
                     ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
-                    ResponseRepository repositoryMapClass = promise.getRepositoryMapClass(ResponseRepository.class);
+                    ResponseRepository repositoryMapClass = promise.getRepositoryMapClass(
+                            ResponseRepository.class,
+                            (Supplier<ResponseRepository>) ResponseRepository::new
+                    );
                     repositoryMapClass.put("status", true);
                     servletHandler.setResponseBodyFromMap(repositoryMapClass);
                     servletHandler.responseComplete();

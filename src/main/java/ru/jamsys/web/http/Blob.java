@@ -57,7 +57,6 @@ public class Blob implements PromiseGenerator, HttpHandler {
                     ParsedJsonRepository parsedJsonRepository = promise.getRepositoryMapClass(ParsedJsonRepository.class);
                     List<Map<String, Object>> execute = jdbcResource.execute(new JdbcRequest(Data.SELECT_SYSTEM_STATIC)
                                     .addArg(parsedJsonRepository)
-                            //.setDebug(true)
                     );
                     System.out.println(execute);
                     if (execute.isEmpty()) {

@@ -246,7 +246,7 @@ public class Sync implements PromiseGenerator, HttpHandler {
             for (Map<String, Object> dataToInsert : listDataToInsert) {
                 Map<String, Object> arguments = promise.getRepositoryMapClass(AuthRepository.class).get();
                 arguments.putAll(dataToInsert);
-                List<Map<String, Object>> exec = jdbcResource.execute(new JdbcRequest(Data.INSERT).addArg(arguments).setDebug(true));
+                List<Map<String, Object>> exec = jdbcResource.execute(new JdbcRequest(Data.INSERT).addArg(arguments));
 
                 if (!exec.isEmpty() && exec.getFirst().containsKey("new_id_revision")) {
                     String newIdRevisionString = (String) exec.getFirst().get("new_id_revision");
