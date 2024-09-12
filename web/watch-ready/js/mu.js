@@ -64,10 +64,10 @@ window.reloadSelectedFiles = function () {
         block.innerHTML = template;
         block.getElementsByClassName("uuid")[0].value = getName(window.selectedFiles[i].name).toLowerCase();
         block.getElementsByClassName("idx")[0].idx = i;
-        block.getElementsByClassName("file-index")[0].innerHTML = i;
+        block.getElementsByClassName("file-index")[0].innerHTML = i + "";
         var ar = ["key", "meta", "lazy_sync"];
-        for (var i = 0; i < ar.length; i++) {
-            block.getElementsByClassName(ar[i])[0].value = $$(ar[i]).value;
+        for (var j = 0; j < ar.length; j++) {
+            block.getElementsByClassName(ar[j])[0].value = $$(ar[j]).value;
         }
         $$("selected-files").appendChild(block);
     }
@@ -88,16 +88,15 @@ window.sendFiles = function () {
 }
 window.handleQueue = function (ar) {
     let block = ar.pop();
-    console.log(block);
     if (block != null && block != undefined) {
         var fd = new FormData();
         var idx = block.getElementsByClassName("file-index")[0].innerHTML * 1;
         fd.append("file", window.selectedFiles[idx]);
-        var ar = ["uuid", "key", "meta", "lazy_sync"];
-        for (var i = 0; i < ar.length; i++) {
-            var val = block.getElementsByClassName(ar[i])[0].value;
+        var field = ["uuid", "key", "meta", "lazy_sync"];
+        for (var i = 0; i < field.length; i++) {
+            var val = block.getElementsByClassName(field[i])[0].value;
             if (val != undefined && val.trim() != "") {
-                fd.append(ar[i], val);
+                fd.append(field[i], val);
             }
         }
         ajax("/BlobUpload", fd, function (data) {
