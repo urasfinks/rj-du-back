@@ -41,7 +41,6 @@ public class BlobUpload implements PromiseGenerator, HttpHandler {
     @Override
     public Promise generate() {
         return servicePromise.get(index, 1000L)
-                .setDebug(true)
                 .extension(PromiseExtension::thenSelectIdUserRequire)
                 .extension(PromiseExtension::addParsedJsonRepository)
                 .extension(PromiseExtension::addAuthRepository)
@@ -79,7 +78,6 @@ public class BlobUpload implements PromiseGenerator, HttpHandler {
                 .thenWithResource("db", JdbcResource.class, "default", (_, promise, jdbcResource)
                         -> jdbcResource.execute(new JdbcRequest(Data.INSERT)
                         .addArg(promise.getRepositoryMapClass(ParsedJsonRepository.class))
-                        .setDebug(true)
                 ))
                 .extension(PromiseExtension::addTerminal);
     }
