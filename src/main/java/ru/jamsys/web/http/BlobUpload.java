@@ -41,6 +41,7 @@ public class BlobUpload implements PromiseGenerator, HttpHandler {
     @Override
     public Promise generate() {
         return servicePromise.get(index, 1000L)
+                .setDebug(true)
                 .extension(PromiseExtension::thenSelectIdUserRequire)
                 .extension(PromiseExtension::addParsedJsonRepository)
                 .extension(PromiseExtension::addAuthRepository)
@@ -70,14 +71,15 @@ public class BlobUpload implements PromiseGenerator, HttpHandler {
                             .append("is_remove_data", 0)
                             .append("id_user", authRepository.getIdUser())
                             .append("key_data", map.get("key"))
-                            .append("meta_data", map.get("meta_data"))
-                            .append("lazy_sync_data", map.get("lazy_sync_data"))
+                            .append("meta_data", map.get("meta"))
+                            .append("lazy_sync_data", map.get("lazy_sync"))
                             .append("uuid_device", authRepository.getUuidDevice())
                             .append("new_id_revision", new BigDecimal(0));
                 })
                 .thenWithResource("db", JdbcResource.class, "default", (_, promise, jdbcResource)
                         -> jdbcResource.execute(new JdbcRequest(Data.INSERT)
                         .addArg(promise.getRepositoryMapClass(ParsedJsonRepository.class))
+                        .setDebug(true)
                 ))
                 .extension(PromiseExtension::addTerminal);
     }

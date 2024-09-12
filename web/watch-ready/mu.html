@@ -14,11 +14,17 @@
         <table>
             <tr>
                 <td width="1%" class="file-index"></td>
-                <td width="29%">
+                <td width="24%">
                     <input type="text" class="key">
                 </td>
-                <td width="69%">
-                    <input type="text" class="name">
+                <td width="24%">
+                    <input type="text" class="meta">
+                </td>
+                <td width="24%">
+                    <input type="text" class="lazy_sync">
+                </td>
+                <td width="26%">
+                    <input type="text" class="uuid">
                 </td>
                 <td width="1%">
                     <button class="idx" onclick="window.removeSelectedFile(this.idx)">х</button>
@@ -32,16 +38,30 @@
     <div class="block border-radius select-files">
         <table>
             <tr>
-                <td width="1%" class="file-index"></td>
-                <td width="29%">
-                    <input type="text" id="key" placeholder="key" onchange="keyChange(this.value);" onkeyup="keyChange(this.value)">
+                <td width="1%"></td>
+                <td width="24%">Ключ</td>
+                <td width="24%">Мета</td>
+                <td width="24%">Ленивый</td>
+                <td width="26%">Файл</td>
+                <td width="1%"></td>
+            </tr>
+            <tr>
+                <td class="file-index"></td>
+                <td>
+                    <input type="text" id="key" placeholder="key" onchange="lsChange(this);" onkeyup="lsChange(this)">
                 </td>
-                <td width="69%">
+                <td>
+                    <input type="text" id="meta" placeholder="meta" onchange="lsChange(this);" onkeyup="lsChange(this)">
+                </td>
+                <td>
+                    <input type="text" id="lazy_sync" placeholder="lazy" onchange="lsChange(this);" onkeyup="lsChange(this)">
+                </td>
+                <td>
                     <button>
                         <label for="files">Выбрать файлы</label>
                     </button>
                 </td>
-                <td width="1%">
+                <td>
                     <button onclick="window.selectedFiles=[];window.reloadSelectedFiles();">х</button>
                 </td>
             </tr>

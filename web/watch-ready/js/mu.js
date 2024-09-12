@@ -2,8 +2,8 @@ window.$$ = function (id) {
     return document.getElementById(id);
 }
 
-function keyChange(value) {
-    localStorage.setItem("key", value);
+function lsChange(obj) {
+    localStorage.setItem(obj.id, obj.value);
 }
 
 function getName(fullPath) {
@@ -59,14 +59,16 @@ window.selectedFiles = [];
 window.reloadSelectedFiles = function () {
     var template = $$("template").innerHTML;
     $$("selected-files").innerHTML = "";
-    var keyValue = $$("key").value;
     for (var i = 0; i < window.selectedFiles.length; i++) {
         let block = document.createElement("div");
         block.innerHTML = template;
-        block.getElementsByClassName("name")[0].value = getName(window.selectedFiles[i].name).toLowerCase();
-        block.getElementsByClassName("key")[0].value = keyValue;
+        block.getElementsByClassName("uuid")[0].value = getName(window.selectedFiles[i].name).toLowerCase();
         block.getElementsByClassName("idx")[0].idx = i;
         block.getElementsByClassName("file-index")[0].innerHTML = i;
+        var ar = ["key", "meta", "lazy_sync"];
+        for (var i = 0; i < ar.length; i++) {
+            block.getElementsByClassName(ar[i])[0].value = $$(ar[i]).value;
+        }
         $$("selected-files").appendChild(block);
     }
     $$("btn-load-to-server").style.display = window.selectedFiles.length == 0 ? "none" : "inline";
@@ -86,12 +88,18 @@ window.sendFiles = function () {
 }
 window.handleQueue = function (ar) {
     let block = ar.pop();
+    console.log(block);
     if (block != null && block != undefined) {
         var fd = new FormData();
         var idx = block.getElementsByClassName("file-index")[0].innerHTML * 1;
         fd.append("file", window.selectedFiles[idx]);
-        fd.append("uuid", block.getElementsByClassName("name")[0].value);
-        fd.append("key", block.getElementsByClassName("key")[0].value);
+        var ar = ["uuid", "key", "meta", "lazy_sync"];
+        for (var i = 0; i < ar.length; i++) {
+            var val = block.getElementsByClassName(ar[i])[0].value;
+            if (val != undefined && val.trim() != "") {
+                fd.append(ar[i], val);
+            }
+        }
         ajax("/BlobUpload", fd, function (data) {
             window.removeSelectedFile(idx);
             if (data.status == undefined || data.status != true) {
@@ -105,8 +113,11 @@ window.handleQueue = function (ar) {
 }
 
 onReady(function () {
-    var lastKey = localStorage.getItem("key");
-    if (lastKey !== undefined) {
-        document.getElementById("key").value = lastKey;
+    var ar = ["key", "meta", "lazy_sync"];
+    for (var i = 0; i < ar.length; i++) {
+        var lastKey = localStorage.getItem(ar[i]);
+        if (lastKey !== undefined) {
+            document.getElementById(ar[i]).value = lastKey;
+        }
     }
 });
