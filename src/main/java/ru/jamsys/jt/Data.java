@@ -191,6 +191,7 @@ public enum Data implements JdbcRequestRepository {
                 ${IN.id_user::NUMBER}::bigint,
                 ${IN.key_data::VARCHAR},
                 ${IN.meta_data::VARCHAR},
+                ${IN.lazy_sync_data::VARCHAR},
                 ${IN.uuid_device::VARCHAR},
                 ${OUT.new_id_revision::VARCHAR}
             );

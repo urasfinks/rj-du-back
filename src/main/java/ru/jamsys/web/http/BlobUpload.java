@@ -70,6 +70,8 @@ public class BlobUpload implements PromiseGenerator, HttpHandler {
                             .append("is_remove_data", 0)
                             .append("id_user", authRepository.getIdUser())
                             .append("key_data", map.get("key"))
+                            .append("meta_data", map.get("meta_data"))
+                            .append("lazy_sync_data", map.get("lazy_sync_data"))
                             .append("uuid_device", authRepository.getUuidDevice())
                             .append("new_id_revision", new BigDecimal(0));
                 })

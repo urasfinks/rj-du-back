@@ -161,6 +161,7 @@ CREATE OR REPLACE PROCEDURE public.add_data(
 	IN p_id_user bigint,
 	IN p_key_data character varying,
 	IN p_meta_data character varying,
+	IN p_lazy_sync_data character varying,
 	IN p_uuid_device_data character varying,
 	OUT p_new_revision_data character varying)
 LANGUAGE 'plpgsql'
@@ -180,6 +181,7 @@ BEGIN
                     value_data = p_value_data,
                     key_data = p_key_data,
                     meta_data = p_meta_data,
+                    lazy_sync_data = p_lazy_sync_data,
                     is_remove_data = 0 --Случай удаления пользователя, и повторная запись account/avatar
                 WHERE id_data = idData
                 AND (uuid_device_data = p_uuid_device_data OR id_user = p_id_user);
@@ -190,7 +192,7 @@ BEGIN
                 p_new_revision_data := newRevisionData || '';
             END IF;
         ELSE
-            INSERT INTO "data" (uuid_data, value_data, type_data, parent_uuid_data, date_add_data, is_remove_data, id_user, key_data, meta_data, uuid_device_data)
+            INSERT INTO "data" (uuid_data, value_data, type_data, parent_uuid_data, date_add_data, is_remove_data, id_user, key_data, meta_data, lazy_sync_data, uuid_device_data)
             VALUES (
                 p_uuid_data,
                 p_value_data,
@@ -201,6 +203,7 @@ BEGIN
                 p_id_user,
                 p_key_data,
                 p_meta_data,
+                p_lazy_sync_data,
                 p_uuid_device_data
             ) RETURNING revision_data INTO newRevisionData;
             p_new_revision_data := newRevisionData || '';
