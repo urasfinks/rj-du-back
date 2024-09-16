@@ -37,7 +37,6 @@ public class Root implements PromiseGenerator, HttpHandler {
     @Override
     public Promise generate() {
         return servicePromise.get(index, 1000L)
-                .extension(PromiseExtension::thenSelectIdUserRequire)
                 .then("init", (_, promise) -> {
                     ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
                     servletHandler.writeFileToOutput(new File(location + "index.html"));
