@@ -120,6 +120,14 @@ public class Sync implements PromiseGenerator, HttpHandler {
                         if (authJustNow && (dataType.isUserData() || dataType == DataType.socket)) {
                             rqRevision = 0;
                         }
+                        // Случилась такая история, все blob данные имеют статус lazy_sync, а запрос приходит без
+                        // захвата ленивых данных, логично, что dbRevisionMap.get('blob') => null
+                        // мы это дело классно getOrDefault('blob', 0) и посылаем клиенту, что неплохо бы было отправить
+                        // на сервер все blob с 0 ревизией и больше
+                        // Пока не понимаю как это действие может аукнуться, буду наблюдать
+                        if (!dbMaxRevisionByType.containsKey(dataType.toString())) {
+                            continue;
+                        }
                         long dbRevision = dbMaxRevisionByType.getOrDefault(dataType.toString(), 0L);
                         if (dbRevision > rqRevision) {
                             Map<String, Object> arguments = promise.getRepositoryMapClass(AuthRepository.class).get();
@@ -160,6 +168,8 @@ public class Sync implements PromiseGenerator, HttpHandler {
                             // На устройстве номер ревизии больше, чем в серверной БД
                             // Возвращаем клиенту, последний номер ревизии в серверной БД
                             // Для того, что бы клиент пометил у себя в локальной БД данные для следующей синхронизации
+                            // ++ 2024-09-15
+                            // Клиент был разлогинен, ничего интересного не нашёл, ревизия реально больше на устройстве
                             needUpgrade.put(dataType.toString(), dbRevision);
                         }
                     }
