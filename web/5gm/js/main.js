@@ -66,7 +66,7 @@ function connect() {
 function getData() {
     try {
         $.ajax({
-            url: '/Data',
+            url: '/CodeData',
             method: 'post',
             contentType: "application/json",
             dataType: 'json',
