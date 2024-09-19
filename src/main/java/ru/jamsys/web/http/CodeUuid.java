@@ -41,7 +41,7 @@ public class CodeUuid implements PromiseGenerator, HttpHandler {
     public Promise generate() {
         return servicePromise.get(index, 1000L)
                 .extension(PromiseExtension::addResponseRepository)
-                .then("init", (_, promise) -> {
+                .then("init", (_, _, promise) -> {
                     //{"code": 267936}
                     ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
                     String data = servletHandler.getRequestReader().getData();

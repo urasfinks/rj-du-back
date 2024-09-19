@@ -43,7 +43,7 @@ public class Blob implements PromiseGenerator, HttpHandler {
     public Promise generate() {
         return servicePromise.get(index, 1000L)
                 .extension(PromiseExtension::addParsedJsonRepository)
-                .then("init", (_, promise) -> {
+                .then("init", (_, _, promise) -> {
                     //?uuid=a1b2c3
                     ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
                     Map<String, String> map = servletHandler.getRequestReader().getMap();
@@ -53,7 +53,7 @@ public class Blob implements PromiseGenerator, HttpHandler {
                     ParsedJsonRepository parsedJsonRepository = promise.getRepositoryMapClass(ParsedJsonRepository.class);
                     parsedJsonRepository.put("uuid_data", map.get("uuid"));
                 })
-                .thenWithResource("db", JdbcResource.class, "default", (_, promise, jdbcResource) -> {
+                .thenWithResource("db", JdbcResource.class, "default", (_, _, promise, jdbcResource) -> {
                     ParsedJsonRepository parsedJsonRepository = promise.getRepositoryMapClass(ParsedJsonRepository.class);
                     List<Map<String, Object>> execute = jdbcResource.execute(new JdbcRequest(Data.SELECT_SYSTEM_STATIC)
                                     .addArg(parsedJsonRepository)
@@ -64,7 +64,7 @@ public class Blob implements PromiseGenerator, HttpHandler {
                     }
                     parsedJsonRepository.put("blob", execute.getFirst().get("value_data"));
                 })
-                .onComplete((_, promise) -> {
+                .onComplete((_, task, promise) -> {
                     ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
                     try {
                         ParsedJsonRepository parsedJsonRepository = promise.getRepositoryMapClass(ParsedJsonRepository.class);
@@ -83,7 +83,7 @@ public class Blob implements PromiseGenerator, HttpHandler {
                         );
                         servletHandler.getServletResponse().complete(null);
                     } catch (Throwable th) {
-                        promise.setErrorInRunTask(th);
+                        promise.setError(task, th);
                         PromiseExtension.errorHandler(promise);
                     }
                 })

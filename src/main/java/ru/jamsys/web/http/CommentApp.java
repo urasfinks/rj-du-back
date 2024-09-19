@@ -37,7 +37,7 @@ public class CommentApp implements PromiseGenerator, HttpHandler {
         return servicePromise.get(index, 30000L)
                 .extension(PromiseExtension::addParsedJsonRepository)
                 .extension(PromiseExtension::thenSelectIdUserRequire)
-                .then("init", (_, promise) -> {
+                .then("init", (_, _, promise) -> {
                     //{
                     //    "name": "Юрий",
                     //    "email": "urasfinks@yandex.ru",

@@ -48,7 +48,7 @@ public class Sync implements PromiseGenerator, HttpHandler {
         return servicePromise.get(index, 1000L)
                 .extension(PromiseExtension::thenSelectIdUserIfExist)
                 .extension(PromiseExtension::addResponseRepository)
-                .then("init", (_, promise) -> {
+                .then("init", (_, _, promise) -> {
 
                     ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
                     String data = servletHandler.getRequestReader().getData();
@@ -57,7 +57,7 @@ public class Sync implements PromiseGenerator, HttpHandler {
                     promise.setRepositoryMap("result", new HashMap<String, Object>());
 
                 })
-                .thenWithResource("remove", JdbcResource.class, "default", (_, promise, jdbcResource) -> {
+                .thenWithResource("remove", JdbcResource.class, "default", (_, _, promise, jdbcResource) -> {
                     AuthRepository authRepository = promise.getRepositoryMapClass(AuthRepository.class);
                     // Для начала удалим данные которые были удалены на фронте
                     // Да, это всё равно пойдёт ревизией обратно, но уже немного подрезанное (зануление value_data)
@@ -68,7 +68,7 @@ public class Sync implements PromiseGenerator, HttpHandler {
                                 .addArg("uuid_data", uuidData));
                     }
                 })
-                .thenWithResource("getMaxRevisionByType", JdbcResource.class, "default", (_, promise, jdbcResource) -> {
+                .thenWithResource("getMaxRevisionByType", JdbcResource.class, "default", (_, _, promise, jdbcResource) -> {
                     // Поиск ревизий стандартно ведётся без учёта ленивых данных
                     // Но иногда фронт явно говорит - мне нужно синхронизировать ленивые данные
                     // К ленивым данным относились музыкальные нарезки к урокам, пока на фронте явно мы не зайдём в урок
@@ -90,7 +90,7 @@ public class Sync implements PromiseGenerator, HttpHandler {
                     }
                     promise.setRepositoryMap("dbRevisionMap", dbRevisionMap);
                 })
-                .thenWithResource("selectDataResponse", JdbcResource.class, "default", (_, promise, jdbcResource) -> {
+                .thenWithResource("selectDataResponse", JdbcResource.class, "default", (_, _, promise, jdbcResource) -> {
 
                     @SuppressWarnings("unchecked")
                     Map<String, List<Map<String, Object>>> result = promise.getRepositoryMap(Map.class, "result");
@@ -179,19 +179,19 @@ public class Sync implements PromiseGenerator, HttpHandler {
                             .append("serverNeedUpgrade", needUpgrade);
 
                 })
-                .thenWithResource("updateUserDataRSync", JdbcResource.class, "default", (_, promise, jdbcResource) -> {
+                .thenWithResource("updateUserDataRSync", JdbcResource.class, "default", (_, _, promise, jdbcResource) -> {
                     // userDataRSync может прийти пустым, так как просто человечек не залогинен
                     // А может получится так, что устройство считает себя залогиненным, но сервер переехал без восстановления БД
                     insertData(promise, DataType.userDataRSync.name(), jdbcResource);
                 })
-                .thenWithResource("updateBlobRSync", JdbcResource.class, "default", (_, promise, jdbcResource) -> {
+                .thenWithResource("updateBlobRSync", JdbcResource.class, "default", (_, _, promise, jdbcResource) -> {
                     //blobRSync может прийти пустым, так как просто человечек не залогинен
                     // А может получится так, что устройство считает себя залогиненным, но сервер переехал без восстановления БД
                     insertData(promise, DataType.blobRSync.name(), jdbcResource);
                 })
-                .thenWithResource("updateSocket", JdbcResource.class, "default", (_, promise, jdbcResource)
+                .thenWithResource("updateSocket", JdbcResource.class, "default", (_, _, promise, jdbcResource)
                         -> insertData(promise, DataType.socket.name(), jdbcResource))
-                .thenWithResource("updateSocketParentData", JdbcResource.class, "default", (_, promise, jdbcResource) -> {
+                .thenWithResource("updateSocketParentData", JdbcResource.class, "default", (_, _, promise, jdbcResource) -> {
                     // Если пришли новые данные с типом socket у которых установлен parrent_uuid
                     // Скорее всего это новая установка (наследование) и надо по мимо регистрации их в серверной БД
                     // Надо выдать последнюю ревизию родителя
@@ -204,7 +204,7 @@ public class Sync implements PromiseGenerator, HttpHandler {
                         updateSocketParentData(result.get(DataType.socket.name()), jdbcResource);
                     }
                 })
-                .then("sizeControl", (_, promise) -> sizeControl(promise))
+                .then("sizeControl", (_, _, promise) -> sizeControl(promise))
                 .extension(PromiseExtension::addTerminal);
     }
 

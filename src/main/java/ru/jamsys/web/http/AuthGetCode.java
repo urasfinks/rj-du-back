@@ -45,7 +45,7 @@ public class AuthGetCode implements PromiseGenerator, HttpHandler {
     @Override
     public Promise generate() {
         return servicePromise.get(index, 7_000L)
-                .then("init", (_, promise) -> {
+                .then("init", (_, _, promise) -> {
                     //{"mail":"urasfinks@yandex.ru"}
                     ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
                     String data = servletHandler.getRequestReader().getData();
@@ -54,7 +54,7 @@ public class AuthGetCode implements PromiseGenerator, HttpHandler {
                     promise.setRepositoryMap("mail", map.get("mail"));
                     promise.setRepositoryMap("code", Util.random(100000, 999999));
                 })
-                .thenWithResource("db", JdbcResource.class, "default", (_, promise, jdbcResource) -> {
+                .thenWithResource("db", JdbcResource.class, "default", (_, _, promise, jdbcResource) -> {
                     Map<String, Object> arg = new HashMapBuilder<String, Object>()
                             .append("mail", promise.getRepositoryMap(String.class, "mail"))
                             .append("code", promise.getRepositoryMap(Integer.class, "code"));
@@ -67,7 +67,7 @@ public class AuthGetCode implements PromiseGenerator, HttpHandler {
                         jdbcResource.execute(new JdbcRequest(User.SET_CODE).addArg(arg));
                     }
                 })
-                .thenWithResource("email", EmailNotificationResource.class, (_, promise, emailNotificationResource) -> {
+                .thenWithResource("email", EmailNotificationResource.class, (_, _, promise, emailNotificationResource) -> {
                     Integer code = promise.getRepositoryMap(Integer.class, "code");
                     String mail = promise.getRepositoryMap(String.class, "mail");
                     HashMap<String, String> data = new HashMapBuilder<String, String>()

@@ -35,7 +35,7 @@ public class PromiseExtension {
     public static void thenSelectUuidDeviceRequire(Promise promiseSource) {
         promiseSource
                 .extension(PromiseExtension::addAuthRepository)
-                .then("SelectUuidDevice", (_, promise) -> {
+                .then("SelectUuidDevice", (_, _, promise) -> {
                     ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
                     servletHandler.getRequestReader().basicAuthHandler((user, password) -> {
                         if (!user.startsWith("v")) {
@@ -50,7 +50,7 @@ public class PromiseExtension {
     public static void thenSelectIdUserRequire(Promise promiseSource) {
         promiseSource
                 .extension(PromiseExtension::thenSelectIdUserIfExist)
-                .then("CheckIdUser", (_, promise) -> {
+                .then("CheckIdUser", (_, _, promise) -> {
                     AuthRepository authRepository = promise.getRepositoryMapClass(AuthRepository.class);
                     if (authRepository.getIdUser() == null) {
                         throw new AuthException("User device undefined");
@@ -62,7 +62,7 @@ public class PromiseExtension {
     public static void thenSelectIdUserIfExist(Promise promiseSource) {
         promiseSource
                 .extension(PromiseExtension::thenSelectUuidDeviceRequire)
-                .thenWithResource("SelectIdUser", JdbcResource.class, "default", (_, promise, jdbcResource) -> {
+                .thenWithResource("SelectIdUser", JdbcResource.class, "default", (_, _, promise, jdbcResource) -> {
                     AuthRepository authRepository = promise.getRepositoryMapClass(AuthRepository.class);
                     List<Map<String, Object>> exec = jdbcResource.execute(
                             new JdbcRequest(Device.SELECT_BY_UUID).addArg(authRepository.get())
@@ -81,7 +81,7 @@ public class PromiseExtension {
 
     public static void addCompleteHandler(Promise promiseSource) {
         promiseSource
-                .onComplete((_, promise) -> {
+                .onComplete((_, _, promise) -> {
                     ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
                     ResponseRepository repositoryMapClass = promise.getRepositoryMapClass(
                             ResponseRepository.class,
@@ -94,7 +94,7 @@ public class PromiseExtension {
     }
 
     public static void addErrorHandler(Promise promiseSource) {
-        promiseSource.onError((_, promise) -> errorHandler(promise));
+        promiseSource.onError((_, _, promise) -> errorHandler(promise));
     }
 
     public static void errorHandler(Promise promise) {

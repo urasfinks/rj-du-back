@@ -52,7 +52,7 @@ public class SocketUpdate implements PromiseGenerator, HttpHandler {
     public Promise generate() {
         return servicePromise.get(index, 1000L)
                 .extension(PromiseExtension::thenSelectIdUserIfExist)
-                .then("init", (_, promise) -> {
+                .then("init", (_, _, promise) -> {
                     ServletHandler input = promise.getRepositoryMapClass(ServletHandler.class);
                     String data = input.getRequestReader().getData();
                     JsonSchema.validate(data, UtilFileResource.getAsString("schema/http/UpdateSocketData.json"), "UpdateSocketData.json");
@@ -65,7 +65,7 @@ public class SocketUpdate implements PromiseGenerator, HttpHandler {
     }
 
     public static void dbUpdate(Promise promiseSource) {
-        promiseSource.thenWithResource("DbUpdate", JdbcResource.class, "default", (_, promise, jdbcResource) -> {
+        promiseSource.thenWithResource("DbUpdate", JdbcResource.class, "default", (_, _, promise, jdbcResource) -> {
             Map<String, Object> arg = promise.getRepositoryMapClass(AuthRepository.class).get()
                     .append("uuid_data", promise.getRepositoryMap(String.class, "uuid_data"));
 

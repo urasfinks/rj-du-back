@@ -37,11 +37,11 @@ public class Root implements PromiseGenerator, HttpHandler {
     @Override
     public Promise generate() {
         return servicePromise.get(index, 1000L)
-                .then("init", (_, promise) -> {
+                .then("init", (_, _, promise) -> {
                     ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
                     servletHandler.writeFileToOutput(new File(location + "index.html"));
                 })
-                .onComplete((_, _) -> {
+                .onComplete((_, _, _) -> {
                 })
                 .extension(PromiseExtension::addErrorHandler);
     }

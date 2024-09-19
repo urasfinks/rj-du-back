@@ -44,7 +44,7 @@ public class SignIn implements PromiseGenerator, HttpHandler {
     public Promise generate() {
         return servicePromise.get(index, 1000L)
                 .extension(PromiseExtension::thenSelectUuidDeviceRequire)
-                .then("init", (_, promise) -> {
+                .then("init", (_, _, promise) -> {
                     //{"mail":"urasfinks@yandex.ru", "code": 123456}
                     ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
                     String data = servletHandler.getRequestReader().getData();
@@ -54,7 +54,7 @@ public class SignIn implements PromiseGenerator, HttpHandler {
                     Integer code = (Integer) map.get("code");
                     promise.setRepositoryMap("code", code);
                 })
-                .thenWithResource("db", JdbcResource.class, "default", (_, promise, jdbcResource) -> {
+                .thenWithResource("db", JdbcResource.class, "default", (_, _, promise, jdbcResource) -> {
                     Integer code = promise.getRepositoryMap(Integer.class, "code");
                     String mail = promise.getRepositoryMap(String.class, "mail");
                     boolean isAppleReviewAppStore = mail.equals("admin@admin.ru") && code == 214365;

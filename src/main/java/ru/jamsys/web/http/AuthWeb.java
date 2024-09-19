@@ -45,7 +45,7 @@ public class AuthWeb implements PromiseGenerator, HttpHandler {
     public Promise generate() {
         return servicePromise.get(index, 1000L)
                 .extension(PromiseExtension::thenSelectIdUserRequire)
-                .then("init", (_, promise) -> {
+                .then("init", (_, _, promise) -> {
                     ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
                     String uri = servletHandler.getRequest().getRequestURI().substring(8);
                     if (staticFile.containsKey(uri)) {
@@ -54,7 +54,7 @@ public class AuthWeb implements PromiseGenerator, HttpHandler {
                         throw new RuntimeException("Resource not found");
                     }
                 })
-                .onComplete((_, _) -> {
+                .onComplete((_, _, _) -> {
                 })
                 .extension(PromiseExtension::addErrorHandler);
     }

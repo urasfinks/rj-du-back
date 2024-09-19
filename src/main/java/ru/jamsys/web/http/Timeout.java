@@ -34,7 +34,7 @@ public class Timeout implements PromiseGenerator, HttpHandler {
     @Override
     public Promise generate() {
         return servicePromise.get(index, 30000L)
-                .then("init", (_, promise) -> {
+                .then("init", (_, _, promise) -> {
                     ServletHandler input = promise.getRepositoryMapClass(ServletHandler.class);
                     Map<String, String> map = input.getRequestReader().getMap();
                     int timeoutMs = 5000;

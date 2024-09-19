@@ -44,7 +44,7 @@ public class BlobUpload implements PromiseGenerator, HttpHandler {
                 .extension(PromiseExtension::thenSelectIdUserRequire)
                 .extension(PromiseExtension::addParsedJsonRepository)
                 .extension(PromiseExtension::addAuthRepository)
-                .then("init", (_, promise) -> {
+                .then("init", (_, _, promise) -> {
                     ServletHandler servletHandler = promise.getRepositoryMapClass(ServletHandler.class);
                     Map<String, String> map = servletHandler.getRequestReader().getMap();
                     if (!map.containsKey("uuid")) {
@@ -75,7 +75,7 @@ public class BlobUpload implements PromiseGenerator, HttpHandler {
                             .append("uuid_device", authRepository.getUuidDevice())
                             .append("new_id_revision", new BigDecimal(0));
                 })
-                .thenWithResource("db", JdbcResource.class, "default", (_, promise, jdbcResource)
+                .thenWithResource("db", JdbcResource.class, "default", (_, _, promise, jdbcResource)
                         -> jdbcResource.execute(new JdbcRequest(Data.INSERT)
                         .addArg(promise.getRepositoryMapClass(ParsedJsonRepository.class))
                 ))

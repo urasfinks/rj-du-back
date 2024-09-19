@@ -35,7 +35,7 @@ public class LogoutWithRemove implements PromiseGenerator, HttpHandler {
     public Promise generate() {
         return servicePromise.get(index, 1000L)
                 .extension(PromiseExtension::thenSelectIdUserRequire)
-                .thenWithResource("db", JdbcResource.class, "default", (_, promise, jdbcResource) -> {
+                .thenWithResource("db", JdbcResource.class, "default", (_, _, promise, jdbcResource) -> {
                     AuthRepository authRepository = promise.getRepositoryMapClass(AuthRepository.class);
                     jdbcResource.execute(new JdbcRequest(Data.REMOVE_ALL).addArg(authRepository.get()));
                 })

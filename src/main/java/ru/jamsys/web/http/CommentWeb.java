@@ -40,7 +40,7 @@ public class CommentWeb implements PromiseGenerator, HttpHandler {
     public Promise generate() {
         return servicePromise.get(index, 30000L)
                 .extension(PromiseExtension::addParsedJsonRepository)
-                .then("init", (_, promise) -> {
+                .then("init", (_, _, promise) -> {
                     //{
                     //    "name": "Юрий",
                     //    "email": "urasfinks@yandex.ru",
@@ -57,7 +57,7 @@ public class CommentWeb implements PromiseGenerator, HttpHandler {
                     );
                     promise.getRepositoryMapClass(ParsedJsonRepository.class).putAll(UtilJson.getMapOrThrow(data));
                 })
-                .thenWithResource("recaptcha", ReCaptchaResource.class, (_, promise, reCaptchaResource) -> {
+                .thenWithResource("recaptcha", ReCaptchaResource.class, (_, _, promise, reCaptchaResource) -> {
                     ParsedJsonRepository parsedJsonRepository = promise.getRepositoryMapClass(ParsedJsonRepository.class);
                     HttpResponse httpResponse = reCaptchaResource.execute((String) parsedJsonRepository.get("g-recaptcha-response"));
                     if (!httpResponse.isStatus()) {
@@ -70,7 +70,7 @@ public class CommentWeb implements PromiseGenerator, HttpHandler {
 
     public static void thenSendToTelegram(Promise promiseResource) {
         promiseResource
-                .thenWithResource("http", TelegramNotificationResource.class, (_, promise, telegramNotificationResource) -> {
+                .thenWithResource("http", TelegramNotificationResource.class, (_, _, promise, telegramNotificationResource) -> {
                     ParsedJsonRepository parsedJsonRepository = promise.getRepositoryMapClass(ParsedJsonRepository.class);
                     parsedJsonRepository.remove("g-recaptcha-response");
                     HttpResponse httpResponse = telegramNotificationResource.execute(
