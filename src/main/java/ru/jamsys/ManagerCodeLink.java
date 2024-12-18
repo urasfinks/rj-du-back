@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import ru.jamsys.core.component.manager.ManagerBroker;
 import ru.jamsys.core.component.manager.item.Broker;
 import ru.jamsys.core.extension.UniqueClassNameImpl;
-import ru.jamsys.core.flat.util.ListSort;
+import ru.jamsys.core.flat.util.UtilListSort;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,7 +35,7 @@ public class ManagerCodeLink {
         for (int i = start; i < end; i++) {
             codes.add(i);
         }
-        ListSort.shuffle(codes);
+        UtilListSort.shuffle(codes);
         queueShuffleCode.addAll(codes);
 
         this.broker = managerBroker.initAndGet(
